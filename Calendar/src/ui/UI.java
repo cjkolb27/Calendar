@@ -31,6 +31,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.border.LineBorder;
 
 import events.EventData;
 import manager.CalendarManager;
@@ -47,6 +48,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private static JFrame screen;
 	/** Holds the panel for all button days */
 	private JPanel panel;
+	/** North Panel */
+	private JPanel northPanel;
+	/** West Panel */
+	private JPanel westPanel;
 	/** Environment Graphics */
 	private static GraphicsEnvironment env;
 	/** Default environment */
@@ -84,6 +89,14 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private Boolean settingsChanged;
 	/** Scroll Frame for holding all map days */
 	private JScrollPane scrollFrame;
+	/** Scroll Frame color */
+	private static Color panelColor = new Color(20, 20, 20);
+	/** Odd month color */
+	private static Color oddMonthColor = new Color(38, 38, 38);
+	/** Even month color */
+	private static Color evenMonthColor = new Color(26, 26, 26, 255);
+	/** Event color */
+	private static Color eventColor = new Color(255, 153, 161, 255);
 	/** File menu title */
 	private static final String FILE_MENU_TITLE = "File";
 	/** Load calendar title */
@@ -104,7 +117,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private double scrollLocation;
 	/** Keeps track of scroll bar height */
 	private double scrollHeight;
-	
+
 	private JMenuItem removeAll;
 	private JMenuItem addAll;
 
@@ -121,6 +134,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		screen.setLayout(new BorderLayout());
 
 		panel = new JPanel(new GridLayout(54, 7, 1, 1));
+		panel.setBorder(BorderFactory.createEtchedBorder());
 
 		setAllDates();
 
@@ -211,24 +225,25 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private void setUpScreen() {
 		scrollFrame = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollFrame.setBackground(Color.RED);
+		scrollFrame.setBackground(panelColor);
+		scrollFrame.setBorder(BorderFactory.createEtchedBorder());
 		scrollFrame.getVerticalScrollBar().setUnitIncrement(20);
 		scrollFrame.addMouseWheelListener(this);
 
-		JPanel pl = new JPanel(new FlowLayout());
-		JPanel pl2 = new JPanel();
-		pl.setBackground(Color.DARK_GRAY);
-		pl2.setBackground(Color.BLUE);
-		pl.setPreferredSize(new Dimension(100, 100));
-		pl2.setPreferredSize(new Dimension(300, 200));
+		northPanel = new JPanel(new FlowLayout());
+		westPanel = new JPanel();
+		northPanel.setBackground(Color.DARK_GRAY);
+		westPanel.setBackground(Color.DARK_GRAY);
+		northPanel.setPreferredSize(new Dimension(1, 100));
+		westPanel.setPreferredSize(new Dimension(265, 1));
 		month = new JLabel("January");
 		month.setFont(new Font("Comic Sans", Font.BOLD, 40));
 		month.setForeground(Color.WHITE);
-		pl.add(month);
-		screen.add(pl2, BorderLayout.WEST);
+		northPanel.add(month);
+		screen.add(westPanel, BorderLayout.WEST);
 
 		JPanel calendarScrollingPan = new JPanel(new BorderLayout());
-		calendarScrollingPan.add(pl, BorderLayout.NORTH);
+		calendarScrollingPan.add(northPanel, BorderLayout.NORTH);
 		calendarScrollingPan.add(scrollFrame, BorderLayout.CENTER);
 		screen.add(calendarScrollingPan, BorderLayout.CENTER);
 	}
@@ -313,21 +328,28 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				label.setVerticalAlignment(SwingConstants.TOP);
 				label.setVerticalTextPosition(SwingConstants.TOP);
 				label.setFont(new Font("Comic Sans", Font.BOLD, 25));
-				label.setForeground(Color.WHITE);
+				cal = Calendar.getInstance();
+				if (cal.get(Calendar.DAY_OF_MONTH) == j + 1 && cal.get(Calendar.MONTH) == i + 1 && cal.get(Calendar.YEAR) == yearOfCalendar) {
+					label.setForeground(eventColor);
+					buttons[currentDay].setBorder(new LineBorder(eventColor));
+				} else {
+					label.setForeground(Color.WHITE);
+					buttons[currentDay].setBorder(BorderFactory.createEtchedBorder());
+				}
 				buttons[currentDay].setLayout(new BorderLayout());
 				buttons[currentDay].add(label, BorderLayout.NORTH);
 				buttons[currentDay].setFocusable(false);
 				// buttons[currentDay].setContentAreaFilled(false);
 				if (i % 2 == 0) {
-					buttons[currentDay].setBackground(Color.BLACK);
+					buttons[currentDay].setBackground(evenMonthColor);
 				} else
-					buttons[currentDay].setBackground(Color.GRAY);
-				buttons[currentDay].setBorder(BorderFactory.createEtchedBorder());
+					buttons[currentDay].setBackground(oddMonthColor);
 				datePanel[currentDay] = new DatePanel((j + 1), (i + 1), yearOfCalendar);
 				while (currentData != null && currentData.getDay() == j + 1 && currentData.getMonth() == i + 1
 						&& currentData.getYear() == yearOfCalendar) {
-					datePanel[currentDay].addButton(currentData.getStartTime(), currentData.getStartInt(), currentData.getEndTime(),
-							currentData.getDay(), currentData.getMonth(), currentData.getYear(), currentData.getName());
+					datePanel[currentDay].addButton(currentData.getStartTime(), currentData.getStartInt(),
+							currentData.getEndTime(), currentData.getDay(), currentData.getMonth(),
+							currentData.getYear(), currentData.getName());
 
 					if (it.hasNext()) {
 						currentData = it.next();
@@ -351,7 +373,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		panel.setAlignmentX(SwingConstants.RIGHT);
 		panel.setAlignmentY(SwingConstants.BOTTOM);
 		panel.setPreferredSize(new Dimension(500, 10000));
-		panel.setBackground(Color.RED);
+		panel.setBackground(panelColor);
 	}
 
 	private void setScreenWindow() {
@@ -504,7 +526,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			}
 		} else if (e.getSource() == quit) {
 			System.exit(0);
-		} if (e.getSource() == addAll) {
+		}
+		if (e.getSource() == addAll) {
 			for (int i = 0; i < 366; i++) {
 				if (datePanel[i].size() > 0) {
 					datePanel[i].addAllButtons();
@@ -548,9 +571,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 								EventData newEvent = manager.createEvent((String) jtf1.getText(),
 										(String) jtf2.getText(), (String) jtf3.getText(), datePanel[i].getDay(),
 										datePanel[i].getMonth(), datePanel[i].getYear());
-								datePanel[i].addButton(newEvent.getStartTime(), newEvent.getStartInt(), newEvent.getEndTime(),
-										datePanel[i].getDay(), datePanel[i].getMonth(), datePanel[i].getYear(),
-										newEvent.getName());
+								datePanel[i].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
+										newEvent.getEndTime(), datePanel[i].getDay(), datePanel[i].getMonth(),
+										datePanel[i].getYear(), newEvent.getName());
 								screen.setVisible(true);
 								repaint();
 								validate();
@@ -587,7 +610,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			this.day = day;
 			this.month = month;
 			this.year = year;
-			head = new DateButton(null, 0, null, day, month, year, null, this);
+			head = new DateButton(null, 0, null, day, month, year, null);
 			panel = new JPanel();
 			panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 			size = 0;
@@ -610,8 +633,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		}
 
 		public void addButton(String start, int startTime, String end, int day, int month, int year, String event) {
-			DateButton newLabel = new DateButton(start, startTime, end, day, month, year, event, this);
+			DateButton newLabel = new DateButton(start, startTime, end, day, month, year, event);
 			newLabel.getButton().addActionListener(this);
+			newLabel.getButton().setPreferredSize(new Dimension(300, 0));
+			newLabel.getButton().setHorizontalAlignment(SwingConstants.LEFT);
 			if (size == 0) {
 				head.next = newLabel;
 				getPanel().add(newLabel.getButton());
@@ -640,15 +665,16 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			getPanel().add(newLabel.getButton());
 			size++;
 		}
-		
-		public void editButton(String start, int originalStartTime, int startTime, String end, int day, int month, int year, String event) {
+
+		public void editButton(String start, int originalStartTime, int startTime, String end, int day, int month,
+				int year, String event) {
 			if (size == 0) {
 				return;
 			}
 			removeButton(originalStartTime);
 			addButton(start, startTime, end, day, month, year, event);
 		}
-		
+
 		public void removeButton(int startTime) {
 			if (size == 0) {
 				return;
@@ -684,7 +710,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		public void removeAllButtons() {
 			DateButton current = head;
 			while (current.next != null) {
-				//System.out.println(current.startTime);
+				// System.out.println(current.startTime);
 				getPanel().remove(current.next.getButton());
 				current = current.next;
 			}
@@ -696,7 +722,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			while (current != null) {
 				System.out.println(current.startTime);
 				getPanel().add(current.getButton());
-				//current.getButton().addActionListener(this);
+				// current.getButton().addActionListener(this);
 				current = current.next;
 			}
 			panel.repaint();
@@ -734,10 +760,11 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 						if (optionSelected == 0) {
 							try {
 								EventData newEvent = getManager().editEvent(
-										(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime(), jtf1.getText(),
-										jtf2.getText(), jtf3.getText(), getDay(), getMonth(), getYear());
-								editButton(newEvent.getStartTime(), current.getStartTime(), newEvent.getStartInt(), newEvent.getEndTime(), getDay(),
-										getMonth(), getYear(), newEvent.getName());
+										(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime(),
+										jtf1.getText(), jtf2.getText(), jtf3.getText(), getDay(), getMonth(),
+										getYear());
+								editButton(newEvent.getStartTime(), current.getStartTime(), newEvent.getStartInt(),
+										newEvent.getEndTime(), getDay(), getMonth(), getYear(), newEvent.getName());
 								screen.setVisible(true);
 								getScreen().repaint();
 								getScreen().validate();
@@ -748,7 +775,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 							}
 						} else if (optionSelected == 1) {
 							try {
-								getManager().removeEvent((double) (year + (((month * 31) + (day)) * .001)), current.getStartTime());
+								getManager().removeEvent((double) (year + (((month * 31) + (day)) * .001)),
+										current.getStartTime());
 								removeButton(current.getStartTime());
 								screen.setVisible(true);
 								getScreen().repaint();
@@ -787,22 +815,23 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		private JButton button;
 		/** Next dateLabel */
 		private DateButton next;
-		/** DatePanel attached too */
-		private DatePanel datePanel;
 
-		public DateButton(String start, int startTime, String end, int day, int month, int year, String event,
-				DatePanel datePanel) {
+		public DateButton(String start, int startTime, String end, int day, int month, int year, String event) {
 			setStart(start);
 			setStartTime(startTime);
 			setEnd(end);
-			this.datePanel = datePanel;
 			setDay(day);
 			setMonth(month);
 			setYear(year);
 			this.event = event;
 			button = new JButton(start + " " + event);
-			button.setFont(new Font("Comic Sans", Font.BOLD, 20));
-			button.setForeground(Color.RED);
+			button.setContentAreaFilled(false);
+			button.setFocusable(false);
+			button.setBorderPainted(false);
+			button.setFont(new Font("Comic Sans", Font.BOLD, 15));
+			button.setMargin(new Insets(0, 0, 0, 0));
+			button.setIcon(null);
+			button.setForeground(eventColor);
 			next = null;
 		}
 
@@ -833,7 +862,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		public void setStart(String start) {
 			this.start = start;
 		}
-		
+
 		public void setStartTime(int startTime) {
 			this.startTime = startTime;
 		}
