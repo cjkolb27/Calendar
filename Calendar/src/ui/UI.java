@@ -1,17 +1,23 @@
 // Test UI Window
 package ui;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.YearMonth;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Iterator;
 
 import javax.swing.BorderFactory;
@@ -27,9 +33,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTextField;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
@@ -38,10 +42,14 @@ import manager.CalendarManager;
 import util.SortedDateList;
 
 /**
+ * GUI for displaying the Calendar to the user.
  * 
+ * @author Caleb Kolb
  */
 public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
+	/** Default Serial Version UID */
+	private static final long serialVersionUID = 1L;
 	/** Settings window state */
 	private ScreenState windowState = null;
 	/** Frame that holds all components on the screen */
@@ -132,6 +140,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				Toolkit.getDefaultToolkit().getScreenSize().height);
 		screen.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		screen.setLayout(new BorderLayout());
+		screen.setTitle(PROGRAM_TITLE);
 
 		panel = new JPanel(new GridLayout(54, 7, 1, 1));
 		panel.setBorder(BorderFactory.createEtchedBorder());
@@ -228,6 +237,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		scrollFrame.setBackground(panelColor);
 		scrollFrame.setBorder(BorderFactory.createEtchedBorder());
 		scrollFrame.getVerticalScrollBar().setUnitIncrement(20);
+		scrollFrame.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0));
 		scrollFrame.addMouseWheelListener(this);
 
 		northPanel = new JPanel(new FlowLayout());
@@ -329,7 +339,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				label.setVerticalTextPosition(SwingConstants.TOP);
 				label.setFont(new Font("Comic Sans", Font.BOLD, 25));
 				cal = Calendar.getInstance();
-				if (cal.get(Calendar.DAY_OF_MONTH) == j + 1 && cal.get(Calendar.MONTH) == i + 1 && cal.get(Calendar.YEAR) == yearOfCalendar) {
+				if (cal.get(Calendar.DAY_OF_MONTH) == j + 1 && cal.get(Calendar.MONTH) == i
+						&& cal.get(Calendar.YEAR) == yearOfCalendar) {
 					label.setForeground(eventColor);
 					buttons[currentDay].setBorder(new LineBorder(eventColor));
 				} else {
@@ -422,6 +433,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private void createMenuBar() {
 		menuBar = new JMenuBar();
 		menu = new JMenu(FILE_MENU_TITLE);
+		menu.setBackground(Color.DARK_GRAY);
+		menu.setForeground(Color.WHITE);
 		loadCalendar = new JMenuItem(LOADCAL);
 		editSettings = new JMenuItem(EDITSET);
 		quit = new JMenuItem("Quit");
@@ -429,10 +442,20 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		addAll = new JMenuItem("Add All");
 
 		loadCalendar.addActionListener(this);
+		loadCalendar.setBackground(Color.DARK_GRAY);
+		loadCalendar.setForeground(Color.WHITE);
 		editSettings.addActionListener(this);
+		editSettings.setBackground(Color.DARK_GRAY);
+		editSettings.setForeground(Color.WHITE);
 		removeAll.addActionListener(this);
+		removeAll.setBackground(Color.DARK_GRAY);
+		removeAll.setForeground(Color.WHITE);
 		addAll.addActionListener(this);
+		addAll.setBackground(Color.DARK_GRAY);
+		addAll.setForeground(Color.WHITE);
 		quit.addActionListener(this);
+		quit.setBackground(Color.DARK_GRAY);
+		quit.setForeground(Color.WHITE);
 
 		menu.add(loadCalendar);
 		menu.add(editSettings);
@@ -440,6 +463,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		menu.add(addAll);
 		menu.add(quit);
 		menuBar.add(menu);
+		menuBar.setBackground(Color.DARK_GRAY);
+		menuBar.setForeground(Color.WHITE);
+		menuBar.setBorder(BorderFactory.createBevelBorder(0));
 		screen.setJMenuBar(menuBar);
 	}
 
@@ -903,6 +929,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 	private String getFileName(boolean load) {
 		JFileChooser fchooser = new JFileChooser("C:\\Users\\Caleb\\Documents\\CalendarData");
+		fchooser.setBackground(Color.DARK_GRAY);
+		fchooser.setForeground(Color.WHITE);
 		int returnVal = Integer.MIN_VALUE;
 		if (load) {
 			returnVal = fchooser.showOpenDialog(screen);
@@ -915,5 +943,4 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		File fileName = fchooser.getSelectedFile();
 		return fileName.getAbsolutePath();
 	}
-
 }
