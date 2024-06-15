@@ -62,11 +62,7 @@ public class CalendarManager {
 		path = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "CalendarData"
 				+ File.separator + year + ".txt";
 		try {
-			if (path == null) {
-				throw new IOException();
-			} else {
-				new File(path).createNewFile();
-			}
+			new File(path).createNewFile();
 			eventYearList = CalendarReader.readCalendar(new File(path));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -137,6 +133,7 @@ public class CalendarManager {
 	public void loadCalendar(int yearAdd) {
 		eventYearList = new SortedDateList<EventData>();
 		year += yearAdd;
+		System.out.println("Something" + year);
 		path = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "CalendarData"
 				+ File.separator + year + ".txt";
 		try {

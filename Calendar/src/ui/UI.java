@@ -3,6 +3,7 @@ package ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -34,8 +35,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
+import javax.swing.plaf.basic.BasicArrowButton;
 
 import events.EventData;
 import manager.CalendarManager;
@@ -60,6 +63,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private JPanel northPanel;
 	/** West Panel */
 	private JPanel westPanel;
+	/** Srolling panel */
+	private JPanel calendarScrollingPan;
 	/** Environment Graphics */
 	private static GraphicsEnvironment env;
 	/** Default environment */
@@ -71,16 +76,33 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	/** All month names */
 	private static final String[] ALLMONTHNAMES = { "January", "Febuary", "March", "April", "May", "June", "July",
 			"August", "September", "October", "November", "December" };
+	/** All week names */
+	private static final String[] DAYSOFWEEKNAMES = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+			"Saturday" };
 	/** Stores all settings as an array of strings */
 	private static String[] settings;
+	/** Holds strings for all presetEvents */
+	private static String[] presetEvents;
 	/** Days per month */
 	private static int[] daysPerMonth = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-	/// ** Weeks per month */
-	// private static int[] weeksPerMonth = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+	// ** Weeks per month */
+	private static int[] startWeekPerMonth = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	/** Position of week that changes month JLabel */
 	private static int[] transitionWeek = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 	/** Buttons for every calendar day */
 	private JButton[] buttons;
+	/** Previous year button */
+	private JButton lastYear;
+	/** Next year button */
+	private JButton nextYear;
+	/** All presets of an event */
+	private JComboBox preset;
+	/** Event text field */
+	private JTextField eventTextField;
+	/** Start text field */
+	private JTextField startTextField;
+	/** End text field */
+	private JTextField endTextField;
 	/** Panel for all events added to a day */
 	private static DatePanel[] datePanel;
 	/** Menu bar */
@@ -121,16 +143,26 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private int daysInCalendar;
 	/** Current Month shown on the calendar */
 	private int scrollMonth;
+	/** Total number of weeks in the year */
+	private int totalWeeks;
 	/** Keeps track of scroll bar location */
 	private double scrollLocation;
 	/** Keeps track of scroll bar height */
 	private double scrollHeight;
-
+	/** Used for removing all events visually */
 	private JMenuItem removeAll;
+	/** Used for add all events visually */
 	private JMenuItem addAll;
 
+	/**
+	 * Creates the GUI for the user to interact with the CalendarManager
+	 */
 	public UI() {
 		super();
+		presetEvents = new String[] { "", "Work 6:30am-2:00pm", "Work 2:00pm-8:30pm" };
+		preset = new JComboBox<>(presetEvents);
+		preset.addActionListener(this);
+		preset.setFocusable(false);
 		env = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		ev = env.getDefaultScreenDevice();
 		settingsChanged = false;
@@ -162,6 +194,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		setUpScreen();
 
 		screen.setVisible(true);
+		scrollFrame.getVerticalScrollBar()
+				.setValue((int) (((double) (scrollFrame.getVerticalScrollBar().getMaximum()) / (double) totalWeeks)
+						* ((double) (startWeekPerMonth[monthOfCalendar] - 1) - .3)));
 	}
 
 	/**
@@ -173,12 +208,17 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		new UI();
 	}
 
+	public static String[] getPresetEvents() {
+		return presetEvents;
+	}
+
 	/**
 	 * Changes the window type to windowed, fullscreen, or borderless.
 	 * 
 	 * @param applied the newly applied window type
 	 */
 	public void changeWindow(ScreenState applied) {
+		screen.setVisible(false);
 		if (applied == ScreenState.Fullscreen && windowState != ScreenState.Fullscreen) {
 			if (settingsChanged) {
 				setScreenWindow();
@@ -215,6 +255,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				// you can choose to make the screen fit or not
 				screen.setExtendedState(Frame.MAXIMIZED_BOTH);
 				screen.setVisible(true);
+				System.out.println("IDK");
 			} else {
 				screen.setUndecorated(false);
 				// you can choose to make the screen fit or not
@@ -222,40 +263,94 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			}
 			windowState = ScreenState.Windowed;
 			System.out.println("State Changed to Windowed");
+			screen.setVisible(true);
 		}
-		/**
-		 * if (!settingsChanged) { settingsChanged = true; } else if (stateChanged) {
-		 * //Container c = getContentPane(); //c.setLayout(new GridBagLayout());
-		 * //screen.setContentPane(c); //screen.setVisible(true);
-		 * System.out.println("State Change"); }
-		 */
 	}
 
 	private void setUpScreen() {
 		scrollFrame = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		// scrollFrame.getVerticalScrollBar().setValue((scrollFrame.getVerticalScrollBar().getMaximum()
+		// / 12) * monthOfCalendar);
 		scrollFrame.setBackground(panelColor);
 		scrollFrame.setBorder(BorderFactory.createEtchedBorder());
 		scrollFrame.getVerticalScrollBar().setUnitIncrement(20);
 		scrollFrame.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0));
 		scrollFrame.addMouseWheelListener(this);
 
-		northPanel = new JPanel(new FlowLayout());
+		northPanel = new JPanel(new GridLayout(2, 1, 0, 0));
+		northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.PAGE_AXIS));
 		westPanel = new JPanel();
 		northPanel.setBackground(Color.DARK_GRAY);
 		westPanel.setBackground(Color.DARK_GRAY);
 		northPanel.setPreferredSize(new Dimension(1, 100));
 		westPanel.setPreferredSize(new Dimension(265, 1));
-		month = new JLabel("January");
+		month = new JLabel("<html>" + ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar + "</html>");
 		month.setFont(new Font("Comic Sans", Font.BOLD, 40));
 		month.setForeground(Color.WHITE);
-		northPanel.add(month);
+		JPanel yearSelecter = new JPanel(new FlowLayout());
+		// yearSelecter.setLayout(new BoxLayout(yearSelecter, BoxLayout.LINE_AXIS));
+		yearSelecter.setBackground(null);
+		yearSelecter.setPreferredSize(new Dimension(50, 50));
+		for (int i = 0; i < 7; i++) {
+			JLabel space = new JLabel();
+			space.setSize(new Dimension(0, 0));
+			space.setVisible(true);
+			if (i == 2) {
+				lastYear = new JButton("<html>" + "\u2190" + "</html>");
+				lastYear.addActionListener(this);
+				lastYear.setFont(new Font("Comic Sans", Font.BOLD, 40));
+				lastYear.setBackground(null);
+				lastYear.setForeground(Color.WHITE);
+				lastYear.setBorderPainted(false);
+				lastYear.setFocusable(false);
+				lastYear.setPreferredSize(new Dimension(40, 40));
+				lastYear.setMargin(new Insets(0, 0, 0, 0));
+				yearSelecter.add(lastYear);
+				northPanel.add(space);
+			} else if (i == 3) {
+				yearSelecter.add(month);
+				northPanel.add(yearSelecter);
+			} else if (i == 4) {
+				nextYear = new JButton("<html>" + "\u2192" + "</html>");
+				nextYear.addActionListener(this);
+				nextYear.setFont(new Font("Comic Sans", Font.BOLD, 40));
+				nextYear.setBackground(null);
+				nextYear.setForeground(Color.WHITE);
+				nextYear.setBorderPainted(false);
+				nextYear.setFocusable(false);
+				nextYear.setPreferredSize(new Dimension(40, 40));
+				nextYear.setMargin(new Insets(0, 0, 0, 0));
+				yearSelecter.add(nextYear);
+				northPanel.add(space);
+			} else {
+				// yearSelecter.add(space);
+				northPanel.add(space);
+			}
+		}
+		JPanel week = new JPanel(new GridLayout(1, 7, 0, 0));
+		week.setBackground(null);
+		for (int i = 0; i < 7; i++) {
+			JLabel weekDay = new JLabel(DAYSOFWEEKNAMES[i]);
+			weekDay.setFont(new Font("Comic Sans", Font.BOLD, 20));
+			weekDay.setForeground(Color.WHITE);
+			// northPanel.add(weekDay);
+			week.add(weekDay);
+		}
+		northPanel.add(week);
 		screen.add(westPanel, BorderLayout.WEST);
 
-		JPanel calendarScrollingPan = new JPanel(new BorderLayout());
+		calendarScrollingPan = new JPanel(new BorderLayout());
 		calendarScrollingPan.add(northPanel, BorderLayout.NORTH);
 		calendarScrollingPan.add(scrollFrame, BorderLayout.CENTER);
 		screen.add(calendarScrollingPan, BorderLayout.CENTER);
+		// System.out.println(buttons[transitionWeek[1]].getHeight());
+		// scrollFrame.getVerticalScrollBar().setValue();
+		// screen.setVisible(true);
+		scrollFrame.getVerticalScrollBar()
+				.setValue((int) (((double) (scrollFrame.getVerticalScrollBar().getMaximum()) / (double) totalWeeks)
+						* ((double) (startWeekPerMonth[monthOfCalendar] - 1) - .3)));
+		// - scrollFrame.getVerticalScrollBar().getHeight()
 	}
 
 	/**
@@ -280,20 +375,22 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 		SortedDateList<EventData> sdl = manager.getEvents();
 
-		System.out.println(sdl.size());
+		// System.out.println(sdl.size());
 
 		Iterator<EventData> it = sdl.iterator();
 		EventData currentData;
 		if (it.hasNext()) {
 			currentData = it.next();
-			System.out.println("Not Null");
-			System.out.println("Printed Data: " + currentData.getDay() + " " + currentData.getMonth() + " "
-					+ currentData.getYear());
+			// System.out.println("Not Null");
+			// System.out.println("Printed Data: " + currentData.getDay() + " " +
+			// currentData.getMonth() + " "
+			// + currentData.getYear());
 		} else {
 			currentData = null;
 		}
 
 		int currentDay = 0;
+		int currentWeek = 0;
 		for (int i = 0; i < 12; i++) {
 			cal.set(yearOfCalendar, i, 1);
 			int days = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -314,6 +411,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			} else
 				daysPerMonth[1] = 29;
 			int weekCount = 0;
+			startWeekPerMonth[i] = 0;
+
 			for (int j = 0; j < days; j++) {
 				cal.set(yearOfCalendar, i, j + 1);
 				if (cal.get(Calendar.DAY_OF_WEEK) == 7 && weekCount < 3) {
@@ -324,6 +423,12 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					} else {
 						weekCount++;
 					}
+				}
+				if (cal.get(Calendar.DAY_OF_WEEK) == 1 || (i == 0 && j == 0)) {
+					currentWeek++;
+				}
+				if (j == 0) {
+					startWeekPerMonth[i] = currentWeek;
 				}
 				buttons[currentDay] = new JButton();
 				buttons[currentDay].setPreferredSize(new Dimension(75, 75));
@@ -364,8 +469,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 					if (it.hasNext()) {
 						currentData = it.next();
-						System.out.println("Printed Data: " + currentData.getDay() + " " + currentData.getMonth() + " "
-								+ currentData.getYear());
+						// System.out.println("Printed Data: " + currentData.getDay() + " " +
+						// currentData.getMonth() + " "
+						// + currentData.getYear());
 					} else {
 						currentData = null;
 					}
@@ -379,6 +485,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			}
 			daysInCalendar = currentDay;
 		}
+		totalWeeks = currentWeek;
+		// System.out.println(totalWeeks);
 		panel.setLayout(
 				new GridLayout((int) Math.ceil((cal.get(Calendar.DAY_OF_WEEK) + daysInCalendar) / 7.0), 7, 1, 1));
 		panel.setAlignmentX(SwingConstants.RIGHT);
@@ -388,6 +496,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	}
 
 	private void setScreenWindow() {
+		System.out.println("Setting something");
 		screen.dispose();
 		screen.setVisible(false);
 		env = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -406,16 +515,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		buildButtonDays();
 
 		createMenuBar();
-		/**
-		 * settings = manager.defaultSettings(); ScreenState state =
-		 * ScreenState.Windowed; if ("Borderless".equals(settings[1])) { state =
-		 * ScreenState.Borderless; } else if ("Fullscreen".equals(settings[1])) { state
-		 * = ScreenState.Fullscreen; } changeWindow(state);
-		 */
 
 		setUpScreen();
-
-		// screen.setVisible(true);
+		System.out.println("Setting everything");
 	}
 
 	/**
@@ -480,7 +582,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					if ((buttons[transitionWeek[i]].getVisibleRect().height
 							* buttons[transitionWeek[i]].getVisibleRect().width) != 0) {
 						scrollMonth = i;
-						month.setText(ALLMONTHNAMES[scrollMonth]);
+						month.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
 						i = 12;
 					}
 				}
@@ -491,14 +593,14 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					if ((buttons[transitionWeek[i]].getVisibleRect().height
 							* buttons[transitionWeek[i]].getVisibleRect().width) != 0) {
 						scrollMonth = i;
-						month.setText(ALLMONTHNAMES[scrollMonth]);
+						month.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
 						i = 12;
 					}
 				}
 			}
 			if (scrollLocation == scrollHeight) {
 				scrollMonth = 11;
-				month.setText(ALLMONTHNAMES[scrollMonth]);
+				month.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
 			}
 		} catch (Exception e) {
 			// Nothing
@@ -507,7 +609,20 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == loadCalendar) {
+		if (e.getSource() == preset) {
+			if ("Work 6:30am-2:00pm".equals(preset.getSelectedItem())) {
+				eventTextField.setText("Work");
+				startTextField.setText("6:30am");
+				endTextField.setText("2:00pm");
+				preset.setSelectedIndex(0);
+			}
+			if ("Work 2:00pm-8:30pm".equals(preset.getSelectedItem())) {
+				eventTextField.setText("Work");
+				startTextField.setText("2:00pm");
+				endTextField.setText("8:30pm");
+				preset.setSelectedIndex(0);
+			}
+		} else if (e.getSource() == loadCalendar) {
 			System.out.println("file tried");
 			try {
 				manager.loadCalendarByName(getFileName(true));
@@ -533,6 +648,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				windowPanel.add(combo);
 				int test = JOptionPane.showConfirmDialog(screen, windowPanel, "Test", JOptionPane.OK_CANCEL_OPTION,
 						JOptionPane.PLAIN_MESSAGE);
+				System.out.println("Something");
 				System.out.println(test);
 				System.out.println(combo.getSelectedItem());
 				if (test == -1 || test == 2) {
@@ -552,8 +668,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			}
 		} else if (e.getSource() == quit) {
 			System.exit(0);
-		}
-		if (e.getSource() == addAll) {
+		} else if (e.getSource() == addAll) {
 			for (int i = 0; i < 366; i++) {
 				if (datePanel[i].size() > 0) {
 					datePanel[i].addAllButtons();
@@ -567,42 +682,102 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				}
 			}
 			screen.setVisible(true);
+		} else if (e.getSource() == lastYear) {
+			try {
+				manager.loadCalendar(-1);
+				yearOfCalendar--;
+				scrollFrame.remove(panel);
+				screen.remove(northPanel);
+				screen.remove(westPanel);
+				screen.remove(calendarScrollingPan);
+				screen.remove(scrollFrame);
+				// panel.removeAll();
+				panel = new JPanel(new GridLayout(54, 7, 1, 1));
+				panel.setBorder(BorderFactory.createEtchedBorder());
+				buildButtonDays();
+				monthOfCalendar = 11;
+				if (Calendar.getInstance().get(Calendar.YEAR) == yearOfCalendar) {
+					monthOfCalendar = Calendar.getInstance().get(Calendar.MONTH);
+				}
+				setUpScreen();
+				screen.setVisible(true);
+				scrollFrame.getVerticalScrollBar().setValue(scrollFrame.getVerticalScrollBar().getMaximum());
+				if (Calendar.getInstance().get(Calendar.YEAR) == yearOfCalendar) {
+					scrollFrame.getVerticalScrollBar().setValue(
+							(int) (((double) (scrollFrame.getVerticalScrollBar().getMaximum()) / (double) totalWeeks)
+									* ((double) (startWeekPerMonth[monthOfCalendar] - 1) - .3)));
+				}
+			} catch (Exception e2) {
+				throw new IllegalArgumentException(e2.getMessage());
+			}
+		} else if (e.getSource() == nextYear) {
+			try {
+				manager.loadCalendar(1);
+				yearOfCalendar++;
+				scrollFrame.remove(panel);
+				screen.remove(northPanel);
+				screen.remove(westPanel);
+				screen.remove(calendarScrollingPan);
+				screen.remove(scrollFrame);
+				// panel.removeAll();
+				panel = new JPanel(new GridLayout(54, 7, 1, 1));
+				panel.setBorder(BorderFactory.createEtchedBorder());
+				buildButtonDays();
+				monthOfCalendar = 0;
+				if (Calendar.getInstance().get(Calendar.YEAR) == yearOfCalendar) {
+					monthOfCalendar = Calendar.getInstance().get(Calendar.MONTH);
+				}
+				setUpScreen();
+				screen.setVisible(true);
+				scrollFrame.getVerticalScrollBar().setValue(0);
+				if (Calendar.getInstance().get(Calendar.YEAR) == yearOfCalendar) {
+					scrollFrame.getVerticalScrollBar().setValue(
+							(int) (((double) (scrollFrame.getVerticalScrollBar().getMaximum()) / (double) totalWeeks)
+									* ((double) (startWeekPerMonth[monthOfCalendar] - 1) - .3)));
+				}
+			} catch (Exception e2) {
+				throw new IllegalArgumentException(e2.getMessage());
+			}
 		} else {
 			for (int i = 0; i < 366; i++) {
 				if (e.getSource() == buttons[i]) {
 					System.out.println("Button Listener");
+					JLabel pre = new JLabel("Preset Event");
 					JLabel lab1 = new JLabel("Event Name");
-					JTextField jtf1 = new JTextField();
+					eventTextField = new JTextField();
 					JLabel lab2 = new JLabel("Start Time");
-					JTextField jtf2 = new JTextField();
+					startTextField = new JTextField();
 					JLabel lab3 = new JLabel("End Time");
-					JTextField jtf3 = new JTextField();
+					endTextField = new JTextField();
 					JPanel pan = new JPanel();
 					pan.setSize(new Dimension(500, 500));
-					pan.setLayout(new GridLayout(3, 2, 1, 1));
+					pan.setLayout(new GridLayout(4, 2, 0, 0));
+					pan.add(pre);
+					pan.add(preset);
 					pan.add(lab1);
-					pan.add(jtf1);
+					pan.add(eventTextField);
 					pan.add(lab2);
-					pan.add(jtf2);
+					pan.add(startTextField);
 					pan.add(lab3);
-					pan.add(jtf3);
+					pan.add(endTextField);
 					boolean tryEvent = true;
 					while (tryEvent) {
 						tryEvent = false;
-						int optionSelected = JOptionPane.showConfirmDialog(screen, pan, "Test",
+						int optionSelected = JOptionPane.showConfirmDialog(screen, pan, "Add Event",
 								JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 						System.out.println(optionSelected);
 						if (optionSelected == 0) {
 							try {
-								EventData newEvent = manager.createEvent((String) jtf1.getText(),
-										(String) jtf2.getText(), (String) jtf3.getText(), datePanel[i].getDay(),
-										datePanel[i].getMonth(), datePanel[i].getYear());
+								System.out.println(yearOfCalendar);
+								EventData newEvent = manager.createEvent((String) eventTextField.getText(),
+										(String) startTextField.getText(), (String) endTextField.getText(),
+										datePanel[i].getDay(), datePanel[i].getMonth(), datePanel[i].getYear());
 								datePanel[i].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
 										newEvent.getEndTime(), datePanel[i].getDay(), datePanel[i].getMonth(),
 										datePanel[i].getYear(), newEvent.getName());
 								screen.setVisible(true);
-								repaint();
-								validate();
+								screen.repaint();
+								screen.validate();
 								return;
 							} catch (Exception e1) {
 								JOptionPane.showMessageDialog(screen, e1.getMessage());
@@ -614,10 +789,17 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			}
 
 		}
-		repaint();
-		validate();
+		screen.repaint();
+		screen.validate();
 	}
 
+	/**
+	 * Panel for holding all Calendar events for an individual date. The panel
+	 * allows for adding, editing, and removing DateButtons. DateButtons are stored
+	 * as a LinkedList with a sentinel head pointer.
+	 * 
+	 * @author Caleb Kolb
+	 */
 	public static class DatePanel implements ActionListener {
 		/** Day of event */
 		private int day;
@@ -629,6 +811,14 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		private JPanel panel;
 		/** First dateLabel */
 		private DateButton head;
+		/** Combo box of preset events */
+		private JComboBox<String> presets;
+		/** Event text field */
+		private JTextField jtf1;
+		/** Start time text field */
+		private JTextField jtf2;
+		/** End time text field */
+		private JTextField jtf3;
 		/** Size of dateLabel */
 		private int size;
 
@@ -639,6 +829,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			head = new DateButton(null, 0, null, day, month, year, null);
 			panel = new JPanel();
 			panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
+			String[] chooses = { "", "Work 6:30am-2:00pm", "Work 2:00pm-8:30pm" };
+			presets = new JComboBox<>(getPresetEvents());
+			presets.addActionListener(this);
+			presets.setFocusable(false);
 			size = 0;
 		}
 
@@ -733,6 +927,12 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			return head;
 		}
 
+		public void deleteAll() {
+			removeAllButtons();
+			head.next = null;
+			size = 0;
+		}
+
 		public void removeAllButtons() {
 			DateButton current = head;
 			while (current.next != null) {
@@ -756,66 +956,86 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			System.out.println("Action");
-			DateButton current = head.next;
-			while (current != null) {
-				if (e.getSource() == current.getButton()) {
-					System.out.println("Button pressed");
-					JLabel lab1 = new JLabel("Event Name");
-					JTextField jtf1 = new JTextField(current.getEvent());
-					JLabel lab2 = new JLabel("Start Time");
-					JTextField jtf2 = new JTextField(current.start);
-					JLabel lab3 = new JLabel("End Time");
-					JTextField jtf3 = new JTextField(current.end);
-					JPanel pan = new JPanel();
-					pan.setSize(new Dimension(500, 500));
-					pan.setLayout(new GridLayout(3, 2, 1, 1));
-					pan.add(lab1);
-					pan.add(jtf1);
-					pan.add(lab2);
-					pan.add(jtf2);
-					pan.add(lab3);
-					pan.add(jtf3);
-					boolean tryEvent = true;
-					while (tryEvent) {
-						tryEvent = false;
-						String[] choices = { "Update", "Delete", "Cancel" };
-						int optionSelected = JOptionPane.showOptionDialog(getScreen(), pan, "Test",
-								JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, choices[0]);
-						System.out.println(optionSelected);
-						if (optionSelected == 0) {
-							try {
-								EventData newEvent = getManager().editEvent(
-										(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime(),
-										jtf1.getText(), jtf2.getText(), jtf3.getText(), getDay(), getMonth(),
-										getYear());
-								editButton(newEvent.getStartTime(), current.getStartTime(), newEvent.getStartInt(),
-										newEvent.getEndTime(), getDay(), getMonth(), getYear(), newEvent.getName());
-								screen.setVisible(true);
-								getScreen().repaint();
-								getScreen().validate();
-								return;
-							} catch (Exception e1) {
-								JOptionPane.showMessageDialog(screen, e1.getMessage());
-								tryEvent = true;
-							}
-						} else if (optionSelected == 1) {
-							try {
-								getManager().removeEvent((double) (year + (((month * 31) + (day)) * .001)),
-										current.getStartTime());
-								removeButton(current.getStartTime());
-								screen.setVisible(true);
-								getScreen().repaint();
-								getScreen().validate();
-								return;
-							} catch (Exception e2) {
-								JOptionPane.showMessageDialog(screen, e2.getMessage());
-								tryEvent = true;
+			if (e.getSource() == presets) {
+				System.out.println("This thing is working");
+				if ("Work 6:30am-2:00pm".equals(presets.getSelectedItem())) {
+					jtf1.setText("Work");
+					jtf2.setText("6:30am");
+					jtf3.setText("2:00pm");
+					presets.setSelectedIndex(0);
+				}
+				if ("Work 2:00pm-8:30pm".equals(presets.getSelectedItem())) {
+					jtf1.setText("Work");
+					jtf2.setText("2:00pm");
+					jtf3.setText("8:30pm");
+					presets.setSelectedIndex(0);
+				}
+			} else {
+				System.out.println("Action");
+				DateButton current = head.next;
+				while (current != null) {
+					if (e.getSource() == current.getButton()) {
+						System.out.println("Button pressed");
+						JLabel pre = new JLabel("Preset Event");
+						JLabel lab1 = new JLabel("Event Name");
+						jtf1 = new JTextField(current.getEvent());
+						JLabel lab2 = new JLabel("Start Time");
+						jtf2 = new JTextField(current.start);
+						JLabel lab3 = new JLabel("End Time");
+						jtf3 = new JTextField(current.end);
+						JPanel pan = new JPanel();
+						pan.setSize(new Dimension(500, 500));
+						pan.setLayout(new GridLayout(4, 2, 0, 0));
+						pan.add(pre);
+						pan.add(presets);
+						pan.add(lab1);
+						pan.add(jtf1);
+						pan.add(lab2);
+						pan.add(jtf2);
+						pan.add(lab3);
+						pan.add(jtf3);
+						boolean tryEvent = true;
+						while (tryEvent) {
+							tryEvent = false;
+							String[] choices = { "Update", "Delete", "Cancel" };
+							int optionSelected = JOptionPane.showOptionDialog(getScreen(), pan, "Edit Event",
+									JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices,
+									choices[0]);
+							System.out.println(optionSelected);
+							if (optionSelected == 0) {
+								try {
+									EventData newEvent = getManager().editEvent(
+											(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime(),
+											jtf1.getText(), jtf2.getText(), jtf3.getText(), getDay(), getMonth(),
+											getYear());
+									editButton(newEvent.getStartTime(), current.getStartTime(), newEvent.getStartInt(),
+											newEvent.getEndTime(), getDay(), getMonth(), getYear(), newEvent.getName());
+									screen.setVisible(true);
+									getScreen().repaint();
+									getScreen().validate();
+									return;
+								} catch (Exception e1) {
+									JOptionPane.showMessageDialog(screen, e1.getMessage());
+									tryEvent = true;
+								}
+							} else if (optionSelected == 1) {
+								try {
+									getManager().removeEvent((double) (year + (((month * 31) + (day)) * .001)),
+											current.getStartTime());
+									removeButton(current.getStartTime());
+									screen.setVisible(true);
+									screen.repaint();
+									screen.validate();
+									return;
+								} catch (Exception e2) {
+									JOptionPane.showMessageDialog(screen, e2.getMessage());
+									tryEvent = true;
+								}
 							}
 						}
 					}
+					current = current.next;
 				}
-				current = current.next;
 			}
 		}
 	}
