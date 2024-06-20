@@ -193,6 +193,7 @@ public class SortedDateList<E> {
 		if (size == 0) {
 			throw new IllegalArgumentException("Cannot remove from an empty list");
 		}
+		System.out.println("Current Date: " + date);
 		ListNode current = front;
 		if (current.date == date && current.startTime == startTime) {
 			if (size == 1) {
@@ -213,6 +214,7 @@ public class SortedDateList<E> {
 			return;
 		}
 		while (current.next != null) {
+			System.out.println(current.date);
 			if (current.next.date == date && current.next.startTime == startTime) {
 				if (current.next.next == null) {
 					current.next = current.next.next;

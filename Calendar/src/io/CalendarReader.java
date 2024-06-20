@@ -31,10 +31,13 @@ public class CalendarReader {
 					int day = scanner.nextInt();
 					int month = scanner.nextInt();
 					int year = scanner.nextInt();
+					int red = scanner.nextInt();
+					int green = scanner.nextInt();
+					int blue = scanner.nextInt();
 					if (scanner.hasNextLine()) {
 						scanner.nextLine();
 					}
-					EventData eventData = new EventData(name, startTime, endTime, day, month, year);
+					EventData eventData = new EventData(name, startTime, endTime, day, month, year, red, green, blue);
 					list.add(eventData, eventData.getDate(), eventData.getStartInt());
 				} catch (Exception e) {
 					// Nothing

@@ -28,7 +28,9 @@ public class CalendarWriter {
 						+ "@@"
 						+ list.getAtIndex(i).getEndTime().substring(0, list.getAtIndex(i).getEndTime().length() - 1)
 						+ "@@" + list.getAtIndex(i).getDay() + "@@" + list.getAtIndex(i).getMonth() + "@@"
-						+ list.getAtIndex(i).getYear() + "@@\n");
+						+ list.getAtIndex(i).getYear() + "@@" + list.getAtIndex(i).getColor().getRed() + "@@"
+						+ list.getAtIndex(i).getColor().getGreen() + "@@" + list.getAtIndex(i).getColor().getBlue()
+						+ "@@\n");
 			}
 			fileWriter.close();
 		} catch (FileNotFoundException e) {

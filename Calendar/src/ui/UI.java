@@ -20,14 +20,18 @@ import java.awt.event.MouseWheelListener;
 import java.io.File;
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.Scanner;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -119,6 +123,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private Boolean settingsChanged;
 	/** Scroll Frame for holding all map days */
 	private JScrollPane scrollFrame;
+	/** All color options */
+	private static ColorData colorOptions;
 	/** Scroll Frame color */
 	private static Color panelColor = new Color(20, 20, 20);
 	/** Odd month color */
@@ -126,7 +132,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	/** Even month color */
 	private static Color evenMonthColor = new Color(26, 26, 26, 255);
 	/** Event color */
-	private static Color eventColor = new Color(255, 153, 161, 255);
+	private static Color eventColor = new Color(255, 153, 161);
 	/** File menu title */
 	private static final String FILE_MENU_TITLE = "File";
 	/** Load calendar title */
@@ -159,6 +165,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	 */
 	public UI() {
 		super();
+		colorOptions = new ColorData("mtf", System.getProperty("user.home") + File.separator + "Documents"
+				+ File.separator + "CalendarData" + File.separator + "Colors.txt");
 		presetEvents = new String[] { "", "Work 6:30am-2:00pm", "Work 2:00pm-8:30pm" };
 		preset = new JComboBox<>(presetEvents);
 		preset.addActionListener(this);
@@ -447,7 +455,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				if (cal.get(Calendar.DAY_OF_MONTH) == j + 1 && cal.get(Calendar.MONTH) == i
 						&& cal.get(Calendar.YEAR) == yearOfCalendar) {
 					label.setForeground(eventColor);
-					buttons[currentDay].setBorder(new LineBorder(eventColor));
+					buttons[currentDay].setBorder(new LineBorder(eventColor, 2));
 				} else {
 					label.setForeground(Color.WHITE);
 					buttons[currentDay].setBorder(BorderFactory.createEtchedBorder());
@@ -465,7 +473,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 						&& currentData.getYear() == yearOfCalendar) {
 					datePanel[currentDay].addButton(currentData.getStartTime(), currentData.getStartInt(),
 							currentData.getEndTime(), currentData.getDay(), currentData.getMonth(),
-							currentData.getYear(), currentData.getName());
+							currentData.getYear(), currentData.getName(), currentData.getColor().getRed(),
+							currentData.getColor().getGreen(), currentData.getColor().getBlue());
 
 					if (it.hasNext()) {
 						currentData = it.next();
@@ -750,7 +759,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					JLabel lab3 = new JLabel("End Time");
 					endTextField = new JTextField();
 					JPanel pan = new JPanel();
-					pan.setSize(new Dimension(500, 500));
+					// pan.setSize(new Dimension(500, 500));
 					pan.setLayout(new GridLayout(4, 2, 0, 0));
 					pan.add(pre);
 					pan.add(preset);
@@ -771,10 +780,12 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 								System.out.println(yearOfCalendar);
 								EventData newEvent = manager.createEvent((String) eventTextField.getText(),
 										(String) startTextField.getText(), (String) endTextField.getText(),
-										datePanel[i].getDay(), datePanel[i].getMonth(), datePanel[i].getYear());
+										datePanel[i].getDay(), datePanel[i].getMonth(), datePanel[i].getYear(),
+										eventColor.getRed(), eventColor.getGreen(), eventColor.getBlue());
 								datePanel[i].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
 										newEvent.getEndTime(), datePanel[i].getDay(), datePanel[i].getMonth(),
-										datePanel[i].getYear(), newEvent.getName());
+										datePanel[i].getYear(), newEvent.getName(), newEvent.getColor().getRed(),
+										newEvent.getColor().getGreen(), newEvent.getColor().getBlue());
 								screen.setVisible(true);
 								screen.repaint();
 								screen.validate();
@@ -826,14 +837,13 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			this.day = day;
 			this.month = month;
 			this.year = year;
-			head = new DateButton(null, 0, null, day, month, year, null);
+			head = new DateButton(null, 0, null, day, month, year, null, 0, 0, 0);
 			panel = new JPanel();
 			panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
-			String[] chooses = { "", "Work 6:30am-2:00pm", "Work 2:00pm-8:30pm" };
+			String[] colorChooces = { "Something" };
 			presets = new JComboBox<>(getPresetEvents());
 			presets.addActionListener(this);
 			presets.setFocusable(false);
-			size = 0;
 		}
 
 		public JPanel getPanel() {
@@ -852,8 +862,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			return year;
 		}
 
-		public void addButton(String start, int startTime, String end, int day, int month, int year, String event) {
-			DateButton newLabel = new DateButton(start, startTime, end, day, month, year, event);
+		public void addButton(String start, int startTime, String end, int day, int month, int year, String event,
+				int red, int green, int blue) {
+			DateButton newLabel = new DateButton(start, startTime, end, day, month, year, event, red, green, blue);
 			newLabel.getButton().addActionListener(this);
 			newLabel.getButton().setPreferredSize(new Dimension(300, 0));
 			newLabel.getButton().setHorizontalAlignment(SwingConstants.LEFT);
@@ -887,12 +898,12 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		}
 
 		public void editButton(String start, int originalStartTime, int startTime, String end, int day, int month,
-				int year, String event) {
+				int year, String event, int red, int green, int blue) {
 			if (size == 0) {
 				return;
 			}
 			removeButton(originalStartTime);
-			addButton(start, startTime, end, day, month, year, event);
+			addButton(start, startTime, end, day, month, year, event, red, green, blue);
 		}
 
 		public void removeButton(int startTime) {
@@ -976,6 +987,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				while (current != null) {
 					if (e.getSource() == current.getButton()) {
 						System.out.println("Button pressed");
+						JLabel col = new JLabel("Event Color");
 						JLabel pre = new JLabel("Preset Event");
 						JLabel lab1 = new JLabel("Event Name");
 						jtf1 = new JTextField(current.getEvent());
@@ -985,7 +997,14 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 						jtf3 = new JTextField(current.end);
 						JPanel pan = new JPanel();
 						pan.setSize(new Dimension(500, 500));
-						pan.setLayout(new GridLayout(4, 2, 0, 0));
+						pan.setLayout(new GridLayout(5, 2, 0, 0));
+
+						JColorBox jcb = new JColorBox(colorOptions);
+						jcb.setSelectedItem(current.getColor());
+						jcb.setBounds(100, 20, 140, 30);
+						// pan.add(colors);
+						pan.add(col);
+						pan.add(jcb);
 						pan.add(pre);
 						pan.add(presets);
 						pan.add(lab1);
@@ -994,22 +1013,34 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 						pan.add(jtf2);
 						pan.add(lab3);
 						pan.add(jtf3);
+
 						boolean tryEvent = true;
 						while (tryEvent) {
 							tryEvent = false;
 							String[] choices = { "Update", "Delete", "Cancel" };
+							Color selectedColor = new Color(eventColor.getRed(), eventColor.getGreen(),
+									eventColor.getBlue());
 							int optionSelected = JOptionPane.showOptionDialog(getScreen(), pan, "Edit Event",
 									JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices,
 									choices[0]);
 							System.out.println(optionSelected);
+							try {
+								selectedColor = colorOptions.getColors()[jcb.getSelectedIndex()];
+							} catch (Exception e2) {
+								selectedColor = new Color(eventColor.getRed(), eventColor.getGreen(),
+										eventColor.getBlue());
+							}
 							if (optionSelected == 0) {
 								try {
 									EventData newEvent = getManager().editEvent(
 											(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime(),
 											jtf1.getText(), jtf2.getText(), jtf3.getText(), getDay(), getMonth(),
-											getYear());
+											getYear(), selectedColor.getRed(), selectedColor.getGreen(),
+											selectedColor.getBlue());
 									editButton(newEvent.getStartTime(), current.getStartTime(), newEvent.getStartInt(),
-											newEvent.getEndTime(), getDay(), getMonth(), getYear(), newEvent.getName());
+											newEvent.getEndTime(), getDay(), getMonth(), getYear(), newEvent.getName(),
+											newEvent.getColor().getRed(), newEvent.getColor().getGreen(),
+											newEvent.getColor().getBlue());
 									screen.setVisible(true);
 									getScreen().repaint();
 									getScreen().validate();
@@ -1061,8 +1092,11 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		private JButton button;
 		/** Next dateLabel */
 		private DateButton next;
+		/** Color of the event */
+		private Color dateColor;
 
-		public DateButton(String start, int startTime, String end, int day, int month, int year, String event) {
+		public DateButton(String start, int startTime, String end, int day, int month, int year, String event, int red,
+				int green, int blue) {
 			setStart(start);
 			setStartTime(startTime);
 			setEnd(end);
@@ -1077,7 +1111,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			button.setFont(new Font("Comic Sans", Font.BOLD, 15));
 			button.setMargin(new Insets(0, 0, 0, 0));
 			button.setIcon(null);
-			button.setForeground(eventColor);
+			dateColor = new Color(red, green, blue);
+			button.setForeground(dateColor);
 			next = null;
 		}
 
@@ -1128,6 +1163,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		public JButton getButton() {
 			return button;
 		}
+		
+		public Color getColor() {
+			return dateColor;
+		}
 
 		public void printToCMD() {
 			System.out.println(start + " " + end + " " + day + " " + month + " " + year + " " + event);
@@ -1145,6 +1184,134 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 	public static DatePanel[] getDatePanel() {
 		return datePanel;
+	}
+
+	private class ColorData {
+		/** Holds an array of colors */
+		private Color[] colors;
+		/** Sorting method to use */
+		private String sortHeuristic;
+		/** Size of the colors array */
+		private int size;
+
+		public ColorData(String sort, String file) {
+			setHeuristic(sort);
+			try {
+				new File(file).createNewFile();
+				Scanner scanner = new Scanner(new File(file));
+				size = scanner.nextInt();
+				System.out.println(size);
+				colors = new Color[size];
+				int counter = 0;
+				scanner.nextLine();
+				while (scanner.hasNextLine() && scanner.hasNext()) {
+					scanner.useDelimiter("[\\n,]+");
+					int red = scanner.nextInt();
+					int green = scanner.nextInt();
+					int blue = scanner.nextInt();
+					System.out.println(red + " " + green + " " + blue);
+					if (scanner.hasNextLine()) {
+						scanner.nextLine();
+					}
+					colors[counter] = new Color(red, green, blue);
+					counter++;
+				}
+				scanner.close();
+			} catch (Exception e) {
+				throw new IllegalArgumentException(e.getMessage());
+			}
+		}
+
+		public void addColor(Color newColor) {
+			size++;
+			Color[] newColors = new Color[size];
+			if ("mtf".equals(sortHeuristic)) {
+				newColors[0] = newColor;
+				for (int i = 0; i < size - 1; i++) {
+					newColors[i + 1] = colors[i];
+				}
+			} else {
+				newColors[size - 1] = newColor;
+				for (int i = 0; i < size - 1; i++) {
+					newColors[i] = colors[i];
+				}
+			}
+			colors = newColors;
+		}
+
+		public void setHeuristic(String heur) {
+			sortHeuristic = heur;
+		}
+
+		public Color[] getColors() {
+			return colors;
+		}
+
+		public int getSize() {
+			return size;
+		}
+	}
+
+	/**
+	 * 
+	 * 
+	 * Code was created with the help of JColorComboBox: JComboBox as Color Chooser,
+	 * Friday 22 July 2011, by All About Java. Source:
+	 * https://www.allabtjava.com/2011/07/jcolorcombobox-jcombobox-as-color.html
+	 * 
+	 * @author Caleb Kolb
+	 */
+	private static class JColorBox extends JComboBox {
+
+		/** Holds a copy of all colors */
+		private static ColorData theColors;
+
+		public JColorBox(ColorData allColors) {
+			super();
+			theColors = allColors;
+			DefaultComboBoxModel dcbm = new DefaultComboBoxModel();
+			for (int i = 0; i < allColors.getSize(); i++) {
+				dcbm.addElement(allColors.getColors()[i]);
+			}
+			setModel(dcbm);
+			setRenderer(new ColorRenderer());
+			this.setOpaque(true);
+			this.setSelectedIndex(0);
+		}
+
+		@Override
+		public void setSelectedItem(Object anObject) {
+			super.setSelectedItem(anObject);
+			System.out.println((Color) anObject);
+
+			setBackground((Color) anObject);
+		}
+
+		private class ColorRenderer extends JLabel implements javax.swing.ListCellRenderer {
+
+			public ColorRenderer() {
+				this.setOpaque(true);
+			}
+
+			public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+					boolean cellHasFocus) {
+				Color color = (Color) value;
+				// System.out.println(color);
+
+				list.setSelectionBackground(null);
+				list.setSelectionForeground(null);
+
+				setBorder(null);
+
+				setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 15));
+				setBackground(color);
+				setText(" ");
+				setForeground(Color.black);
+
+				return this;
+			}
+
+		}
 	}
 
 	private String getFileName(boolean load) {

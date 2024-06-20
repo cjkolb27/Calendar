@@ -1,5 +1,7 @@
 package events;
 
+import java.awt.Color;
+
 /**
  * Abstract Class for setting all event data
  * 
@@ -24,6 +26,8 @@ public class EventData {
 	private int year;
 	/** Date factor */
 	private double date;
+	/** Color of an event */
+	private Color eventColor;
 
 	/**
 	 * Sets all parameters in an Event
@@ -34,8 +38,13 @@ public class EventData {
 	 * @param day       the day of the event
 	 * @param month     the month of the event
 	 * @param year      the year of the event
+	 * @param red       the red color
+	 * @param blue      the blue color
+	 * @param green     the green color
 	 */
-	public EventData(String name, String startTime, String endTime, int day, int month, int year) {
+	public EventData(String name, String startTime, String endTime, int day, int month, int year, int red, int green,
+			int blue) {
+		setColor(red, green, blue);
 		setName(name);
 		setStartTime(startTime);
 		setEndTime(endTime);
@@ -45,6 +54,15 @@ public class EventData {
 		setMonth(month);
 		setDay(day);
 		setDate();
+	}
+
+	private void setColor(int red, int green, int blue) {
+		if (red < 0 || red > 255 || green < 0 || green > 255 || blue < 0 || blue > 255) {
+			eventColor = new Color(255, 255, 255);
+		} else {
+			eventColor = new Color(red, green, blue);
+		}
+
 	}
 
 	private void setName(String name) {
@@ -78,11 +96,11 @@ public class EventData {
 					throw new IllegalArgumentException("Invalid Start Time");
 			} else if (start.length() == 6) {
 				if (start.charAt(5) == 'a') {
-					this.startTime = "" + start.charAt(0) + start.charAt(1) + ":" + start.charAt(3)
-							+ start.charAt(4) + "am";
+					this.startTime = "" + start.charAt(0) + start.charAt(1) + ":" + start.charAt(3) + start.charAt(4)
+							+ "am";
 				} else if (start.charAt(5) == 'p') {
-					this.startTime = "" + start.charAt(0) + start.charAt(1) + ":" + start.charAt(3)
-							+ start.charAt(4) + "pm";
+					this.startTime = "" + start.charAt(0) + start.charAt(1) + ":" + start.charAt(3) + start.charAt(4)
+							+ "pm";
 				} else
 					throw new IllegalArgumentException("Invalid Start Time");
 			}
@@ -97,11 +115,11 @@ public class EventData {
 				throw new IllegalArgumentException("Invalid Start Time");
 		} else if (start.length() == 5) {
 			if (start.charAt(4) == 'a') {
-				this.startTime = "" + start.charAt(0) + start.charAt(1) + ":" + start.charAt(2)
-						+ start.charAt(3) + "am";
+				this.startTime = "" + start.charAt(0) + start.charAt(1) + ":" + start.charAt(2) + start.charAt(3)
+						+ "am";
 			} else if (start.charAt(4) == 'p') {
-				this.startTime = "" + start.charAt(0) + start.charAt(1) + ":" + start.charAt(2)
-						+ start.charAt(3) + "pm";
+				this.startTime = "" + start.charAt(0) + start.charAt(1) + ":" + start.charAt(2) + start.charAt(3)
+						+ "pm";
 			} else
 				throw new IllegalArgumentException("Invalid Start Time");
 		} else
@@ -132,11 +150,9 @@ public class EventData {
 					throw new IllegalArgumentException("Invalid End Time");
 			} else if (end.length() == 6) {
 				if (end.charAt(5) == 'a') {
-					this.endTime = "" + end.charAt(0) + end.charAt(1) + ":" + end.charAt(3)
-							+ end.charAt(4) + "am";
+					this.endTime = "" + end.charAt(0) + end.charAt(1) + ":" + end.charAt(3) + end.charAt(4) + "am";
 				} else if (end.charAt(5) == 'p') {
-					this.endTime = "" + end.charAt(0) + end.charAt(1) + ":" + end.charAt(3)
-							+ end.charAt(4) + "pm";
+					this.endTime = "" + end.charAt(0) + end.charAt(1) + ":" + end.charAt(3) + end.charAt(4) + "pm";
 				} else
 					throw new IllegalArgumentException("Invalid End Time");
 			}
@@ -151,11 +167,9 @@ public class EventData {
 				throw new IllegalArgumentException("Invalid End Time");
 		} else if (end.length() == 5) {
 			if (end.charAt(4) == 'a') {
-				this.endTime = "" + end.charAt(0) + end.charAt(1) + ":" + end.charAt(2) + end.charAt(3)
-						+ "am";
+				this.endTime = "" + end.charAt(0) + end.charAt(1) + ":" + end.charAt(2) + end.charAt(3) + "am";
 			} else if (end.charAt(4) == 'p') {
-				this.endTime = "" + end.charAt(0) + end.charAt(1) + ":" + end.charAt(2) + end.charAt(3)
-						+ "pm";
+				this.endTime = "" + end.charAt(0) + end.charAt(1) + ":" + end.charAt(2) + end.charAt(3) + "pm";
 			} else
 				throw new IllegalArgumentException("Invalid End Time");
 		} else
@@ -164,14 +178,14 @@ public class EventData {
 
 	private void setStartInt() {
 		if (startTime.length() == 6) {
-			int time = Integer.parseInt(
-					"" + startTime.charAt(0) + startTime.charAt(2) + startTime.charAt(3));
+			int time = Integer.parseInt("" + startTime.charAt(0) + startTime.charAt(2) + startTime.charAt(3));
 			if (startTime.charAt(4) == 'p') {
 				time = time + 1200;
 			}
 			startInt = time;
 		} else {
-			int time = Integer.parseInt("" + startTime.charAt(0) + startTime.charAt(1) + startTime.charAt(3) + startTime.charAt(4));
+			int time = Integer.parseInt(
+					"" + startTime.charAt(0) + startTime.charAt(1) + startTime.charAt(3) + startTime.charAt(4));
 			if (startTime.charAt(5) == 'p') {
 				time = time + 1200;
 			} else if (startTime.charAt(5) == 'a' && startTime.charAt(1) == '2') {
@@ -183,14 +197,14 @@ public class EventData {
 
 	private void setEndInt() {
 		if (endTime.length() == 6) {
-			int time = Integer.parseInt(
-					"" + endTime.charAt(0) + endTime.charAt(2) + endTime.charAt(3));
+			int time = Integer.parseInt("" + endTime.charAt(0) + endTime.charAt(2) + endTime.charAt(3));
 			if (endTime.charAt(4) == 'p') {
 				time = time + 1200;
-			} 
+			}
 			endInt = time;
 		} else {
-			int time = Integer.parseInt("" + endTime.charAt(0) + endTime.charAt(1) + endTime.charAt(3) + endTime.charAt(4));
+			int time = Integer
+					.parseInt("" + endTime.charAt(0) + endTime.charAt(1) + endTime.charAt(3) + endTime.charAt(4));
 			if (endTime.charAt(5) == 'p') {
 				time = time + 1200;
 			} else if (startTime.charAt(5) == 'a' && startTime.charAt(1) == '2') {
@@ -235,7 +249,7 @@ public class EventData {
 	}
 
 	private void setDate() {
-		this.date = year + (((month * 31) + (day)) * .001);
+		this.date = year + (month * 31 + (double) day) * .001;
 	}
 
 	/**
@@ -264,11 +278,21 @@ public class EventData {
 	public String getEndTime() {
 		return endTime;
 	}
-	
+
+	/**
+	 * Returns the start time as an int
+	 * 
+	 * @return startInt the start time
+	 */
 	public int getStartInt() {
 		return startInt;
 	}
-	
+
+	/**
+	 * Returns the end time as an int
+	 * 
+	 * @return endInt the end time
+	 */
 	public int getEndInt() {
 		return endInt;
 	}
@@ -310,6 +334,15 @@ public class EventData {
 	}
 
 	/**
+	 * Returns the color of an event
+	 * 
+	 * @return eventColor the color of the event
+	 */
+	public Color getColor() {
+		return eventColor;
+	}
+
+	/**
 	 * Updates all data when editing an event
 	 * 
 	 * @param name      the name of the event
@@ -318,8 +351,13 @@ public class EventData {
 	 * @param day       the day of the event
 	 * @param month     the month of the event
 	 * @param year      the year of the event
+	 * @param red       the red color
+	 * @param green     the green color
+	 * @param blue      the blue color
 	 */
-	public void editData(String name, String startTime, String endTime, int day, int month, int year) {
+	public void editData(String name, String startTime, String endTime, int day, int month, int year, int red,
+			int green, int blue) {
+		setColor(red, green, blue);
 		setName(name);
 		setStartTime(startTime);
 		setEndTime(endTime);

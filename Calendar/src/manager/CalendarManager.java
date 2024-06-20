@@ -189,10 +189,14 @@ public class CalendarManager {
 	 * @param day       the day of the event
 	 * @param month     the month of the event
 	 * @param year      the year of the event
+	 * @param red       the red color
+	 * @param blue      the blue color
+	 * @param green     the green color
 	 * @return newEvent the newly created event
 	 */
-	public EventData createEvent(String name, String startTime, String endTime, int day, int month, int year) {
-		EventData newEvent = new EventData(name, startTime, endTime, day, month, year);
+	public EventData createEvent(String name, String startTime, String endTime, int day, int month, int year, int red, int green,
+			int blue) {
+		EventData newEvent = new EventData(name, startTime, endTime, day, month, year, red, green, blue);
 		if (year != this.year) {
 			throw new IllegalArgumentException("Year does not match current year");
 		}
@@ -217,12 +221,15 @@ public class CalendarManager {
 	 * @param day           the day of the event
 	 * @param month         the month of the event
 	 * @param year          the year of the event
+	 * @param red           the red color
+	 * @param blue          the blue color
+	 * @param green         the green color
 	 * @return EventData the event edited
 	 */
 	public EventData editEvent(double originalDate, int originalStart, String name, String startTime, String endTime,
-			int day, int month, int year) {
+			int day, int month, int year, int red, int green, int blue) {
 		try {
-			EventData newEvent = new EventData(name, startTime, endTime, day, month, year);
+			EventData newEvent = new EventData(name, startTime, endTime, day, month, year, red, green, blue);
 			eventYearList.removeD(originalDate, originalStart);
 			eventYearList.add(newEvent, newEvent.getDate(), newEvent.getStartInt());
 			saveCalendar();
@@ -235,8 +242,8 @@ public class CalendarManager {
 	/**
 	 * Removes an event from the list using the original date and starting time
 	 * 
-	 * @param originalDate the date of the event
-	 * @param originalStart the 
+	 * @param originalDate  the date of the event
+	 * @param originalStart the
 	 * @return EventData the event removed
 	 */
 	public EventData removeEvent(double originalDate, int originalStart) {
