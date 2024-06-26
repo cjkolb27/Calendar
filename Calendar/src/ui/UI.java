@@ -22,12 +22,13 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Scanner;
 
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -41,8 +42,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.plaf.basic.BasicArrowButton;
 
 import events.EventData;
 import manager.CalendarManager;
@@ -89,7 +90,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private static String[] presetEvents;
 	/** Days per month */
 	private static int[] daysPerMonth = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-	// ** Weeks per month */
+	/** Weeks per month */
 	private static int[] startWeekPerMonth = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	/** Position of week that changes month JLabel */
 	private static int[] transitionWeek = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -100,7 +101,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	/** Next year button */
 	private JButton nextYear;
 	/** All presets of an event */
-	private JComboBox preset;
+	private JComboBox<String> preset;
 	/** Event text field */
 	private JTextField eventTextField;
 	/** Start text field */
@@ -167,7 +168,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		super();
 		colorOptions = new ColorData("mtf", System.getProperty("user.home") + File.separator + "Documents"
 				+ File.separator + "CalendarData" + File.separator + "Colors.txt");
-		presetEvents = new String[] { "", "Work 6:30am-2:00pm", "Work 2:00pm-8:30pm" };
+		presetEvents = new String[] { "Work 6:30am-2:00pm", "Work 2:00pm-8:30pm" };
 		preset = new JComboBox<>(presetEvents);
 		preset.addActionListener(this);
 		preset.setFocusable(false);
@@ -216,6 +217,11 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		new UI();
 	}
 
+	/**
+	 * Returns an array of all preset events
+	 * 
+	 * @return presetEvents an array of strings of all presets
+	 */
 	public static String[] getPresetEvents() {
 		return presetEvents;
 	}
@@ -526,6 +532,11 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		createMenuBar();
 
 		setUpScreen();
+
+		// screen.setVisible(true);
+		scrollFrame.getVerticalScrollBar()
+				.setValue((int) (((double) (scrollFrame.getVerticalScrollBar().getMaximum()) / (double) totalWeeks)
+						* ((double) (startWeekPerMonth[monthOfCalendar] - 1) - .3)));
 		System.out.println("Setting everything");
 	}
 
@@ -663,8 +674,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				if (test == -1 || test == 2) {
 					System.out.println("Cancelled or Closed");
 				} else {
-					settingsChanged = true;
-					changeWindow((ScreenState) combo.getSelectedItem());
+					if (windowState != combo.getSelectedItem()) {
+						settingsChanged = true;
+						changeWindow((ScreenState) combo.getSelectedItem());
+					}
 					manager.saveSettings(manager.defaultSettings()[0], windowState);
 					System.out.println(windowState);
 				}
@@ -842,6 +855,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 			String[] colorChooces = { "Something" };
 			presets = new JComboBox<>(getPresetEvents());
+			presets.setSelectedIndex(-1);
 			presets.addActionListener(this);
 			presets.setFocusable(false);
 		}
@@ -973,46 +987,91 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					jtf1.setText("Work");
 					jtf2.setText("6:30am");
 					jtf3.setText("2:00pm");
-					presets.setSelectedIndex(0);
+					presets.setSelectedIndex(-1);
 				}
 				if ("Work 2:00pm-8:30pm".equals(presets.getSelectedItem())) {
 					jtf1.setText("Work");
 					jtf2.setText("2:00pm");
 					jtf3.setText("8:30pm");
-					presets.setSelectedIndex(0);
+					presets.setSelectedIndex(-1);
 				}
 			} else {
 				System.out.println("Action");
 				DateButton current = head.next;
 				while (current != null) {
 					if (e.getSource() == current.getButton()) {
+						int textFieldSizeX = 151;
+						int textFieldSizeZ = 20;
+						
 						System.out.println("Button pressed");
 						JLabel col = new JLabel("Event Color");
 						JLabel pre = new JLabel("Preset Event");
 						JLabel lab1 = new JLabel("Event Name");
 						jtf1 = new JTextField(current.getEvent());
+						jtf1.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
 						JLabel lab2 = new JLabel("Start Time");
 						jtf2 = new JTextField(current.start);
+						jtf2.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
 						JLabel lab3 = new JLabel("End Time");
 						jtf3 = new JTextField(current.end);
+						jtf3.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
 						JPanel pan = new JPanel();
-						pan.setSize(new Dimension(500, 500));
-						pan.setLayout(new GridLayout(5, 2, 0, 0));
+						pan.setPreferredSize(new Dimension(100, 150));
+						SpringLayout layout = new SpringLayout();
+						pan.setLayout(layout);
 
 						JColorBox jcb = new JColorBox(colorOptions);
 						jcb.setSelectedItem(current.getColor());
-						jcb.setBounds(100, 20, 140, 30);
+						// jcb.setBounds(100, 20, 140, 30);
+						jcb.setPreferredSize(new Dimension(30, 20));
+						jcb.setFocusable(false);
+						jcb.setBorder(BorderFactory.createLineBorder(current.getColor(), 200));
+						jcb.setForeground(null);
+						
+						Component[] c = jcb.getComponents();
+						for (Component res : c) {
+							System.out.println("Component: " + res);
+							if (res instanceof AbstractButton) {
+								if (res.isVisible()) {
+									res.setVisible(false);
+								}
+							}
+						}
 						// pan.add(colors);
 						pan.add(col);
 						pan.add(jcb);
+						layout.putConstraint(SpringLayout.WEST, col, 5, SpringLayout.WEST, pan);
+						layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.NORTH, pan);
+						layout.putConstraint(SpringLayout.WEST, jcb, 14, SpringLayout.EAST, col);
+						layout.putConstraint(SpringLayout.NORTH, jcb, 5, SpringLayout.NORTH, pan);
+						
 						pan.add(pre);
 						pan.add(presets);
+						layout.putConstraint(SpringLayout.WEST, pre, 5, SpringLayout.WEST, pan);
+						layout.putConstraint(SpringLayout.NORTH, pre, 30, SpringLayout.NORTH, col);
+						layout.putConstraint(SpringLayout.WEST, presets, 5, SpringLayout.EAST, pre);
+						layout.putConstraint(SpringLayout.NORTH, presets, 30, SpringLayout.NORTH, jcb);
+						
 						pan.add(lab1);
 						pan.add(jtf1);
+						layout.putConstraint(SpringLayout.WEST, lab1, 5, SpringLayout.WEST, pan);
+						layout.putConstraint(SpringLayout.NORTH, lab1, 30, SpringLayout.NORTH, pre);
+						layout.putConstraint(SpringLayout.WEST, jtf1, 10, SpringLayout.EAST, lab1);
+						layout.putConstraint(SpringLayout.NORTH, jtf1, 30, SpringLayout.NORTH, presets);
+						
 						pan.add(lab2);
 						pan.add(jtf2);
+						layout.putConstraint(SpringLayout.WEST, lab2, 5, SpringLayout.WEST, pan);
+						layout.putConstraint(SpringLayout.NORTH, lab2, 24, SpringLayout.NORTH, lab1);
+						layout.putConstraint(SpringLayout.WEST, jtf2, 18, SpringLayout.EAST, lab2);
+						layout.putConstraint(SpringLayout.NORTH, jtf2, 24, SpringLayout.NORTH, jtf1);
+						
 						pan.add(lab3);
 						pan.add(jtf3);
+						layout.putConstraint(SpringLayout.WEST, lab3, 5, SpringLayout.WEST, pan);
+						layout.putConstraint(SpringLayout.NORTH, lab3, 24, SpringLayout.NORTH, lab2);
+						layout.putConstraint(SpringLayout.WEST, jtf3, 25, SpringLayout.EAST, lab3);
+						layout.putConstraint(SpringLayout.NORTH, jtf3, 24, SpringLayout.NORTH, jtf2);
 
 						boolean tryEvent = true;
 						while (tryEvent) {
@@ -1163,7 +1222,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		public JButton getButton() {
 			return button;
 		}
-		
+
 		public Color getColor() {
 			return dateColor;
 		}
@@ -1273,6 +1332,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			for (int i = 0; i < allColors.getSize(); i++) {
 				dcbm.addElement(allColors.getColors()[i]);
 			}
+			setFocusable(false);
 			setModel(dcbm);
 			setRenderer(new ColorRenderer());
 			this.setOpaque(true);
@@ -1283,7 +1343,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		public void setSelectedItem(Object anObject) {
 			super.setSelectedItem(anObject);
 			System.out.println((Color) anObject);
-
+			setBorder(BorderFactory.createLineBorder((Color) anObject, 200));
 			setBackground((Color) anObject);
 		}
 
@@ -1302,7 +1362,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				list.setSelectionForeground(null);
 
 				setBorder(null);
-
+				
 				setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 15));
 				setBackground(color);
 				setText(" ");
