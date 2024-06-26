@@ -493,6 +493,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				}
 				// datePanel[currentDay].addLabel(630, "Work");
 				datePanel[currentDay].getPanel().setBackground(null);
+				datePanel[currentDay].getPanel().setPreferredSize(
+						new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width - 300) / 7 - 1, 0));
 				buttons[currentDay].add(datePanel[currentDay].getPanel(), BorderLayout.WEST);
 				panel.add(buttons[currentDay]);
 				// System.out.println("Day: " + currentDay + "printed");
@@ -853,6 +855,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			head = new DateButton(null, 0, null, day, month, year, null, 0, 0, 0);
 			panel = new JPanel();
 			panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
+			panel.setBackground(null);
 			String[] colorChooces = { "Something" };
 			presets = new JComboBox<>(getPresetEvents());
 			presets.setSelectedIndex(-1);
@@ -1002,7 +1005,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					if (e.getSource() == current.getButton()) {
 						int textFieldSizeX = 151;
 						int textFieldSizeZ = 20;
-						
+
 						System.out.println("Button pressed");
 						JLabel col = new JLabel("Event Color");
 						JLabel pre = new JLabel("Preset Event");
@@ -1027,7 +1030,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 						jcb.setFocusable(false);
 						jcb.setBorder(BorderFactory.createLineBorder(current.getColor(), 200));
 						jcb.setForeground(null);
-						
+
 						Component[] c = jcb.getComponents();
 						for (Component res : c) {
 							System.out.println("Component: " + res);
@@ -1044,28 +1047,28 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 						layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.NORTH, pan);
 						layout.putConstraint(SpringLayout.WEST, jcb, 14, SpringLayout.EAST, col);
 						layout.putConstraint(SpringLayout.NORTH, jcb, 5, SpringLayout.NORTH, pan);
-						
+
 						pan.add(pre);
 						pan.add(presets);
 						layout.putConstraint(SpringLayout.WEST, pre, 5, SpringLayout.WEST, pan);
 						layout.putConstraint(SpringLayout.NORTH, pre, 30, SpringLayout.NORTH, col);
 						layout.putConstraint(SpringLayout.WEST, presets, 5, SpringLayout.EAST, pre);
 						layout.putConstraint(SpringLayout.NORTH, presets, 30, SpringLayout.NORTH, jcb);
-						
+
 						pan.add(lab1);
 						pan.add(jtf1);
 						layout.putConstraint(SpringLayout.WEST, lab1, 5, SpringLayout.WEST, pan);
 						layout.putConstraint(SpringLayout.NORTH, lab1, 30, SpringLayout.NORTH, pre);
 						layout.putConstraint(SpringLayout.WEST, jtf1, 10, SpringLayout.EAST, lab1);
 						layout.putConstraint(SpringLayout.NORTH, jtf1, 30, SpringLayout.NORTH, presets);
-						
+
 						pan.add(lab2);
 						pan.add(jtf2);
 						layout.putConstraint(SpringLayout.WEST, lab2, 5, SpringLayout.WEST, pan);
 						layout.putConstraint(SpringLayout.NORTH, lab2, 24, SpringLayout.NORTH, lab1);
 						layout.putConstraint(SpringLayout.WEST, jtf2, 18, SpringLayout.EAST, lab2);
 						layout.putConstraint(SpringLayout.NORTH, jtf2, 24, SpringLayout.NORTH, jtf1);
-						
+
 						pan.add(lab3);
 						pan.add(jtf3);
 						layout.putConstraint(SpringLayout.WEST, lab3, 5, SpringLayout.WEST, pan);
@@ -1362,7 +1365,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				list.setSelectionForeground(null);
 
 				setBorder(null);
-				
+
 				setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 15));
 				setBackground(color);
 				setText(" ");

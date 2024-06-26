@@ -243,14 +243,14 @@ public class SortedDateList<E> {
 	}
 
 	public Iterator<E> iterator() {
-		return new dateIterator();
+		return new DateIterator();
 	}
 
-	private class dateIterator implements Iterator<E> {
+	private class DateIterator implements Iterator<E> {
 
 		private ListNode current;
 
-		public dateIterator() {
+		public DateIterator() {
 			current = new ListNode(null, 0, 0, null, null);
 			current.next = front;
 		}
