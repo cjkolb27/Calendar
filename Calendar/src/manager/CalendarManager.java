@@ -194,8 +194,8 @@ public class CalendarManager {
 	 * @param green     the green color
 	 * @return newEvent the newly created event
 	 */
-	public EventData createEvent(String name, String startTime, String endTime, int day, int month, int year, int red, int green,
-			int blue) {
+	public EventData createEvent(String name, String startTime, String endTime, int day, int month, int year, int red,
+			int green, int blue) {
 		EventData newEvent = new EventData(name, startTime, endTime, day, month, year, red, green, blue);
 		if (year != this.year) {
 			throw new IllegalArgumentException("Year does not match current year");
@@ -230,6 +230,9 @@ public class CalendarManager {
 			int day, int month, int year, int red, int green, int blue) {
 		try {
 			EventData newEvent = new EventData(name, startTime, endTime, day, month, year, red, green, blue);
+			if (!eventYearList.checkValue(originalDate, newEvent.getStartInt()) && newEvent.getStartInt() != originalStart) {
+				throw new IllegalArgumentException("Duplicate Dates when Editing");
+			}
 			eventYearList.removeD(originalDate, originalStart);
 			eventYearList.add(newEvent, newEvent.getDate(), newEvent.getStartInt());
 			saveCalendar();

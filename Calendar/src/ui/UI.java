@@ -28,7 +28,6 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -42,7 +41,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 import events.EventData;
@@ -495,6 +493,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				datePanel[currentDay].getPanel().setBackground(null);
 				datePanel[currentDay].getPanel().setPreferredSize(
 						new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width - 300) / 7 - 1, 0));
+				// datePanel[currentDay].getPanel().setPreferredSize(new Dimension(20, 0));
 				buttons[currentDay].add(datePanel[currentDay].getPanel(), BorderLayout.WEST);
 				panel.add(buttons[currentDay]);
 				// System.out.println("Day: " + currentDay + "printed");
@@ -631,6 +630,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		System.out.println("Action Listener");
 		if (e.getSource() == preset) {
 			if ("Work 6:30am-2:00pm".equals(preset.getSelectedItem())) {
 				eventTextField.setText("Work");
@@ -1108,6 +1108,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 									getScreen().validate();
 									return;
 								} catch (Exception e1) {
+									jtf2.setText(current.start);
+									jtf3.setText(current.end);
 									JOptionPane.showMessageDialog(screen, e1.getMessage());
 									tryEvent = true;
 								}
@@ -1166,7 +1168,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			setMonth(month);
 			setYear(year);
 			this.event = event;
-			button = new JButton(start + " " + event);
+			button = new JButton("<html>" + start + " " + event + "</html>");
 			button.setContentAreaFilled(false);
 			button.setFocusable(false);
 			button.setBorderPainted(false);

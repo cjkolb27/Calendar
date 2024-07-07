@@ -24,6 +24,17 @@ public class SortedDateList<E> {
 		front = null;
 		back = null;
 	}
+	
+	public boolean checkValue(double date, int startTime) {
+		ListNode temp = front;
+		while (temp != null) {
+			if (temp.date == date && temp.startTime == startTime) {
+				return false;
+			}
+			temp = temp.next;
+		}
+		return true;
+	}
 
 	/**
 	 * Adds an event in order of the date
@@ -35,6 +46,10 @@ public class SortedDateList<E> {
 	public void add(E data, double date, int startTime) {
 		if (data == null) {
 			throw new NullPointerException();
+		}
+		if (!checkValue(date, startTime)) {
+			return;
+			//throw new IllegalArgumentException("Duplicate Dates");
 		}
 		if (size > 1) {
 			if (front.date > date || (front.date == date && front.startTime >= startTime)) {
