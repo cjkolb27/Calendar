@@ -23,12 +23,12 @@ class CalendarWriterTest {
 	@Test
 	void testWriteCalendar() {
 		SortedDateList<EventData> s = new SortedDateList<EventData>();
-		EventData e1 = new EventData("Job", "12:30a", "12:35a", 12, 11, 2024);
-		EventData e2 = new EventData("Job", "12:35a", "12:36a", 12, 11, 2024);
-		EventData e3 = new EventData("Job", "12:29a", "12:30a", 12, 11, 2024);
-		EventData e4 = new EventData("Job", "12:30a", "12:35a", 17, 11, 2024);
-		EventData e5 = new EventData("Job", "1:00a", "12:35a", 18, 11, 2024);
-		EventData e6 = new EventData("Job", "12:40a", "12:35a", 21, 11, 2024);
+		EventData e1 = new EventData("Job", "12:30a", "12:35a", 12, 11, 2024, 100, 100, 100);
+		EventData e2 = new EventData("Job", "12:35a", "12:36a", 12, 11, 2024, 100, 100, 100);
+		EventData e3 = new EventData("Job", "12:29a", "12:30a", 12, 11, 2024, 100, 100, 100);
+		EventData e4 = new EventData("Job", "12:30a", "12:35a", 17, 11, 2024, 100, 100, 100);
+		EventData e5 = new EventData("Job", "1:00a", "12:35a", 18, 11, 2024, 100, 100, 100);
+		EventData e6 = new EventData("Job", "12:40a", "12:35a", 21, 11, 2024, 100, 100, 100);
 		s.add(e1, e1.getDate(), e1.getStartInt());
 		s.add(e2, e2.getDate(), e2.getStartInt());
 		s.add(e3, e3.getDate(), e3.getStartInt());
