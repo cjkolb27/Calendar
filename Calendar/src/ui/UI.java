@@ -180,6 +180,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		screen.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		screen.setLayout(new BorderLayout());
 		screen.setTitle(PROGRAM_TITLE);
+		screen.setBackground(panelColor);
 
 		panel = new JPanel(new GridLayout(54, 7, 1, 1));
 		panel.setBorder(BorderFactory.createEtchedBorder());
@@ -204,6 +205,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		scrollFrame.getVerticalScrollBar()
 				.setValue((int) (((double) (scrollFrame.getVerticalScrollBar().getMaximum()) / (double) totalWeeks)
 						* ((double) (startWeekPerMonth[monthOfCalendar] - 1) - .3)));
+		screen.repaint();
+		screen.validate();
 	}
 
 	/**
@@ -538,6 +541,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		scrollFrame.getVerticalScrollBar()
 				.setValue((int) (((double) (scrollFrame.getVerticalScrollBar().getMaximum()) / (double) totalWeeks)
 						* ((double) (startWeekPerMonth[monthOfCalendar] - 1) - .3)));
+		
+		screen.repaint();
+		screen.validate();
 		System.out.println("Setting everything");
 	}
 
