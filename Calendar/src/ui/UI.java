@@ -267,13 +267,11 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			if (settingsChanged) {
 				setScreenWindow();
 				screen.setUndecorated(false);
-				// you can choose to make the screen fit or not
 				screen.setExtendedState(Frame.MAXIMIZED_BOTH);
 				screen.setVisible(true);
 				System.out.println("IDK");
 			} else {
 				screen.setUndecorated(false);
-				// you can choose to make the screen fit or not
 				screen.setExtendedState(Frame.MAXIMIZED_BOTH);
 			}
 			windowState = ScreenState.Windowed;
@@ -285,8 +283,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private void setUpScreen() {
 		scrollFrame = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		// scrollFrame.getVerticalScrollBar().setValue((scrollFrame.getVerticalScrollBar().getMaximum()
-		// / 12) * monthOfCalendar);
 		scrollFrame.setBackground(panelColor);
 		scrollFrame.setBorder(BorderFactory.createEtchedBorder());
 		scrollFrame.getVerticalScrollBar().setUnitIncrement(20);
@@ -304,7 +300,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		month.setFont(new Font("Comic Sans", Font.BOLD, 40));
 		month.setForeground(Color.WHITE);
 		JPanel yearSelecter = new JPanel(new FlowLayout());
-		// yearSelecter.setLayout(new BoxLayout(yearSelecter, BoxLayout.LINE_AXIS));
 		yearSelecter.setBackground(null);
 		yearSelecter.setPreferredSize(new Dimension(50, 50));
 		for (int i = 0; i < 7; i++) {
@@ -339,7 +334,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				yearSelecter.add(nextYear);
 				northPanel.add(space);
 			} else {
-				// yearSelecter.add(space);
 				northPanel.add(space);
 			}
 		}
@@ -349,7 +343,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			JLabel weekDay = new JLabel(DAYSOFWEEKNAMES[i]);
 			weekDay.setFont(new Font("Comic Sans", Font.BOLD, 20));
 			weekDay.setForeground(Color.WHITE);
-			// northPanel.add(weekDay);
 			week.add(weekDay);
 		}
 		northPanel.add(week);
@@ -359,13 +352,31 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		calendarScrollingPan.add(northPanel, BorderLayout.NORTH);
 		calendarScrollingPan.add(scrollFrame, BorderLayout.CENTER);
 		screen.add(calendarScrollingPan, BorderLayout.CENTER);
-		// System.out.println(buttons[transitionWeek[1]].getHeight());
-		// scrollFrame.getVerticalScrollBar().setValue();
-		// screen.setVisible(true);
 		scrollFrame.getVerticalScrollBar()
 				.setValue((int) (((double) (scrollFrame.getVerticalScrollBar().getMaximum()) / (double) totalWeeks)
 						* ((double) (startWeekPerMonth[monthOfCalendar] - 1) - .3)));
-		// - scrollFrame.getVerticalScrollBar().getHeight()
+	}
+
+	/**
+	 * Resets the scroll panel when changing to a different year
+	 */
+	public void resetScrollPan() {
+		calendarScrollingPan.remove(scrollFrame);
+		screen.remove(calendarScrollingPan);
+		scrollFrame.remove(panel);
+		scrollFrame = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollFrame.setBackground(panelColor);
+		scrollFrame.setBorder(BorderFactory.createEtchedBorder());
+		scrollFrame.getVerticalScrollBar().setUnitIncrement(20);
+		scrollFrame.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0));
+		scrollFrame.addMouseWheelListener(this);
+
+		calendarScrollingPan = new JPanel(new BorderLayout());
+		calendarScrollingPan.add(northPanel, BorderLayout.NORTH);
+		calendarScrollingPan.add(scrollFrame, BorderLayout.CENTER);
+		screen.add(calendarScrollingPan, BorderLayout.CENTER);
+		screen.setVisible(true);
 	}
 
 	/**
@@ -494,10 +505,14 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				}
 				// datePanel[currentDay].addLabel(630, "Work");
 				datePanel[currentDay].getPanel().setBackground(null);
-				datePanel[currentDay].getPanel().setPreferredSize(
-						new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width - 300) / 7 - 1, 0));
+
+				// datePanel[currentDay].getPanel().setPreferredSize(
+				// new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width - 300) / 7 -
+				// 1, 0));
+
 				// datePanel[currentDay].getPanel().setPreferredSize(new Dimension(20, 0));
-				buttons[currentDay].add(datePanel[currentDay].getPanel(), BorderLayout.WEST);
+				buttons[currentDay].add(datePanel[currentDay].getPanel(), BorderLayout.CENTER);
+				// buttons[currentDay].add(new JPanel(), BorderLayout.CENTER);
 				panel.add(buttons[currentDay]);
 				// System.out.println("Day: " + currentDay + "printed");
 				currentDay++;
@@ -537,11 +552,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 		setUpScreen();
 
-		// screen.setVisible(true);
 		scrollFrame.getVerticalScrollBar()
 				.setValue((int) (((double) (scrollFrame.getVerticalScrollBar().getMaximum()) / (double) totalWeeks)
 						* ((double) (startWeekPerMonth[monthOfCalendar] - 1) - .3)));
-		
+
 		screen.repaint();
 		screen.validate();
 		System.out.println("Setting everything");
@@ -634,6 +648,18 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		}
 	}
 
+	public void deleteAllEvents() {
+		for (int i = 0; i < daysInCalendar; i++) {
+			if (buttons[i] != null) {
+				if (datePanel[i] != null && datePanel[i].size() > 0) {
+					datePanel[i] = null;
+				}
+				buttons[i].removeAll();
+				buttons[i] = null;
+			}
+		}
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		System.out.println("Action Listener");
@@ -696,16 +722,18 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				// nothing
 				System.out.println("IllegalState");
 			}
+			System.gc();
 		} else if (e.getSource() == quit) {
 			System.exit(0);
 		} else if (e.getSource() == addAll) {
 			for (int i = 0; i < 366; i++) {
-				if (datePanel[i].size() > 0) {
+				if (datePanel[i] != null && datePanel[i].size() > 0) {
 					datePanel[i].addAllButtons();
 				}
 			}
 			screen.setVisible(true);
 		} else if (e.getSource() == removeAll) {
+			// deleteAllEvents();
 			for (int i = 0; i < 366; i++) {
 				if (datePanel[i].size() > 0) {
 					datePanel[i].removeAllButtons();
@@ -716,20 +744,16 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			try {
 				manager.loadCalendar(-1);
 				yearOfCalendar--;
-				scrollFrame.remove(panel);
-				screen.remove(northPanel);
-				screen.remove(westPanel);
-				screen.remove(calendarScrollingPan);
-				screen.remove(scrollFrame);
-				// panel.removeAll();
 				panel = new JPanel(new GridLayout(54, 7, 1, 1));
 				panel.setBorder(BorderFactory.createEtchedBorder());
 				buildButtonDays();
+				resetScrollPan();
+				System.gc();
 				monthOfCalendar = 11;
 				if (Calendar.getInstance().get(Calendar.YEAR) == yearOfCalendar) {
 					monthOfCalendar = Calendar.getInstance().get(Calendar.MONTH);
 				}
-				setUpScreen();
+				month.setText("<html>" + ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar + "</html>");
 				screen.setVisible(true);
 				scrollFrame.getVerticalScrollBar().setValue(scrollFrame.getVerticalScrollBar().getMaximum());
 				if (Calendar.getInstance().get(Calendar.YEAR) == yearOfCalendar) {
@@ -744,20 +768,17 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			try {
 				manager.loadCalendar(1);
 				yearOfCalendar++;
-				scrollFrame.remove(panel);
-				screen.remove(northPanel);
-				screen.remove(westPanel);
-				screen.remove(calendarScrollingPan);
-				screen.remove(scrollFrame);
-				// panel.removeAll();
+				deleteAllEvents();
 				panel = new JPanel(new GridLayout(54, 7, 1, 1));
 				panel.setBorder(BorderFactory.createEtchedBorder());
 				buildButtonDays();
+				resetScrollPan();
+				System.gc();
 				monthOfCalendar = 0;
 				if (Calendar.getInstance().get(Calendar.YEAR) == yearOfCalendar) {
 					monthOfCalendar = Calendar.getInstance().get(Calendar.MONTH);
 				}
-				setUpScreen();
+				month.setText("<html>" + ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar + "</html>");
 				screen.setVisible(true);
 				scrollFrame.getVerticalScrollBar().setValue(0);
 				if (Calendar.getInstance().get(Calendar.YEAR) == yearOfCalendar) {
@@ -889,7 +910,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				int red, int green, int blue) {
 			DateButton newLabel = new DateButton(start, startTime, end, day, month, year, event, red, green, blue);
 			newLabel.getButton().addActionListener(this);
-			newLabel.getButton().setPreferredSize(new Dimension(300, 0));
+			// newLabel.getButton().setPreferredSize(new Dimension(3, 0));
 			newLabel.getButton().setHorizontalAlignment(SwingConstants.LEFT);
 			if (size == 0) {
 				head.next = newLabel;
@@ -1174,15 +1195,17 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			setMonth(month);
 			setYear(year);
 			this.event = event;
-			button = new JButton("<html>" + start + " " + event + "</html>");
+			// button = new JButton("<html>" + start + " " + event + "</html>");
+			button = new JButton(start + " " + event);
 			button.setContentAreaFilled(false);
 			button.setFocusable(false);
-			button.setBorderPainted(false);
+			// button.setBorderPainted(false);
 			button.setFont(new Font("Comic Sans", Font.BOLD, 15));
 			button.setMargin(new Insets(0, 0, 0, 0));
 			button.setIcon(null);
 			dateColor = new Color(red, green, blue);
 			button.setForeground(dateColor);
+			// button.setSize(new Dimension(2, 2));
 			next = null;
 		}
 
