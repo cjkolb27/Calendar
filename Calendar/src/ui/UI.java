@@ -299,6 +299,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		}
 	}
 
+	/**
+	 * Sets up all panels on the screen. There is the West panel, North Panel, and
+	 * scrollFrame scroll panel.
+	 */
 	private void setUpScreen() {
 		scrollFrame = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -359,7 +363,11 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		JPanel week = new JPanel(new GridLayout(1, 7, 0, 0));
 		week.setBackground(null);
 		for (int i = 0; i < 7; i++) {
-			JLabel weekDay = new JLabel(DAYSOFWEEKNAMES[i]);
+			JLabel weekDay;
+			if (i == 0) {
+				weekDay = new JLabel(" " + DAYSOFWEEKNAMES[i]);
+			} else
+				weekDay = new JLabel(DAYSOFWEEKNAMES[i]);
 			weekDay.setFont(new Font("Comic Sans", Font.BOLD, 20));
 			weekDay.setForeground(Color.WHITE);
 			week.add(weekDay);
@@ -377,6 +385,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 						* ((double) (startWeekPerMonth[monthOfCalendar] - 1) - .3)));
 	}
 
+	/**
+	 * Sets up the west panel using a BoxLayout to evenly distribute the buttons
+	 */
 	public void setWestPanel() {
 		westPanel.setLayout(new BoxLayout(westPanel, BoxLayout.PAGE_AXIS));
 		newEventBut = new JButton("+ New Event");
@@ -397,39 +408,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		colorsBut.setFont(new Font("Comic Sans", Font.BOLD, 25));
 		colorsBut.setMaximumSize(new Dimension(220, 40));
 
-		smallCalendar = new JPanel();
-		smallCalendar.setLayout(new GridLayout(6, 7, 1, 1));
-		smallCalendar.setMaximumSize(new Dimension(218, 187));
-		smallMonthButtons = new JButton[42];
-		boolean tracker = false;
-		for (int i = 0; i < 42; i++) {
-			if (i >= startDayPerMonth[monthOfCalendar] - 1
-					&& startDayPerMonth[monthOfCalendar] - 1 + daysPerMonth[monthOfCalendar] >= i) {
-				tracker = true;
-				System.out.println(i + " " + true);
-			} else
-				tracker = false;
-			if (!tracker) {
-				smallMonthButtons[i] = new JButton();
-				if (monthOfCalendar % 2 == 0) {
-					smallMonthButtons[i].setBackground(evenMonthColor);
-				} else
-					smallMonthButtons[i].setBackground(oddMonthColor);
-				smallMonthButtons[i].setMargin(new Insets(0, 0, 0, 0));
-				smallMonthButtons[i].setPreferredSize(new Dimension(30, 30));
-			} else {
-				smallMonthButtons[i] = new JButton((i - startDayPerMonth[monthOfCalendar] + 2) + "");
-				if ((monthOfCalendar + 1) % 2 == 0) {
-					smallMonthButtons[i].setBackground(evenMonthColor);
-				} else
-					smallMonthButtons[i].setBackground(oddMonthColor);
-				smallMonthButtons[i].setMargin(new Insets(0, 0, 0, 0));
-				smallMonthButtons[i].setFont(new Font("Comic Sans", Font.BOLD, 15));
-				smallMonthButtons[i].setForeground(Color.WHITE);
-				smallMonthButtons[i].setPreferredSize(new Dimension(30, 30));
-			}
-			smallCalendar.add(smallMonthButtons[i]);
-		}
+		createSmallCalendar(monthOfCalendar);
 
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 60), new Dimension(0, 60)));
 		westPanel.add(newEventBut);
@@ -445,6 +424,55 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 50), new Dimension(0, 100)));
 		westPanel.add(colorsBut);
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 20), new Dimension(0, 20)));
+	}
+
+	/**
+	 * Creates a small calendar of buttons on the westPanel. This allows for
+	 * changing the small calendar to align with the current scroll month and start
+	 * up month when needed.
+	 * 
+	 * @param month the month of the calendar
+	 */
+	public void createSmallCalendar(int month) {
+		if (smallCalendar != null) {
+			for (int i = 0; i < 42; i++) {
+				smallCalendar.remove(smallMonthButtons[i]);
+			}
+		} else
+			smallCalendar = new JPanel();
+		smallCalendar.setLayout(new GridLayout(6, 7, 1, 1));
+		smallCalendar.setMaximumSize(new Dimension(218, 191));
+		smallMonthButtons = new JButton[42];
+		boolean tracker = false;
+		for (int i = 0; i < 42; i++) {
+			if (i >= startDayPerMonth[month] - 1 && startDayPerMonth[month] - 1 + daysPerMonth[month] >= i) {
+				tracker = true;
+
+			} else
+				tracker = false;
+			if (!tracker) {
+				smallMonthButtons[i] = new JButton();
+				if (month % 2 == 0) {
+					smallMonthButtons[i].setBackground(evenMonthColor);
+				} else
+					smallMonthButtons[i].setBackground(oddMonthColor);
+				smallMonthButtons[i].setMargin(new Insets(0, 0, 0, 0));
+				smallMonthButtons[i].setFocusable(false);
+				smallMonthButtons[i].setPreferredSize(new Dimension(30, 30));
+			} else {
+				smallMonthButtons[i] = new JButton((i - startDayPerMonth[month] + 2) + "");
+				if ((month + 1) % 2 == 0) {
+					smallMonthButtons[i].setBackground(evenMonthColor);
+				} else
+					smallMonthButtons[i].setBackground(oddMonthColor);
+				smallMonthButtons[i].setMargin(new Insets(0, 0, 0, 0));
+				smallMonthButtons[i].setFocusable(false);
+				smallMonthButtons[i].setFont(new Font("Comic Sans", Font.BOLD, 15));
+				smallMonthButtons[i].setForeground(Color.WHITE);
+				smallMonthButtons[i].setPreferredSize(new Dimension(30, 30));
+			}
+			smallCalendar.add(smallMonthButtons[i]);
+		}
 	}
 
 	/**
@@ -548,7 +576,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					startWeekPerMonth[i] = currentWeek;
 				}
 				buttons[currentDay] = new JButton();
-				buttons[currentDay].setPreferredSize(new Dimension(75, 75));
+				buttons[currentDay].setPreferredSize(new Dimension(80, GraphicsEnvironment.getLocalGraphicsEnvironment()
+						.getDefaultScreenDevice().getDisplayMode().getWidth() / 12));
+				// System.out.println(GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
+				// .getDisplayMode().getWidth());
 				buttons[currentDay].addActionListener(this);
 				JLabel label;
 				if (j == 0) {
@@ -587,37 +618,24 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 					if (it.hasNext()) {
 						currentData = it.next();
-						// System.out.println("Printed Data: " + currentData.getDay() + " " +
-						// currentData.getMonth() + " "
-						// + currentData.getYear());
 					} else {
 						currentData = null;
 					}
 				}
-				// datePanel[currentDay].addLabel(630, "Work");
 				datePanel[currentDay].getPanel().setBackground(null);
 
-				// datePanel[currentDay].getPanel().setPreferredSize(
-				// new Dimension((Toolkit.getDefaultToolkit().getScreenSize().width - 300) / 7 -
-				// 1, 0));
-
-				// datePanel[currentDay].getPanel().setPreferredSize(new Dimension(20, 0));
 				buttons[currentDay].add(datePanel[currentDay].getPanel(), BorderLayout.CENTER);
-				// buttons[currentDay].add(new JPanel(), BorderLayout.CENTER);
 				panel.add(buttons[currentDay]);
-				// System.out.println("Day: " + currentDay + "printed");
 				currentDay++;
 			}
 			daysInCalendar = currentDay;
 		}
 		totalWeeks = currentWeek;
-		// System.out.println(totalWeeks);
-		panel.setLayout(
-				new GridLayout((int) Math.ceil((cal.get(Calendar.DAY_OF_WEEK) + daysInCalendar) / 7.0), 7, 1, 1));
-		panel.setAlignmentX(SwingConstants.RIGHT);
+		panel.setLayout(new GridLayout(totalWeeks, 7, 1, 1));
+		panel.setAlignmentX(SwingConstants.CENTER);
 		panel.setAlignmentY(SwingConstants.BOTTOM);
-		panel.setPreferredSize(new Dimension(500, 10000));
 		panel.setBackground(panelColor);
+		System.out.println(totalWeeks);
 	}
 
 	private void setScreenWindow() {
@@ -628,12 +646,14 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		ev = env.getDefaultScreenDevice();
 		manager = new CalendarManager();
 		screen = new JFrame();
+		ImageIcon image = new ImageIcon(getClass().getClassLoader().getResource("CalendarPNG.png"));
+		screen.setIconImage(image.getImage());
 		screen.setSize(Toolkit.getDefaultToolkit().getScreenSize().width,
 				Toolkit.getDefaultToolkit().getScreenSize().height);
 		screen.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		screen.setLayout(new BorderLayout());
 
-		panel = new JPanel(new GridLayout(54, 7, 1, 1));
+		panel = new JPanel(new GridLayout(totalWeeks, 7, 1, 1));
 
 		setAllDates();
 
@@ -716,6 +736,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 						scrollMonth = i;
 						month.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
 						monthSmall.setText(ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar);
+						createSmallCalendar(scrollMonth);
+						System.gc();
+						screen.setVisible(true);
 						i = 12;
 					}
 				}
@@ -728,20 +751,30 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 						scrollMonth = i;
 						month.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
 						monthSmall.setText(ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar);
+						createSmallCalendar(scrollMonth);
+						System.gc();
+						screen.setVisible(true);
 						i = 12;
 					}
 				}
 			}
-			if (scrollLocation == scrollHeight) {
+			if (scrollMonth != 11 && scrollLocation == scrollHeight) {
 				scrollMonth = 11;
 				month.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
 				monthSmall.setText(ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar);
+				createSmallCalendar(scrollMonth);
+				System.gc();
+				screen.setVisible(true);
 			}
 		} catch (Exception e) {
 			// Nothing
 		}
 	}
 
+	/**
+	 * Deletes All events from the datePanel by setting them to null. This is used
+	 * to help garbage collection free up this memory quicker
+	 */
 	public void deleteAllEvents() {
 		for (int i = 0; i < daysInCalendar; i++) {
 			if (buttons[i] != null) {
@@ -754,6 +787,12 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		}
 	}
 
+	/**
+	 * This method is used to perform actions when a button is pressed in the
+	 * program. All major buttons on the panel use this method
+	 * 
+	 * @param e the action event
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		System.out.println("Action Listener");
@@ -969,6 +1008,13 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		/** Size of dateLabel */
 		private int size;
 
+		/**
+		 * Date panel holds the current day, month, and year
+		 * 
+		 * @param day   the day of the event
+		 * @param month the moneth of the event
+		 * @param year  the year of the event
+		 */
 		public DatePanel(int day, int month, int year) {
 			this.day = day;
 			this.month = month;
@@ -977,29 +1023,63 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			panel = new JPanel();
 			panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 			panel.setBackground(null);
-			String[] colorChooces = { "Something" };
 			presets = new JComboBox<>(getPresetEvents());
 			presets.setSelectedIndex(-1);
 			presets.addActionListener(this);
 			presets.setFocusable(false);
 		}
 
+		/**
+		 * Returns the JPanel
+		 * 
+		 * @return panel the panel of DatePanel
+		 */
 		public JPanel getPanel() {
 			return panel;
 		}
 
+		/**
+		 * Returns the panels day
+		 * 
+		 * @return day the day of the event
+		 */
 		public int getDay() {
 			return day;
 		}
 
+		/**
+		 * Returns the panels month
+		 * 
+		 * @return month the month of the event
+		 */
 		public int getMonth() {
 			return month;
 		}
 
+		/**
+		 * Returns the panels year
+		 * 
+		 * @return year the year of the event
+		 */
 		public int getYear() {
 			return year;
 		}
 
+		/**
+		 * Adding a button to the linked list of buttons requires a start string, start
+		 * time, end string, day, month, year, and event name.
+		 * 
+		 * @param start     the start time string
+		 * @param startTime the start time as an int
+		 * @param end       the end time string
+		 * @param day       the day of the event
+		 * @param month     the month of the event
+		 * @param year      the year of the event
+		 * @param event     the event name
+		 * @param red       the red color
+		 * @param green     the green color
+		 * @param blue      the blue color
+		 */
 		public void addButton(String start, int startTime, String end, int day, int month, int year, String event,
 				int red, int green, int blue) {
 			DateButton newLabel = new DateButton(start, startTime, end, day, month, year, event, red, green, blue);
@@ -1035,6 +1115,22 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			size++;
 		}
 
+		/**
+		 * Editing a button in the list requires start string, original start time,
+		 * start time, end string, day, month, year, event name, read, blue, green.
+		 * 
+		 * @param start             the start time string
+		 * @param originalStartTime the original start time being edited
+		 * @param startTime         the start time as an int
+		 * @param end               the end time string
+		 * @param day               the day of the event
+		 * @param month             the month of the event
+		 * @param year              the year of the event
+		 * @param event             the event name
+		 * @param red               the red color
+		 * @param green             the green color
+		 * @param blue              the blue color
+		 */
 		public void editButton(String start, int originalStartTime, int startTime, String end, int day, int month,
 				int year, String event, int red, int green, int blue) {
 			if (size == 0) {
@@ -1044,6 +1140,12 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			addButton(start, startTime, end, day, month, year, event, red, green, blue);
 		}
 
+		/**
+		 * Removes a given event based on start time. No two events can have the same
+		 * start time
+		 * 
+		 * @param startTime the start time of the event
+		 */
 		public void removeButton(int startTime) {
 			if (size == 0) {
 				return;
@@ -1068,20 +1170,37 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			}
 		}
 
+		/**
+		 * Returns the size of the list of buttons
+		 * 
+		 * @return size the size of the list
+		 */
 		public int size() {
 			return size;
 		}
 
+		/**
+		 * Returns the sentinel head pointer
+		 * 
+		 * @return head the sentinel head pointer
+		 */
 		public DateButton getHead() {
 			return head;
 		}
 
+		/**
+		 * Deletes all values by seating the head pointer to null
+		 */
 		public void deleteAll() {
 			removeAllButtons();
 			head.next = null;
 			size = 0;
 		}
 
+		/**
+		 * Visually removes all buttons from the panel view. The data is still stored in
+		 * the list
+		 */
 		public void removeAllButtons() {
 			DateButton current = head;
 			while (current.next != null) {
@@ -1091,6 +1210,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			}
 		}
 
+		/**
+		 * Adds all buttons to the panel from the list
+		 */
 		public void addAllButtons() {
 			DateButton current = head.next;
 			System.out.println();
@@ -1103,6 +1225,12 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			panel.repaint();
 		}
 
+		/**
+		 * Used for checking when an event button has been pressed. This allows for
+		 * editing and deleting the event
+		 * 
+		 * @param e the action event
+		 */
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == presets) {
@@ -1256,6 +1384,12 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		}
 	}
 
+	/**
+	 * Events are stored as button that can be clicked on to edit them. This class
+	 * holds information about each event and is used by the DatePanel class
+	 * 
+	 * @author Caleb Kolb
+	 */
 	public static class DateButton {
 		/** Start time of an event */
 		private int startTime;
@@ -1280,6 +1414,21 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		/** Color of the event */
 		private Color dateColor;
 
+		/**
+		 * Creates a button with information about start time, end time, day, month,
+		 * year, event name, and color.
+		 * 
+		 * @param start     the start time string
+		 * @param startTime the start time as an int
+		 * @param end       the end time string
+		 * @param day       the day of the event
+		 * @param month     the month of the event
+		 * @param year      the year of the event
+		 * @param event     the event name
+		 * @param red       the red color
+		 * @param green     the green color
+		 * @param blue      the blue color
+		 */
 		public DateButton(String start, int startTime, String end, int day, int month, int year, String event, int red,
 				int green, int blue) {
 			setStart(start);
@@ -1303,76 +1452,164 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			next = null;
 		}
 
+		/**
+		 * Sets the day
+		 * 
+		 * @param day the day of the event
+		 */
 		public void setDay(int day) {
 			this.day = day;
 		}
 
+		/**
+		 * Sets the month
+		 * 
+		 * @param month the month of the event
+		 */
 		public void setMonth(int month) {
 			this.month = month;
 		}
 
+		/**
+		 * Sets the year
+		 * 
+		 * @param year the year of the event
+		 */
 		public void setYear(int year) {
 			this.year = year;
 		}
 
+		/**
+		 * Returns the day
+		 * 
+		 * @return day the day of the event
+		 */
 		public int getDay() {
 			return day;
 		}
 
+		/**
+		 * Returns the month
+		 * 
+		 * @return month the month of the event
+		 */
 		public int getMonth() {
 			return month;
 		}
 
+		/**
+		 * Returns the year
+		 * 
+		 * @return year the year of the event
+		 */
 		public int getYear() {
 			return year;
 		}
 
+		/**
+		 * Sets the start time string
+		 * 
+		 * @param start the start time string
+		 */
 		public void setStart(String start) {
 			this.start = start;
 		}
 
+		/**
+		 * Sets the start time int
+		 * 
+		 * @param startTime the start time as an int
+		 */
 		public void setStartTime(int startTime) {
 			this.startTime = startTime;
 		}
 
+		/**
+		 * Sets the end string
+		 * 
+		 * @param end the end time as a string
+		 */
 		public void setEnd(String end) {
 			this.end = end;
 		}
 
+		/**
+		 * Gets the start time
+		 * 
+		 * @return startTime the start time of the event
+		 */
 		public int getStartTime() {
 			return startTime;
 		}
 
+		/**
+		 * Gets the event name
+		 * 
+		 * @return event the event name
+		 */
 		public String getEvent() {
 			return event;
 		}
 
+		/**
+		 * Returns the button of the event
+		 * 
+		 * @return button the button
+		 */
 		public JButton getButton() {
 			return button;
 		}
 
+		/**
+		 * Gets the color of the event
+		 * 
+		 * @return dateColor the color of the event
+		 */
 		public Color getColor() {
 			return dateColor;
 		}
 
+		/**
+		 * Prints all values of the event into a string to the cmd
+		 */
 		public void printToCMD() {
 			System.out.println(start + " " + end + " " + day + " " + month + " " + year + " " + event);
 		}
 
 	}
 
+	/**
+	 * Returns the manager of the calendar
+	 * 
+	 * @return manager the manager of the calendar
+	 */
 	public static CalendarManager getManager() {
 		return manager;
 	}
 
+	/**
+	 * Returns the JFrame of the screen
+	 * 
+	 * @return screen the screen of the JFrame of the calendar
+	 */
 	public static JFrame getScreen() {
 		return screen;
 	}
 
+	/**
+	 * Returns an array of date panels
+	 * 
+	 * @return datePanel the date panel of the calendar
+	 */
 	public static DatePanel[] getDatePanel() {
 		return datePanel;
 	}
 
+	/**
+	 * Class used for sorting and geting color information presets from file
+	 * 
+	 * @author Caleb Kolb
+	 */
 	private class ColorData {
 		/** Holds an array of colors */
 		private Color[] colors;
@@ -1448,14 +1685,17 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	 * 
 	 * @author Caleb Kolb
 	 */
+	@SuppressWarnings("rawtypes")
 	private static class JColorBox extends JComboBox {
 
-		/** Holds a copy of all colors */
-		private static ColorData theColors;
+		/**
+		 * Serial VersionUID
+		 */
+		private static final long serialVersionUID = -6382644066715104691L;
 
+		@SuppressWarnings("unchecked")
 		public JColorBox(ColorData allColors) {
 			super();
-			theColors = allColors;
 			DefaultComboBoxModel dcbm = new DefaultComboBoxModel();
 			for (int i = 0; i < allColors.getSize(); i++) {
 				dcbm.addElement(allColors.getColors()[i]);
@@ -1475,6 +1715,16 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			setBackground((Color) anObject);
 		}
 
+		/**
+		 * Custom renderer used for defining how the component should be rendered
+		 * 
+		 * Code was created with the help of JColorComboBox: JComboBox as Color Chooser,
+		 * Friday 22 July 2011, by All About Java. Source:
+		 * https://www.allabtjava.com/2011/07/jcolorcombobox-jcombobox-as-color.html
+		 * 
+		 * @author Calen Kolb
+		 */
+		@SuppressWarnings("serial")
 		private class ColorRenderer extends JLabel implements javax.swing.ListCellRenderer {
 
 			public ColorRenderer() {
@@ -1502,6 +1752,12 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		}
 	}
 
+	/**
+	 * Code is used for getting a file using a JFileChooser
+	 * 
+	 * @param load the file being loaded or saved
+	 * @return String the file name
+	 */
 	private String getFileName(boolean load) {
 		JFileChooser fchooser = new JFileChooser("C:\\Users\\Caleb\\Documents\\CalendarData");
 		fchooser.setBackground(Color.DARK_GRAY);
