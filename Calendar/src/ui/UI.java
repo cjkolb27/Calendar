@@ -11,6 +11,7 @@ import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -24,8 +25,10 @@ import java.util.Scanner;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -60,6 +63,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private ScreenState windowState = null;
 	/** Frame that holds all components on the screen */
 	private static JFrame screen;
+	/** Small calendar */
+	private JPanel smallCalendar;
 	/** Holds the panel for all button days */
 	private JPanel panel;
 	/** North Panel */
@@ -92,6 +97,16 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private static int[] startWeekPerMonth = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	/** Position of week that changes month JLabel */
 	private static int[] transitionWeek = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	/** Each start day of each month from 1 to 7 */
+	private static int[] startDayPerMonth = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	/** Small Month Buttons */
+	private JButton[] smallMonthButtons;
+	/** New event button */
+	private JButton newEventBut;
+	/** Presets button */
+	private JButton presetsBut;
+	/** Colors buttons */
+	private JButton colorsBut;
 	/** Buttons for every calendar day */
 	private JButton[] buttons;
 	/** Previous year button */
@@ -140,6 +155,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private static final String EDITSET = "Edit Settings";
 	/** Label for holding the month name */
 	private JLabel month;
+	/** Label for holding the month name */
+	private JLabel monthSmall;
 	/** Year of calendar */
 	private int yearOfCalendar;
 	/** Month of calendar */
@@ -175,6 +192,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		settingsChanged = false;
 		manager = new CalendarManager();
 		screen = new JFrame();
+		ImageIcon image = new ImageIcon(getClass().getClassLoader().getResource("CalendarPNG.png"));
+		screen.setIconImage(image.getImage());
 		screen.setSize(Toolkit.getDefaultToolkit().getScreenSize().width,
 				Toolkit.getDefaultToolkit().getScreenSize().height);
 		screen.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -346,6 +365,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			week.add(weekDay);
 		}
 		northPanel.add(week);
+		setWestPanel();
 		screen.add(westPanel, BorderLayout.WEST);
 
 		calendarScrollingPan = new JPanel(new BorderLayout());
@@ -355,6 +375,76 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		scrollFrame.getVerticalScrollBar()
 				.setValue((int) (((double) (scrollFrame.getVerticalScrollBar().getMaximum()) / (double) totalWeeks)
 						* ((double) (startWeekPerMonth[monthOfCalendar] - 1) - .3)));
+	}
+
+	public void setWestPanel() {
+		westPanel.setLayout(new BoxLayout(westPanel, BoxLayout.PAGE_AXIS));
+		newEventBut = new JButton("+ New Event");
+		newEventBut.setAlignmentX(Component.CENTER_ALIGNMENT);
+		newEventBut.addActionListener(this);
+		newEventBut.setFont(new Font("Comic Sans", Font.BOLD, 25));
+		newEventBut.setMaximumSize(new Dimension(220, 40));
+
+		presetsBut = new JButton("+ Preset Event");
+		presetsBut.setAlignmentX(Component.CENTER_ALIGNMENT);
+		presetsBut.addActionListener(this);
+		presetsBut.setFont(new Font("Comic Sans", Font.BOLD, 25));
+		presetsBut.setMaximumSize(new Dimension(220, 40));
+
+		colorsBut = new JButton("+ Colors");
+		colorsBut.setAlignmentX(Component.CENTER_ALIGNMENT);
+		colorsBut.addActionListener(this);
+		colorsBut.setFont(new Font("Comic Sans", Font.BOLD, 25));
+		colorsBut.setMaximumSize(new Dimension(220, 40));
+
+		smallCalendar = new JPanel();
+		smallCalendar.setLayout(new GridLayout(6, 7, 1, 1));
+		smallCalendar.setMaximumSize(new Dimension(218, 187));
+		smallMonthButtons = new JButton[42];
+		boolean tracker = false;
+		for (int i = 0; i < 42; i++) {
+			if (i >= startDayPerMonth[monthOfCalendar] - 1
+					&& startDayPerMonth[monthOfCalendar] - 1 + daysPerMonth[monthOfCalendar] >= i) {
+				tracker = true;
+				System.out.println(i + " " + true);
+			} else
+				tracker = false;
+			if (!tracker) {
+				smallMonthButtons[i] = new JButton();
+				if (monthOfCalendar % 2 == 0) {
+					smallMonthButtons[i].setBackground(evenMonthColor);
+				} else
+					smallMonthButtons[i].setBackground(oddMonthColor);
+				smallMonthButtons[i].setMargin(new Insets(0, 0, 0, 0));
+				smallMonthButtons[i].setPreferredSize(new Dimension(30, 30));
+			} else {
+				smallMonthButtons[i] = new JButton((i - startDayPerMonth[monthOfCalendar] + 2) + "");
+				if ((monthOfCalendar + 1) % 2 == 0) {
+					smallMonthButtons[i].setBackground(evenMonthColor);
+				} else
+					smallMonthButtons[i].setBackground(oddMonthColor);
+				smallMonthButtons[i].setMargin(new Insets(0, 0, 0, 0));
+				smallMonthButtons[i].setFont(new Font("Comic Sans", Font.BOLD, 15));
+				smallMonthButtons[i].setForeground(Color.WHITE);
+				smallMonthButtons[i].setPreferredSize(new Dimension(30, 30));
+			}
+			smallCalendar.add(smallMonthButtons[i]);
+		}
+
+		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 60), new Dimension(0, 60)));
+		westPanel.add(newEventBut);
+		monthSmall = new JLabel(ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar);
+		monthSmall.setFont(new Font("Comic Sans", Font.BOLD, 20));
+		monthSmall.setAlignmentX(Component.CENTER_ALIGNMENT);
+		monthSmall.setForeground(Color.WHITE);
+		westPanel.add(monthSmall);
+		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 10), new Dimension(0, 10)));
+		westPanel.add(smallCalendar);
+		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 1), new Dimension(0, 1000)));
+		westPanel.add(presetsBut);
+		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 50), new Dimension(0, 100)));
+		westPanel.add(colorsBut);
+		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 20), new Dimension(0, 20)));
 	}
 
 	/**
@@ -419,6 +509,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		int currentWeek = 0;
 		for (int i = 0; i < 12; i++) {
 			cal.set(yearOfCalendar, i, 1);
+			startDayPerMonth[i] = cal.get(Calendar.DAY_OF_WEEK);
 			int days = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 			// System.out.println(days);
 			if (i == 0) {
@@ -624,6 +715,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 							* buttons[transitionWeek[i]].getVisibleRect().width) != 0) {
 						scrollMonth = i;
 						month.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
+						monthSmall.setText(ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar);
 						i = 12;
 					}
 				}
@@ -635,6 +727,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 							* buttons[transitionWeek[i]].getVisibleRect().width) != 0) {
 						scrollMonth = i;
 						month.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
+						monthSmall.setText(ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar);
 						i = 12;
 					}
 				}
@@ -642,6 +735,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			if (scrollLocation == scrollHeight) {
 				scrollMonth = 11;
 				month.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
+				monthSmall.setText(ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar);
 			}
 		} catch (Exception e) {
 			// Nothing
