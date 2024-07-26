@@ -24,7 +24,14 @@ public class SortedDateList<E> {
 		front = null;
 		back = null;
 	}
-	
+
+	/**
+	 * Checks if there is a date with the same startTime
+	 * 
+	 * @param date      the date of the event
+	 * @param startTime the start time of the event
+	 * @return boolean true if no duplicate and false if duplicate
+	 */
 	public boolean checkValue(double date, int startTime) {
 		ListNode temp = front;
 		while (temp != null) {
@@ -49,7 +56,7 @@ public class SortedDateList<E> {
 		}
 		if (!checkValue(date, startTime)) {
 			return;
-			//throw new IllegalArgumentException("Duplicate Dates");
+			// throw new IllegalArgumentException("Duplicate Dates");
 		}
 		if (size > 1) {
 			if (front.date > date || (front.date == date && front.startTime >= startTime)) {
@@ -257,12 +264,22 @@ public class SortedDateList<E> {
 		return size;
 	}
 
+	/**
+	 * Creates an iterable list of of events in order
+	 * 
+	 * @return DateIterator the iterator of all events
+	 */
 	public Iterator<E> iterator() {
 		return new DateIterator();
 	}
 
+	/**
+	 * Used for defining what a DateIterator is allowed to do.
+	 * 
+	 * @author Caleb Kolb
+	 */
 	private class DateIterator implements Iterator<E> {
-
+		/** current ListNode */
 		private ListNode current;
 
 		public DateIterator() {

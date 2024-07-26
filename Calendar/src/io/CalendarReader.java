@@ -8,7 +8,11 @@ import events.EventData;
 import util.SortedDateList;
 
 /**
+ * Allows for loading all events in a year from a file. Each file contains rows
+ * of event names, start time, end time, day, month, year, and RGB coloring for
+ * each event.
  * 
+ * @author Caleb Kolb
  */
 public class CalendarReader {
 

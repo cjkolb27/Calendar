@@ -8,7 +8,10 @@ import events.EventData;
 import util.SortedDateList;
 
 /**
+ * Used for writing events to a file. Each file contains an entire year of
+ * events.
  * 
+ * @author Caleb Kolb
  */
 public class CalendarWriter {
 
