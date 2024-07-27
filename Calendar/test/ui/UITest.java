@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import ui.UI.DatePanel;
 import ui.UI.ScreenState;
 
 /**

@@ -20,6 +20,8 @@ import java.awt.event.MouseWheelListener;
 import java.io.File;
 import java.util.Calendar;
 import java.util.Iterator;
+
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -36,6 +38,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.border.LineBorder;
 
@@ -43,6 +46,7 @@ import events.EventData;
 import manager.CalendarManager;
 import util.ColorData;
 import util.DatePanel;
+import util.JColorBox;
 import util.SortedDateList;
 
 /**
@@ -166,10 +170,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private double scrollLocation;
 	/** Keeps track of scroll bar height */
 	private double scrollHeight;
-	/** Used for removing all events visually */
-	private JMenuItem removeAll;
-	/** Used for add all events visually */
-	private JMenuItem addAll;
 
 	/**
 	 * Creates the GUI for the user to interact with the CalendarManager
@@ -219,6 +219,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		scrollFrame.getVerticalScrollBar()
 				.setValue((int) (((double) (scrollFrame.getVerticalScrollBar().getMaximum()) / (double) totalWeeks)
 						* ((double) (startWeekPerMonth[monthOfCalendar] - 1) - .3)));
+
 		screen.repaint();
 		screen.validate();
 	}
@@ -430,43 +431,64 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	 */
 	public void createSmallCalendar(int month) {
 		if (smallCalendar != null) {
+			boolean tracker = false;
 			for (int i = 0; i < 42; i++) {
-				smallCalendar.remove(smallMonthButtons[i]);
+				if (i >= startDayPerMonth[month] - 1 && startDayPerMonth[month] - 1 + daysPerMonth[month] >= i) {
+					tracker = true;
+				} else
+					tracker = false;
+				if (!tracker) {
+					if (month % 2 == 0) {
+						smallMonthButtons[i].setBackground(evenMonthColor);
+					} else
+						smallMonthButtons[i].setBackground(oddMonthColor);
+					smallMonthButtons[i].setText("");
+					smallMonthButtons[i].setFont(new Font("Comic Sans", Font.BOLD, 15));
+				} else {
+					smallMonthButtons[i].setText((i - startDayPerMonth[month] + 2) + "");
+					if ((month + 1) % 2 == 0) {
+						smallMonthButtons[i].setBackground(evenMonthColor);
+					} else
+						smallMonthButtons[i].setBackground(oddMonthColor);
+					smallMonthButtons[i].setFont(new Font("Comic Sans", Font.BOLD, 15));
+					smallMonthButtons[i].setForeground(Color.WHITE);
+				}
+				smallCalendar.add(smallMonthButtons[i]);
 			}
-		} else
+		} else {
 			smallCalendar = new JPanel();
-		smallCalendar.setLayout(new GridLayout(6, 7, 1, 1));
-		smallCalendar.setMaximumSize(new Dimension(218, 191));
-		smallMonthButtons = new JButton[42];
-		boolean tracker = false;
-		for (int i = 0; i < 42; i++) {
-			if (i >= startDayPerMonth[month] - 1 && startDayPerMonth[month] - 1 + daysPerMonth[month] >= i) {
-				tracker = true;
-
-			} else
-				tracker = false;
-			if (!tracker) {
-				smallMonthButtons[i] = new JButton();
-				if (month % 2 == 0) {
-					smallMonthButtons[i].setBackground(evenMonthColor);
+			smallCalendar.setLayout(new GridLayout(6, 7, 1, 1));
+			smallCalendar.setMaximumSize(new Dimension(218, 191));
+			smallMonthButtons = new JButton[42];
+			boolean tracker = false;
+			for (int i = 0; i < 42; i++) {
+				if (i >= startDayPerMonth[month] - 1 && startDayPerMonth[month] - 1 + daysPerMonth[month] >= i) {
+					tracker = true;
 				} else
-					smallMonthButtons[i].setBackground(oddMonthColor);
-				smallMonthButtons[i].setMargin(new Insets(0, 0, 0, 0));
-				smallMonthButtons[i].setFocusable(false);
-				smallMonthButtons[i].setPreferredSize(new Dimension(30, 30));
-			} else {
-				smallMonthButtons[i] = new JButton((i - startDayPerMonth[month] + 2) + "");
-				if ((month + 1) % 2 == 0) {
-					smallMonthButtons[i].setBackground(evenMonthColor);
-				} else
-					smallMonthButtons[i].setBackground(oddMonthColor);
-				smallMonthButtons[i].setMargin(new Insets(0, 0, 0, 0));
-				smallMonthButtons[i].setFocusable(false);
-				smallMonthButtons[i].setFont(new Font("Comic Sans", Font.BOLD, 15));
-				smallMonthButtons[i].setForeground(Color.WHITE);
-				smallMonthButtons[i].setPreferredSize(new Dimension(30, 30));
+					tracker = false;
+				if (!tracker) {
+					smallMonthButtons[i] = new JButton();
+					if (month % 2 == 0) {
+						smallMonthButtons[i].setBackground(evenMonthColor);
+					} else
+						smallMonthButtons[i].setBackground(oddMonthColor);
+					smallMonthButtons[i].setMargin(new Insets(0, 0, 0, 0));
+					smallMonthButtons[i].setFocusable(false);
+					smallMonthButtons[i].setPreferredSize(new Dimension(30, 30));
+				} else {
+					smallMonthButtons[i] = new JButton((i - startDayPerMonth[month] + 2) + "");
+					if ((month + 1) % 2 == 0) {
+						smallMonthButtons[i].setBackground(evenMonthColor);
+					} else
+						smallMonthButtons[i].setBackground(oddMonthColor);
+					smallMonthButtons[i].setMargin(new Insets(0, 0, 0, 0));
+					smallMonthButtons[i].setFocusable(false);
+					smallMonthButtons[i].setFont(new Font("Comic Sans", Font.BOLD, 15));
+					smallMonthButtons[i].setForeground(Color.WHITE);
+					smallMonthButtons[i].setPreferredSize(new Dimension(30, 30));
+				}
+				smallCalendar.add(smallMonthButtons[i]);
 			}
-			smallCalendar.add(smallMonthButtons[i]);
 		}
 	}
 
@@ -588,7 +610,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				buttons[currentDay].setLayout(new BorderLayout());
 				buttons[currentDay].add(label, BorderLayout.NORTH);
 				buttons[currentDay].setFocusable(false);
-				if (i % 2 == 0) {
+				if ((i + 1) % 2 == 0) {
 					buttons[currentDay].setBackground(evenMonthColor);
 				} else
 					buttons[currentDay].setBackground(oddMonthColor);
@@ -623,7 +645,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	}
 
 	private void setScreenWindow() {
-		System.out.println("Setting something");
+		// System.out.println("Setting something");
 		screen.dispose();
 		screen.setVisible(false);
 		env = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -676,8 +698,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		loadCalendar = new JMenuItem(LOADCAL);
 		editSettings = new JMenuItem(EDITSET);
 		quit = new JMenuItem("Quit");
-		removeAll = new JMenuItem("Remove All");
-		addAll = new JMenuItem("Add All");
 
 		loadCalendar.addActionListener(this);
 		loadCalendar.setBackground(Color.DARK_GRAY);
@@ -685,20 +705,12 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		editSettings.addActionListener(this);
 		editSettings.setBackground(Color.DARK_GRAY);
 		editSettings.setForeground(Color.WHITE);
-		removeAll.addActionListener(this);
-		removeAll.setBackground(Color.DARK_GRAY);
-		removeAll.setForeground(Color.WHITE);
-		addAll.addActionListener(this);
-		addAll.setBackground(Color.DARK_GRAY);
-		addAll.setForeground(Color.WHITE);
 		quit.addActionListener(this);
 		quit.setBackground(Color.DARK_GRAY);
 		quit.setForeground(Color.WHITE);
 
 		menu.add(loadCalendar);
 		menu.add(editSettings);
-		menu.add(removeAll);
-		menu.add(addAll);
 		menu.add(quit);
 		menuBar.add(menu);
 		menuBar.setBackground(Color.DARK_GRAY);
@@ -779,7 +791,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		System.out.println("Action Listener");
 		if (e.getSource() == preset) {
 			if ("Work 6:30am-2:00pm".equals(preset.getSelectedItem())) {
 				eventTextField.setText("Work");
@@ -842,18 +853,31 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			System.gc();
 		} else if (e.getSource() == quit) {
 			System.exit(0);
-		} else if (e.getSource() == addAll) {
-			for (int i = 0; i < 366; i++) {
-				if (datePanel[i] != null && datePanel[i].size() > 0) {
-					datePanel[i].addAllButtons();
-				}
-			}
+		} else if (e.getSource() == newEventBut) {
+			System.out.println("New Event Button");
 			screen.setVisible(true);
-		} else if (e.getSource() == removeAll) {
-			// deleteAllEvents();
-			for (int i = 0; i < 366; i++) {
-				if (datePanel[i].size() > 0) {
-					datePanel[i].removeAllButtons();
+		} else if (e.getSource() == presetsBut) {
+			System.out.println("Presets Button");
+			screen.setVisible(true);
+		} else if (e.getSource() == colorsBut) {
+			System.out.println("Color Button");
+			JPanel pan = new JPanel();
+			boolean tryEvent = true;
+			while (tryEvent) {
+				tryEvent = false;
+				int optionSelected = JOptionPane.showConfirmDialog(screen, pan, "Add Event",
+						JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+				System.out.println(optionSelected);
+				if (optionSelected == 0) {
+					try {
+						screen.setVisible(true);
+						screen.repaint();
+						screen.validate();
+						return;
+					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(screen, e1.getMessage());
+						tryEvent = true;
+					}
 				}
 			}
 			screen.setVisible(true);
@@ -867,10 +891,12 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				resetScrollPan();
 				System.gc();
 				monthOfCalendar = 11;
+				createSmallCalendar(monthOfCalendar);
 				if (Calendar.getInstance().get(Calendar.YEAR) == yearOfCalendar) {
 					monthOfCalendar = Calendar.getInstance().get(Calendar.MONTH);
 				}
 				month.setText("<html>" + ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar + "</html>");
+				monthSmall.setText(ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar);
 				screen.setVisible(true);
 				scrollFrame.getVerticalScrollBar().setValue(scrollFrame.getVerticalScrollBar().getMaximum());
 				if (Calendar.getInstance().get(Calendar.YEAR) == yearOfCalendar) {
@@ -892,10 +918,12 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				resetScrollPan();
 				System.gc();
 				monthOfCalendar = 0;
+				createSmallCalendar(monthOfCalendar);
 				if (Calendar.getInstance().get(Calendar.YEAR) == yearOfCalendar) {
 					monthOfCalendar = Calendar.getInstance().get(Calendar.MONTH);
 				}
 				month.setText("<html>" + ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar + "</html>");
+				monthSmall.setText(ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar);
 				screen.setVisible(true);
 				scrollFrame.getVerticalScrollBar().setValue(0);
 				if (Calendar.getInstance().get(Calendar.YEAR) == yearOfCalendar) {
@@ -909,25 +937,82 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		} else {
 			for (int i = 0; i < 366; i++) {
 				if (e.getSource() == buttons[i]) {
-					System.out.println("Button Listener");
+					System.out.println("Button Listener " + i);
+					int textFieldSizeX = 151;
+					int textFieldSizeZ = 20;
+
+					JLabel col = new JLabel("Event Color");
 					JLabel pre = new JLabel("Preset Event");
 					JLabel lab1 = new JLabel("Event Name");
 					eventTextField = new JTextField();
+					eventTextField.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
 					JLabel lab2 = new JLabel("Start Time");
 					startTextField = new JTextField();
+					startTextField.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
 					JLabel lab3 = new JLabel("End Time");
 					endTextField = new JTextField();
+					endTextField.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
 					JPanel pan = new JPanel();
-					// pan.setSize(new Dimension(500, 500));
-					pan.setLayout(new GridLayout(4, 2, 0, 0));
+					pan.setPreferredSize(new Dimension(100, 150));
+					SpringLayout layout = new SpringLayout();
+					pan.setLayout(layout);
+					
+					JColorBox jcb = new JColorBox(getColorOptions());
+					jcb.setSelectedIndex(0);
+					jcb.setPreferredSize(new Dimension(30, 20));
+					jcb.setFocusable(false);
+					jcb.setBorder(BorderFactory.createLineBorder((Color) jcb.getSelectedItem(), 200));
+					jcb.setForeground(null);
+
+					Component[] c = jcb.getComponents();
+					for (Component res : c) {
+						System.out.println("Component: " + res);
+						if (res instanceof AbstractButton) {
+							if (res.isVisible()) {
+								res.setVisible(false);
+							}
+						}
+					}
+					
+					if (preset == null) {
+						preset = new JComboBox<>(getPresetEvents());
+					}
+					
+					pan.add(col);
+					pan.add(jcb);
+					layout.putConstraint(SpringLayout.WEST, col, 5, SpringLayout.WEST, pan);
+					layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.NORTH, pan);
+					layout.putConstraint(SpringLayout.WEST, jcb, 14, SpringLayout.EAST, col);
+					layout.putConstraint(SpringLayout.NORTH, jcb, 5, SpringLayout.NORTH, pan);
+
 					pan.add(pre);
 					pan.add(preset);
+					layout.putConstraint(SpringLayout.WEST, pre, 5, SpringLayout.WEST, pan);
+					layout.putConstraint(SpringLayout.NORTH, pre, 30, SpringLayout.NORTH, col);
+					layout.putConstraint(SpringLayout.WEST, preset, 5, SpringLayout.EAST, pre);
+					layout.putConstraint(SpringLayout.NORTH, preset, 30, SpringLayout.NORTH, jcb);
+
 					pan.add(lab1);
 					pan.add(eventTextField);
+					layout.putConstraint(SpringLayout.WEST, lab1, 5, SpringLayout.WEST, pan);
+					layout.putConstraint(SpringLayout.NORTH, lab1, 30, SpringLayout.NORTH, pre);
+					layout.putConstraint(SpringLayout.WEST, eventTextField, 10, SpringLayout.EAST, lab1);
+					layout.putConstraint(SpringLayout.NORTH, eventTextField, 30, SpringLayout.NORTH, preset);
+
 					pan.add(lab2);
 					pan.add(startTextField);
+					layout.putConstraint(SpringLayout.WEST, lab2, 5, SpringLayout.WEST, pan);
+					layout.putConstraint(SpringLayout.NORTH, lab2, 24, SpringLayout.NORTH, lab1);
+					layout.putConstraint(SpringLayout.WEST, startTextField, 18, SpringLayout.EAST, lab2);
+					layout.putConstraint(SpringLayout.NORTH, startTextField, 24, SpringLayout.NORTH, eventTextField);
+
 					pan.add(lab3);
 					pan.add(endTextField);
+					layout.putConstraint(SpringLayout.WEST, lab3, 5, SpringLayout.WEST, pan);
+					layout.putConstraint(SpringLayout.NORTH, lab3, 24, SpringLayout.NORTH, lab2);
+					layout.putConstraint(SpringLayout.WEST, endTextField, 25, SpringLayout.EAST, lab3);
+					layout.putConstraint(SpringLayout.NORTH, endTextField, 24, SpringLayout.NORTH, startTextField);
+					
 					boolean tryEvent = true;
 					while (tryEvent) {
 						tryEvent = false;
