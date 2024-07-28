@@ -27,6 +27,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -100,20 +101,26 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private static int[] startDayPerMonth = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	/** Small Month Buttons */
 	private JButton[] smallMonthButtons;
+	/** Buttons for every calendar day */
+	private JButton[] buttons;
+	/** Add button for west panel */
+	private JButton add;
+	/** Delete button for west panel */
+	private JButton delete;
 	/** New event button */
 	private JButton newEventBut;
 	/** Presets button */
 	private JButton presetsBut;
 	/** Colors buttons */
 	private JButton colorsBut;
-	/** Buttons for every calendar day */
-	private JButton[] buttons;
 	/** Previous year button */
 	private JButton lastYear;
 	/** Next year button */
 	private JButton nextYear;
 	/** All presets of an event */
 	private JComboBox<String> preset;
+	/** Color combo box */
+	private JColorBox jcb;
 	/** Event text field */
 	private JTextField eventTextField;
 	/** Start text field */
@@ -862,25 +869,94 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		} else if (e.getSource() == colorsBut) {
 			System.out.println("Color Button");
 			JPanel pan = new JPanel();
+			pan.setPreferredSize(new Dimension(150, 100));
+			SpringLayout layout = new SpringLayout();
+			pan.setLayout(layout);
+
+			jcb = new JColorBox(getColorOptions());
+			jcb.updateBox(colorOptions);
+			jcb.setSelectedIndex(0);
+			// jcb.setBounds(100, 20, 140, 30);
+			jcb.setPreferredSize(new Dimension(70, 40));
+			jcb.setFocusable(false);
+			jcb.setBorder(BorderFactory.createLineBorder((Color) jcb.getSelectedItem(), 200));
+			jcb.setForeground(null);
+
+			Component[] c = jcb.getComponents();
+			for (Component res : c) {
+				System.out.println("Component: " + res);
+				if (res instanceof AbstractButton) {
+					if (res.isVisible()) {
+						res.setVisible(false);
+					}
+				}
+			}
+
+			JLabel col = new JLabel("Event Color");
+			JLabel lab1 = new JLabel("Add/Delete");
+			add = new JButton("+");
+			add.setPreferredSize(new Dimension(40, 40));
+			add.setFont(new Font("Comic Sans", Font.BOLD, 25));
+			add.addActionListener(this);
+			add.setMargin(new Insets(0, 0, 0, 0));
+			delete = new JButton("-");
+			delete.setPreferredSize(new Dimension(40, 40));
+			delete.setFont(new Font("Comic Sans", Font.BOLD, 25));
+			delete.addActionListener(this);
+			delete.setMargin(new Insets(0, 0, 0, 0));
+
+			pan.add(col);
+			pan.add(lab1);
+			layout.putConstraint(SpringLayout.WEST, col, 5, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.NORTH, pan);
+			layout.putConstraint(SpringLayout.WEST, lab1, 14, SpringLayout.EAST, col);
+			layout.putConstraint(SpringLayout.NORTH, lab1, 5, SpringLayout.NORTH, pan);
+
+			pan.add(jcb);
+			pan.add(add);
+			pan.add(delete);
+			layout.putConstraint(SpringLayout.WEST, jcb, 5, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, jcb, 30, SpringLayout.NORTH, col);
+			layout.putConstraint(SpringLayout.WEST, add, 5, SpringLayout.EAST, jcb);
+			layout.putConstraint(SpringLayout.NORTH, add, 30, SpringLayout.NORTH, lab1);
+			layout.putConstraint(SpringLayout.WEST, delete, 5, SpringLayout.EAST, add);
+			layout.putConstraint(SpringLayout.NORTH, delete, 30, SpringLayout.NORTH, lab1);
+
 			boolean tryEvent = true;
 			while (tryEvent) {
 				tryEvent = false;
-				int optionSelected = JOptionPane.showConfirmDialog(screen, pan, "Add Event",
-						JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+				int optionSelected = JOptionPane.showConfirmDialog(screen, pan, "Add Event", JOptionPane.CLOSED_OPTION,
+						JOptionPane.PLAIN_MESSAGE);
 				System.out.println(optionSelected);
 				if (optionSelected == 0) {
 					try {
 						screen.setVisible(true);
 						screen.repaint();
 						screen.validate();
+						add.removeActionListener(this);
+						delete.removeActionListener(this);
 						return;
 					} catch (Exception e1) {
 						JOptionPane.showMessageDialog(screen, e1.getMessage());
 						tryEvent = true;
 					}
 				}
+				add.removeActionListener(this);
+				delete.removeActionListener(this);
 			}
 			screen.setVisible(true);
+		} else if (e.getSource() == add) {
+			new JColorChooser();
+			Color jcc = JColorChooser.showDialog(this, "Color Selector", panelColor);
+			System.out.println(jcc);
+			if (jcc != null) {
+				colorOptions.addColor(jcc);
+				jcb.updateBox(colorOptions);
+				System.out.println("Try Adding");
+			}
+		} else if (e.getSource() == delete) {
+			colorOptions.removeColor((Color) jcb.getSelectedItem());
+			jcb.updateBox(colorOptions);
 		} else if (e.getSource() == lastYear) {
 			try {
 				manager.loadCalendar(-1);
@@ -956,8 +1032,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					pan.setPreferredSize(new Dimension(100, 150));
 					SpringLayout layout = new SpringLayout();
 					pan.setLayout(layout);
-					
-					JColorBox jcb = new JColorBox(getColorOptions());
+
+					jcb = new JColorBox(getColorOptions());
 					jcb.setSelectedIndex(0);
 					jcb.setPreferredSize(new Dimension(30, 20));
 					jcb.setFocusable(false);
@@ -967,17 +1043,15 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					Component[] c = jcb.getComponents();
 					for (Component res : c) {
 						System.out.println("Component: " + res);
-						if (res instanceof AbstractButton) {
-							if (res.isVisible()) {
-								res.setVisible(false);
-							}
+						if (res instanceof AbstractButton && res.isVisible()) {
+							res.setVisible(false);
 						}
 					}
-					
+
 					if (preset == null) {
 						preset = new JComboBox<>(getPresetEvents());
 					}
-					
+
 					pan.add(col);
 					pan.add(jcb);
 					layout.putConstraint(SpringLayout.WEST, col, 5, SpringLayout.WEST, pan);
@@ -1012,7 +1086,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					layout.putConstraint(SpringLayout.NORTH, lab3, 24, SpringLayout.NORTH, lab2);
 					layout.putConstraint(SpringLayout.WEST, endTextField, 25, SpringLayout.EAST, lab3);
 					layout.putConstraint(SpringLayout.NORTH, endTextField, 24, SpringLayout.NORTH, startTextField);
-					
+
 					boolean tryEvent = true;
 					while (tryEvent) {
 						tryEvent = false;
@@ -1025,7 +1099,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 								EventData newEvent = manager.createEvent((String) eventTextField.getText(),
 										(String) startTextField.getText(), (String) endTextField.getText(),
 										datePanel[i].getDay(), datePanel[i].getMonth(), datePanel[i].getYear(),
-										eventColor.getRed(), eventColor.getGreen(), eventColor.getBlue());
+										((Color) jcb.getSelectedItem()).getRed(),
+										((Color) jcb.getSelectedItem()).getGreen(),
+										((Color) jcb.getSelectedItem()).getBlue());
 								datePanel[i].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
 										newEvent.getEndTime(), datePanel[i].getDay(), datePanel[i].getMonth(),
 										datePanel[i].getYear(), newEvent.getName(), newEvent.getColor().getRed(),

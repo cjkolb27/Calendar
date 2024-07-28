@@ -45,6 +45,20 @@ public class JColorBox extends JComboBox {
 		this.setSelectedIndex(0);
 	}
 
+	/**
+	 * 
+	 * @param allColors
+	 */
+	public void updateBox(ColorData allColors) {
+		DefaultComboBoxModel dcbm = new DefaultComboBoxModel();
+		for (int i = 0; i < allColors.getSize(); i++) {
+			dcbm.addElement(allColors.getColors()[i]);
+		}
+		setModel(dcbm);
+		setRenderer(new ColorRenderer());
+		this.setSelectedIndex(0);
+	}
+
 	@Override
 	public void setSelectedItem(Object anObject) {
 		super.setSelectedItem(anObject);

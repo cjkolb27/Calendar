@@ -2,6 +2,8 @@ package util;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.Scanner;
 
 /**
@@ -33,7 +35,6 @@ public class ColorData {
 			Scanner scanner = new Scanner(new File(file));
 			colorFile = file;
 			size = scanner.nextInt();
-			System.out.println(size);
 			colors = new Color[size];
 			int counter = 0;
 			scanner.nextLine();
@@ -42,7 +43,6 @@ public class ColorData {
 				int red = scanner.nextInt();
 				int green = scanner.nextInt();
 				int blue = scanner.nextInt();
-				System.out.println(red + " " + green + " " + blue);
 				if (scanner.hasNextLine()) {
 					scanner.nextLine();
 				}
@@ -75,6 +75,44 @@ public class ColorData {
 			}
 		}
 		colors = newColors;
+		saveColor();
+	}
+
+	/**
+	 * Removes a color to the list of color
+	 * 
+	 * @param color the color to remove
+	 */
+	public void removeColor(Color color) {
+		boolean foundColor = false;
+		for (int i = 0; i < size - 1; i++) {
+			if (foundColor || colors[i].equals(color)) {
+				foundColor = true;
+				colors[i] = colors[i + 1];
+			}
+			if (i == size - 2 && colors[size - 1].equals(color)) {
+				foundColor = true;
+			}
+		}
+		if (foundColor) {
+			colors[size - 1] = null;
+			size--;
+			saveColor();
+		}
+	}
+	
+	private void saveColor() {
+		try {
+			PrintStream fileWriter = new PrintStream(colorFile);
+			fileWriter.print(size + "\n");
+			for (int i = 0; i < size; i++) {
+				fileWriter
+						.print(colors[i].getRed() + "," + colors[i].getGreen() + "," + colors[i].getBlue() + "\n");
+			}
+			fileWriter.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
