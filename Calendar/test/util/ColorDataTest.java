@@ -22,6 +22,24 @@ class ColorDataTest {
 	void testColorData() {
 		ColorData cd = new ColorData("mtf", "testFiles/colors.txt");
 		assertNotNull(cd);
+		cd.printColors();
+		cd.moveToFront(new Color(3, 4, 6));
+		cd.printColors();
+
+		cd.moveToFront(new Color(0, 0, 0));
+		cd.printColors();
+
+		cd.moveToFront(new Color(255, 255, 255));
+		cd.printColors();
+		
+		cd.moveToFront(new Color(255, 255, 255));
+		cd.printColors();
+		
+		cd.moveToFront(new Color(255, 255, 255));
+		cd.moveToFront(new Color(0, 0, 0));
+		cd.moveToFront(new Color(230, 100, 140));
+		cd.moveToFront(new Color(255, 153, 161));
+		cd.printColors();
 	}
 
 	/**

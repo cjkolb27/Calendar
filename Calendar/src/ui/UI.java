@@ -803,14 +803,18 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				eventTextField.setText("Work");
 				startTextField.setText("6:30am");
 				endTextField.setText("2:00pm");
-				preset.setSelectedIndex(0);
+				preset.setSelectedIndex(-1);
 			}
 			if ("Work 2:00pm-8:30pm".equals(preset.getSelectedItem())) {
 				eventTextField.setText("Work");
 				startTextField.setText("2:00pm");
 				endTextField.setText("8:30pm");
-				preset.setSelectedIndex(0);
+				preset.setSelectedIndex(-1);
 			}
+		} else if (e.getSource() == jcb) {
+			System.out.println("Changed Color");
+			colorOptions.moveToFront((Color) jcb.getSelectedItem());
+			jcb.updateBox(colorOptions);
 		} else if (e.getSource() == loadCalendar) {
 			System.out.println("file tried");
 			try {
@@ -1039,6 +1043,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					jcb.setFocusable(false);
 					jcb.setBorder(BorderFactory.createLineBorder((Color) jcb.getSelectedItem(), 200));
 					jcb.setForeground(null);
+					jcb.addActionListener(this);
 
 					Component[] c = jcb.getComponents();
 					for (Component res : c) {
@@ -1051,6 +1056,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					if (preset == null) {
 						preset = new JComboBox<>(getPresetEvents());
 					}
+					preset.setSelectedIndex(-1);
 
 					pan.add(col);
 					pan.add(jcb);
@@ -1122,6 +1128,12 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		}
 		screen.repaint();
 		screen.validate();
+	}
+
+	public JColorBox getJCB() {
+		jcb = new JColorBox(getColorOptions());
+		jcb.addActionListener(this);
+		return jcb;
 	}
 
 	/**

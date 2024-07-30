@@ -79,6 +79,40 @@ public class ColorData {
 	}
 
 	/**
+	 * Moves a color to the front of the list if it exist
+	 * 
+	 * @param color the color to mtf
+	 */
+	public void moveToFront(Color color) {
+		Color[] oldColors = new Color[size];
+		for (int i = 0; i < size; i++) {
+			oldColors[i] = colors[i];
+		}
+		Color temp = new Color(0, 0, 0);
+		for (int i = 0; i < size; i++) {
+			if (i == 0) {
+				if (colors[0].equals(color)) {
+					return;
+				}
+				temp = colors[i];
+				colors[i] = color;
+			} else {
+				if (colors[i].equals(color)) {
+					colors[i] = temp;
+					saveColor();
+					return;
+				}
+				Color temp2 = colors[i];
+				colors[i] = temp;
+				temp = temp2;
+			}
+		}
+		for (int i = 0; i < size; i++) {
+			colors[i] = oldColors[i];
+		}
+	}
+
+	/**
 	 * Removes a color to the list of color
 	 * 
 	 * @param color the color to remove
@@ -100,14 +134,13 @@ public class ColorData {
 			saveColor();
 		}
 	}
-	
+
 	private void saveColor() {
 		try {
 			PrintStream fileWriter = new PrintStream(colorFile);
 			fileWriter.print(size + "\n");
 			for (int i = 0; i < size; i++) {
-				fileWriter
-						.print(colors[i].getRed() + "," + colors[i].getGreen() + "," + colors[i].getBlue() + "\n");
+				fileWriter.print(colors[i].getRed() + "," + colors[i].getGreen() + "," + colors[i].getBlue() + "\n");
 			}
 			fileWriter.close();
 		} catch (FileNotFoundException e) {
@@ -131,6 +164,13 @@ public class ColorData {
 	 */
 	public Color[] getColors() {
 		return colors;
+	}
+
+	public void printColors() {
+		for (int i = 0; i < size; i++) {
+			System.out.println("Color " + (i + 1) + ": " + colors[i].getRed() + " " + colors[i].getGreen() + " "
+					+ colors[i].getBlue());
+		}
 	}
 
 	/**

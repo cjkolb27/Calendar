@@ -320,7 +320,7 @@ public class DatePanel implements ActionListener {
 					SpringLayout layout = new SpringLayout();
 					pan.setLayout(layout);
 
-					JColorBox jcb = new JColorBox(currentUI.getColorOptions());
+					JColorBox jcb = currentUI.getJCB();
 					jcb.setSelectedItem(current.getColor());
 					// jcb.setBounds(100, 20, 140, 30);
 					jcb.setPreferredSize(new Dimension(30, 20));
