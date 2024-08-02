@@ -48,6 +48,7 @@ import manager.CalendarManager;
 import util.ColorData;
 import util.DatePanel;
 import util.JColorBox;
+import util.PresetData;
 import util.SortedDateList;
 
 /**
@@ -145,6 +146,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private JScrollPane scrollFrame;
 	/** All color options */
 	private static ColorData colorOptions;
+	/** All preset options */
+	private static PresetData presetOptions;
 	/** Scroll Frame color */
 	private static Color panelColor = new Color(20, 20, 20);
 	/** Odd month color */
@@ -238,15 +241,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	 */
 	public static void main(String[] args) {
 		new UI();
-	}
-
-	/**
-	 * Returns an array of all preset events
-	 * 
-	 * @return presetEvents an array of strings of all presets
-	 */
-	public String[] getPresetEvents() {
-		return presetEvents;
 	}
 
 	/**
@@ -1130,10 +1124,23 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		screen.validate();
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public JColorBox getJCB() {
 		jcb = new JColorBox(getColorOptions());
 		jcb.addActionListener(this);
 		return jcb;
+	}
+
+	/**
+	 * Returns an array of all preset events
+	 * 
+	 * @return presetEvents an array of strings of all presets
+	 */
+	public String[] getPresetEvents() {
+		return presetEvents;
 	}
 
 	/**
