@@ -51,8 +51,42 @@ public class PresetData {
 		}
 	}
 
+	/**
+	 * Adds a preset to the list sorting by start time and alphabetical name. If an
+	 * added event already exists, an IAE is thrown.
+	 * 
+	 * @param name  the name of the event
+	 * @param start the start time
+	 * @param end   the end time
+	 * @param color the color of the event
+	 */
 	public void addPreset(String name, String start, String end, Color color) {
-
+		PresetItems newPreset = new PresetItems(name, start, end, color);
+		PresetItems[] newItems = new PresetItems[size + 1];
+		boolean added = false;
+		for (int i = 0; i < size; i++) {
+			if (presets[i].getName() == newPreset.getName() && presets[i].getStartInt() == newPreset.getStartInt()
+					&& presets[i].getEnd() == newPreset.getEnd()) {
+				throw new IllegalArgumentException("Event Already Exists");
+			}
+			if (!added) {
+				if (presets[i].getStartInt() > newPreset.getStartInt()) {
+					newItems[i] = newPreset;
+					added = true;
+				} else if (presets[i].getStartInt() == newPreset.getStartInt()
+						&& presets[i].getName().charAt(0) > newPreset.getName().charAt(0)) {
+					newItems[i] = newPreset;
+					added = true;
+				} else
+					newItems[i] = presets[i];
+			} else
+				newItems[i + 1] = presets[i];
+		}
+		if (!added) {
+			newItems[size] = newPreset;
+		}
+		presets = newItems;
+		size++;
 	}
 
 	public void removePreset(String name, String start, String end, Color color) {
@@ -115,6 +149,26 @@ public class PresetData {
 
 		public void setColor(Color color) {
 			this.color = color;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getStart() {
+			return start;
+		}
+
+		public String getEnd() {
+			return end;
+		}
+
+		public Color getColor() {
+			return color;
+		}
+
+		public int getStartInt() {
+			return startInt;
 		}
 
 		private void setStartInt() {
