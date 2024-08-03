@@ -118,6 +118,9 @@ public class ColorData {
 	 * @param color the color to remove
 	 */
 	public void removeColor(Color color) {
+		if (size <= 1) {
+			throw new IllegalArgumentException("Can't remove last color");
+		}
 		boolean foundColor = false;
 		for (int i = 0; i < size - 1; i++) {
 			if (foundColor || colors[i].equals(color)) {
@@ -166,6 +169,9 @@ public class ColorData {
 		return colors;
 	}
 
+	/**
+	 * Prints out all colors to cmd
+	 */
 	public void printColors() {
 		for (int i = 0; i < size; i++) {
 			System.out.println("Color " + (i + 1) + ": " + colors[i].getRed() + " " + colors[i].getGreen() + " "

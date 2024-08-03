@@ -188,10 +188,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		super();
 		colorOptions = new ColorData("mtf", System.getProperty("user.home") + File.separator + "Documents"
 				+ File.separator + "CalendarData" + File.separator + "Colors.txt");
+		presetOptions = new PresetData(System.getProperty("user.home") + File.separator + "Documents" + File.separator
+				+ "CalendarData" + File.separator + "Presets.txt");
 		presetEvents = new String[] { "Work 6:30am-2:00pm", "Work 2:00pm-8:30pm" };
-		preset = new JComboBox<>(presetEvents);
-		preset.addActionListener(this);
-		preset.setFocusable(false);
 		env = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		ev = env.getDefaultScreenDevice();
 		settingsChanged = false;
@@ -434,7 +433,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		if (smallCalendar != null) {
 			boolean tracker = false;
 			for (int i = 0; i < 42; i++) {
-				if (i >= startDayPerMonth[month] - 1 && startDayPerMonth[month] - 1 + daysPerMonth[month] >= i) {
+				if (i >= startDayPerMonth[month] - 1 && startDayPerMonth[month] - 2 + daysPerMonth[month] >= i) {
 					tracker = true;
 				} else
 					tracker = false;
@@ -463,7 +462,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			smallMonthButtons = new JButton[42];
 			boolean tracker = false;
 			for (int i = 0; i < 42; i++) {
-				if (i >= startDayPerMonth[month] - 1 && startDayPerMonth[month] - 1 + daysPerMonth[month] >= i) {
+				if (i >= startDayPerMonth[month] - 1 && startDayPerMonth[month] - 2 + daysPerMonth[month] >= i) {
 					tracker = true;
 				} else
 					tracker = false;
@@ -561,11 +560,14 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			}
 			if (i == 1 && days == 28) {
 				daysPerMonth[1] = 28;
+				System.out.println("Set Days in Feb to 28");
 				buttons[currentDay] = new JButton();
 				buttons[currentDay].addActionListener(this);
 				currentDay++;
-			} else
+			} else if (i == 1) {
 				daysPerMonth[1] = 29;
+				System.out.println("Set Days in Feb to 29");
+			}
 			int weekCount = 0;
 			startWeekPerMonth[i] = 0;
 
@@ -642,7 +644,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		panel.setAlignmentX(SwingConstants.CENTER);
 		panel.setAlignmentY(SwingConstants.BOTTOM);
 		panel.setBackground(panelColor);
-		System.out.println(totalWeeks);
 	}
 
 	private void setScreenWindow() {
@@ -676,7 +677,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 		screen.repaint();
 		screen.validate();
-		System.out.println("Setting everything");
 	}
 
 	/**
@@ -793,18 +793,11 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == preset) {
-			if ("Work 6:30am-2:00pm".equals(preset.getSelectedItem())) {
-				eventTextField.setText("Work");
-				startTextField.setText("6:30am");
-				endTextField.setText("2:00pm");
-				preset.setSelectedIndex(-1);
-			}
-			if ("Work 2:00pm-8:30pm".equals(preset.getSelectedItem())) {
-				eventTextField.setText("Work");
-				startTextField.setText("2:00pm");
-				endTextField.setText("8:30pm");
-				preset.setSelectedIndex(-1);
-			}
+			System.out.println("Preset " + preset.getSelectedItem());
+			eventTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getName());
+			startTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getStart());
+			endTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getEnd());
+			preset.setSelectedIndex(-1);
 		} else if (e.getSource() == jcb) {
 			System.out.println("Changed Color");
 			colorOptions.moveToFront((Color) jcb.getSelectedItem());
@@ -863,6 +856,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			screen.setVisible(true);
 		} else if (e.getSource() == presetsBut) {
 			System.out.println("Presets Button");
+			
 			screen.setVisible(true);
 		} else if (e.getSource() == colorsBut) {
 			System.out.println("Color Button");
@@ -1047,10 +1041,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 						}
 					}
 
-					if (preset == null) {
-						preset = new JComboBox<>(getPresetEvents());
-					}
+					preset = new JComboBox<>(presetOptions.getStringPresets());
 					preset.setSelectedIndex(-1);
+					preset.setFocusable(false);
+					preset.addActionListener(this);
 
 					pan.add(col);
 					pan.add(jcb);
@@ -1177,6 +1171,15 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	 */
 	public DatePanel[] getDatePanel() {
 		return datePanel;
+	}
+
+	/**
+	 * Returns presetOption
+	 * 
+	 * @return presetOption the options of preset events
+	 */
+	public PresetData getPresetOptions() {
+		return presetOptions;
 	}
 
 	/**

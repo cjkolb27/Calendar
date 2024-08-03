@@ -71,10 +71,6 @@ public class DatePanel implements ActionListener {
 		panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 		panel.setBackground(null);
-		presets = new JComboBox<>(currentUI.getPresetEvents());
-		presets.setSelectedIndex(-1);
-		presets.addActionListener(this);
-		presets.setFocusable(false);
 	}
 
 	/**
@@ -282,19 +278,11 @@ public class DatePanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == presets) {
-			System.out.println("This thing is working");
-			if ("Work 6:30am-2:00pm".equals(presets.getSelectedItem())) {
-				jtf1.setText("Work");
-				jtf2.setText("6:30am");
-				jtf3.setText("2:00pm");
-				presets.setSelectedIndex(-1);
-			}
-			if ("Work 2:00pm-8:30pm".equals(presets.getSelectedItem())) {
-				jtf1.setText("Work");
-				jtf2.setText("2:00pm");
-				jtf3.setText("8:30pm");
-				presets.setSelectedIndex(-1);
-			}
+			System.out.println("Preset " + presets.getSelectedItem());
+			jtf1.setText(currentUI.getPresetOptions().getPresets()[presets.getSelectedIndex()].getName());
+			jtf2.setText(currentUI.getPresetOptions().getPresets()[presets.getSelectedIndex()].getStart());
+			jtf3.setText(currentUI.getPresetOptions().getPresets()[presets.getSelectedIndex()].getEnd());
+			presets.setSelectedIndex(-1);
 		} else {
 			System.out.println("Action");
 			DateButton current = head.next;
@@ -337,7 +325,12 @@ public class DatePanel implements ActionListener {
 							}
 						}
 					}
-					// pan.add(colors);
+
+					presets = new JComboBox<>(currentUI.getPresetOptions().getStringPresets());
+					presets.setSelectedIndex(-1);
+					presets.setFocusable(false);
+					presets.addActionListener(this);
+
 					pan.add(col);
 					pan.add(jcb);
 					layout.putConstraint(SpringLayout.WEST, col, 5, SpringLayout.WEST, pan);
@@ -433,7 +426,7 @@ public class DatePanel implements ActionListener {
 	 * 
 	 * @author Caleb Kolb
 	 */
-	public static class DateButton {
+	public class DateButton {
 		/** Start time of an event */
 		private int startTime;
 		/** End time of an event */

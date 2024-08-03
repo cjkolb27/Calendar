@@ -2,19 +2,23 @@ package util;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.Scanner;
 
 /**
- * 
+ * Class for storing, loading, and saving preset data for the Calendar.
  * 
  * @author Caleb Kolb
  */
 public class PresetData {
-	/** */
+	/** List of PresetItems */
 	private PresetItems[] presets;
 	/** */
+	private String[] stringPresets;
+	/** File used for loading and saving presets */
 	private String presetFile;
-	/** */
+	/** Size of presets list */
 	private int size;
 
 	/**
@@ -49,6 +53,7 @@ public class PresetData {
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e.getMessage());
 		}
+		setStringPresets();
 	}
 
 	/**
@@ -72,10 +77,13 @@ public class PresetData {
 			if (!added) {
 				if (presets[i].getStartInt() > newPreset.getStartInt()) {
 					newItems[i] = newPreset;
+					newItems[i + 1] = presets[i];
 					added = true;
 				} else if (presets[i].getStartInt() == newPreset.getStartInt()
-						&& presets[i].getName().charAt(0) > newPreset.getName().charAt(0)) {
+						&& Character.toLowerCase(presets[i].getName().charAt(0)) > Character
+								.toLowerCase(newPreset.getName().charAt(0))) {
 					newItems[i] = newPreset;
+					newItems[i + 1] = presets[i];
 					added = true;
 				} else
 					newItems[i] = presets[i];
@@ -87,25 +95,117 @@ public class PresetData {
 		}
 		presets = newItems;
 		size++;
+		savePreset();
+		setStringPresets();
 	}
 
-	public void removePreset(String name, String start, String end, Color color) {
-
+	/**
+	 * Removes a given preset from the list if it exists
+	 * 
+	 * @param name  the name of the event
+	 * @param start the start time of the event
+	 * @param end   the end time of the event
+	 */
+	public void removePreset(String name, String start, String end) {
+		if (size <= 1) {
+			throw new IllegalArgumentException("Can't remove last preset");
+		}
+		boolean foundPreset = false;
+		PresetItems[] newPresets = new PresetItems[size - 1];
+		for (int i = 0; i < size; i++) {
+			if (i < size - 1) {
+				if (!foundPreset && presets[i].getName().equals(name) && presets[i].getStart().equals(start)
+						&& presets[i].getEnd().equals(end)) {
+					foundPreset = true;
+				} else if (foundPreset) {
+					newPresets[i - 1] = presets[i];
+				} else
+					newPresets[i] = presets[i];
+			} else {
+				if (presets[i].getName().equals(name) && presets[i].getStart().equals(start)
+						&& presets[i].getEnd().equals(end)) {
+					presets = newPresets;
+					size--;
+					savePreset();
+					setStringPresets();
+					return;
+				} else if (foundPreset) {
+					newPresets[i - 1] = presets[i];
+					presets = newPresets;
+					size--;
+					savePreset();
+					setStringPresets();
+					return;
+				} else
+					return;
+			}
+		}
 	}
 
+	/**
+	 * Sets the string of preset events
+	 */
+	private void setStringPresets() {
+		if (stringPresets == null) {
+			stringPresets = new String[size];
+		}
+		for (int i = 0; i < size; i++) {
+			stringPresets[i] = presets[i].getName() + " " + presets[i].getStart() + "-" + presets[i].getEnd();
+		}
+	}
+
+	/**
+	 * Returns an array of all presets as strings
+	 * 
+	 * @return stringPresets an array of all presets as strings
+	 */
+	public String[] getStringPresets() {
+		return stringPresets;
+	}
+
+	/**
+	 * Save the presets to the original given file
+	 */
 	private void savePreset() {
-
+		try {
+			PrintStream fileWriter = new PrintStream(presetFile);
+			fileWriter.print(size + "\n");
+			for (int i = 0; i < size; i++) {
+				fileWriter.print(presets[i].getName() + "," + presets[i].getStart() + "," + presets[i].getEnd() + ","
+						+ presets[i].getColor().getRed() + "," + presets[i].getColor().getGreen() + ","
+						+ presets[i].getColor().getBlue() + "\n");
+			}
+			fileWriter.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
+	/**
+	 * Returns a list of PresetItems
+	 * 
+	 * @return presets a list of PresetItems
+	 */
 	public PresetItems[] getPresets() {
 		return presets;
 	}
 
+	/**
+	 * Returns the size of the list
+	 * 
+	 * @return size the size of the list
+	 */
 	public int getSize() {
 		return size;
 	}
 
-	private class PresetItems {
+	/**
+	 * Holds an events name, start time, end time, start time as an int, and the
+	 * color.
+	 * 
+	 * @author Caleb Kolb
+	 */
+	public class PresetItems {
 		/** Event name */
 		private String name;
 		/** Start time */
@@ -117,6 +217,14 @@ public class PresetData {
 		/** Start time as an int */
 		private int startInt;
 
+		/**
+		 * Create a preset item used for staring a preset events information
+		 * 
+		 * @param name  the name of the event
+		 * @param start the start time of the event
+		 * @param end   the end time of the event
+		 * @param color the color of the event
+		 */
 		public PresetItems(String name, String start, String end, Color color) {
 			setName(name);
 			setStart(start);
@@ -125,6 +233,11 @@ public class PresetData {
 			setStartInt();
 		}
 
+		/**
+		 * Sets the name of the event and checks if it is validS
+		 * 
+		 * @param name the name of the event
+		 */
 		public void setName(String name) {
 			if (name == null || "".equals(name)) {
 				throw new IllegalArgumentException("Invalid Start Time");
@@ -132,6 +245,11 @@ public class PresetData {
 			this.name = name;
 		}
 
+		/**
+		 * Sets the start time of the event and checks if the inputed time is valid
+		 * 
+		 * @param start the start time
+		 */
 		public void setStart(String start) {
 			if (start == null || "".equals(start)) {
 				throw new IllegalArgumentException("Invalid Start Time");
@@ -139,6 +257,11 @@ public class PresetData {
 			checkStartTime(start);
 		}
 
+		/**
+		 * Sets the end time of the event and checks if the inputed time is valid
+		 * 
+		 * @param end the end time
+		 */
 		public void setEnd(String end) {
 			if (end == null || "".equals(end)) {
 				throw new IllegalArgumentException("Invalid Start Time");
@@ -147,26 +270,56 @@ public class PresetData {
 			this.end = end;
 		}
 
+		/**
+		 * Sets the color of the event
+		 * 
+		 * @param color the color of the event
+		 */
 		public void setColor(Color color) {
 			this.color = color;
 		}
 
+		/**
+		 * returns the name of the event
+		 * 
+		 * @return name the name of the event
+		 */
 		public String getName() {
 			return name;
 		}
 
+		/**
+		 * Returns the start time of the event
+		 * 
+		 * @return start the start time of the event
+		 */
 		public String getStart() {
 			return start;
 		}
 
+		/**
+		 * Returns the end time of the event
+		 * 
+		 * @return end the end time of the event
+		 */
 		public String getEnd() {
 			return end;
 		}
 
+		/**
+		 * Returns the color of the event
+		 * 
+		 * @return color the color of the event
+		 */
 		public Color getColor() {
 			return color;
 		}
 
+		/**
+		 * Returns the start time as an int
+		 * 
+		 * @return startInt the start time as an int
+		 */
 		public int getStartInt() {
 			return startInt;
 		}
@@ -189,6 +342,11 @@ public class PresetData {
 			}
 		}
 
+		/**
+		 * Checks if a given start time is readable
+		 * 
+		 * @param check the start time to check
+		 */
 		public void checkStartTime(String check) {
 			String startT = check;
 			if (startT == null || "".equals(startT)) {
@@ -243,6 +401,11 @@ public class PresetData {
 				throw new IllegalArgumentException("Invalid Start Time");
 		}
 
+		/**
+		 * Checks if a given end time is readable
+		 * 
+		 * @param check the end time to check
+		 */
 		public void checkEndTime(String check) {
 			String endT = check;
 			if (endT == null || "".equals(endT)) {
