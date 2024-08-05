@@ -105,9 +105,13 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	/** Buttons for every calendar day */
 	private JButton[] buttons;
 	/** Add button for west panel */
-	private JButton add;
+	private JButton addColorBut;
 	/** Delete button for west panel */
-	private JButton delete;
+	private JButton deleteColorBut;
+	/** Add button for adding presets */
+	private JButton addPresetBut;
+	/** Delete button for deleting presets */
+	private JButton deletePresetBut;
 	/** New event button */
 	private JButton newEventBut;
 	/** Presets button */
@@ -856,7 +860,29 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			screen.setVisible(true);
 		} else if (e.getSource() == presetsBut) {
 			System.out.println("Presets Button");
-			
+			JPanel pan = new JPanel();
+			pan.setPreferredSize(new Dimension(150, 100));
+			SpringLayout layout = new SpringLayout();
+			pan.setLayout(layout);
+
+			boolean tryEvent = true;
+			while (tryEvent) {
+				tryEvent = false;
+				int optionSelected = JOptionPane.showConfirmDialog(screen, pan, "Add/Remove Preset",
+						JOptionPane.CLOSED_OPTION, JOptionPane.PLAIN_MESSAGE);
+				System.out.println(optionSelected);
+				if (optionSelected == 0) {
+					try {
+						screen.setVisible(true);
+						screen.repaint();
+						screen.validate();
+						return;
+					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(screen, e1.getMessage());
+						tryEvent = true;
+					}
+				}
+			}
 			screen.setVisible(true);
 		} else if (e.getSource() == colorsBut) {
 			System.out.println("Color Button");
@@ -886,16 +912,16 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 			JLabel col = new JLabel("Event Color");
 			JLabel lab1 = new JLabel("Add/Delete");
-			add = new JButton("+");
-			add.setPreferredSize(new Dimension(40, 40));
-			add.setFont(new Font("Comic Sans", Font.BOLD, 25));
-			add.addActionListener(this);
-			add.setMargin(new Insets(0, 0, 0, 0));
-			delete = new JButton("-");
-			delete.setPreferredSize(new Dimension(40, 40));
-			delete.setFont(new Font("Comic Sans", Font.BOLD, 25));
-			delete.addActionListener(this);
-			delete.setMargin(new Insets(0, 0, 0, 0));
+			addColorBut = new JButton("+");
+			addColorBut.setPreferredSize(new Dimension(40, 40));
+			addColorBut.setFont(new Font("Comic Sans", Font.BOLD, 25));
+			addColorBut.addActionListener(this);
+			addColorBut.setMargin(new Insets(0, 0, 0, 0));
+			deleteColorBut = new JButton("-");
+			deleteColorBut.setPreferredSize(new Dimension(40, 40));
+			deleteColorBut.setFont(new Font("Comic Sans", Font.BOLD, 25));
+			deleteColorBut.addActionListener(this);
+			deleteColorBut.setMargin(new Insets(0, 0, 0, 0));
 
 			pan.add(col);
 			pan.add(lab1);
@@ -905,39 +931,39 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			layout.putConstraint(SpringLayout.NORTH, lab1, 5, SpringLayout.NORTH, pan);
 
 			pan.add(jcb);
-			pan.add(add);
-			pan.add(delete);
+			pan.add(addColorBut);
+			pan.add(deleteColorBut);
 			layout.putConstraint(SpringLayout.WEST, jcb, 5, SpringLayout.WEST, pan);
 			layout.putConstraint(SpringLayout.NORTH, jcb, 30, SpringLayout.NORTH, col);
-			layout.putConstraint(SpringLayout.WEST, add, 5, SpringLayout.EAST, jcb);
-			layout.putConstraint(SpringLayout.NORTH, add, 30, SpringLayout.NORTH, lab1);
-			layout.putConstraint(SpringLayout.WEST, delete, 5, SpringLayout.EAST, add);
-			layout.putConstraint(SpringLayout.NORTH, delete, 30, SpringLayout.NORTH, lab1);
+			layout.putConstraint(SpringLayout.WEST, addColorBut, 5, SpringLayout.EAST, jcb);
+			layout.putConstraint(SpringLayout.NORTH, addColorBut, 30, SpringLayout.NORTH, lab1);
+			layout.putConstraint(SpringLayout.WEST, deleteColorBut, 5, SpringLayout.EAST, addColorBut);
+			layout.putConstraint(SpringLayout.NORTH, deleteColorBut, 30, SpringLayout.NORTH, lab1);
 
 			boolean tryEvent = true;
 			while (tryEvent) {
 				tryEvent = false;
-				int optionSelected = JOptionPane.showConfirmDialog(screen, pan, "Add Event", JOptionPane.CLOSED_OPTION,
-						JOptionPane.PLAIN_MESSAGE);
+				int optionSelected = JOptionPane.showConfirmDialog(screen, pan, "Add/Remove Color",
+						JOptionPane.CLOSED_OPTION, JOptionPane.PLAIN_MESSAGE);
 				System.out.println(optionSelected);
 				if (optionSelected == 0) {
 					try {
 						screen.setVisible(true);
 						screen.repaint();
 						screen.validate();
-						add.removeActionListener(this);
-						delete.removeActionListener(this);
+						addColorBut.removeActionListener(this);
+						deleteColorBut.removeActionListener(this);
 						return;
 					} catch (Exception e1) {
 						JOptionPane.showMessageDialog(screen, e1.getMessage());
 						tryEvent = true;
 					}
 				}
-				add.removeActionListener(this);
-				delete.removeActionListener(this);
+				addColorBut.removeActionListener(this);
+				deleteColorBut.removeActionListener(this);
 			}
 			screen.setVisible(true);
-		} else if (e.getSource() == add) {
+		} else if (e.getSource() == addColorBut) {
 			new JColorChooser();
 			Color jcc = JColorChooser.showDialog(this, "Color Selector", panelColor);
 			System.out.println(jcc);
@@ -946,7 +972,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				jcb.updateBox(colorOptions);
 				System.out.println("Try Adding");
 			}
-		} else if (e.getSource() == delete) {
+		} else if (e.getSource() == deleteColorBut) {
 			colorOptions.removeColor((Color) jcb.getSelectedItem());
 			jcb.updateBox(colorOptions);
 		} else if (e.getSource() == lastYear) {
