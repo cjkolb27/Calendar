@@ -49,6 +49,7 @@ import util.ColorData;
 import util.DatePanel;
 import util.JColorBox;
 import util.PresetData;
+import util.PresetStateMachine;
 import util.SortedDateList;
 
 /**
@@ -62,6 +63,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private static final long serialVersionUID = 1L;
 	/** Settings window state */
 	private ScreenState windowState = null;
+	/** Used for determining which state the presets are in */
+	private PresetStateMachine presetState;
 	/** Frame that holds all components on the screen */
 	private static JFrame screen;
 	/** Small calendar */
@@ -122,6 +125,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private JButton lastYear;
 	/** Next year button */
 	private JButton nextYear;
+	/** Used for saving and updating presets */
+	private JButton savePreset;
+	/** Used for canceling preset options */
+	private JButton cancelPreset;
 	/** All presets of an event */
 	private JComboBox<String> preset;
 	/** Color combo box */
@@ -803,10 +810,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		if (e.getSource() == preset) {
 			if (presetEventMenu) {
 				if (preset.getSelectedIndex() == -1) {
-					eventTextField.setText("");
-					startTextField.setText("");
-					endTextField.setText("");
-				} else {
+					return;
+				}
+				if (presetState.changeState("selected")) {
+					savePreset.setText("Update");
 					eventTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getName());
 					startTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getStart());
 					endTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getEnd());
@@ -877,6 +884,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			screen.setVisible(true);
 		} else if (e.getSource() == presetsBut) {
 			System.out.println("Presets Button");
+			presetState = new PresetStateMachine();
 			presetEventMenu = true;
 			addPresetBut = new JButton("+");
 			deletePresetBut = new JButton("-");
@@ -891,7 +899,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			deletePresetBut.setFont(new Font("Comic Sans", Font.BOLD, 15));
 			deletePresetBut.addActionListener(this);
 			JPanel pan = new JPanel();
-			pan.setPreferredSize(new Dimension(400, 120));
+			pan.setPreferredSize(new Dimension(400, 150));
 			SpringLayout layout = new SpringLayout();
 			pan.setLayout(layout);
 
@@ -916,22 +924,28 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			layout.putConstraint(SpringLayout.WEST, deletePresetBut, 5, SpringLayout.EAST, addPresetBut);
 			layout.putConstraint(SpringLayout.NORTH, deletePresetBut, 5, SpringLayout.NORTH, pan);
 
-			int textFieldSizeX = 151;
-			int textFieldSizeZ = 20;
+			Dimension textFieldSize = new Dimension(151, 20);
+			Dimension labelSize = new Dimension(75, 20);
 			JLabel col = new JLabel("Event Color");
+			col.setPreferredSize(labelSize);
 			JLabel lab1 = new JLabel("Event Name");
+			lab1.setPreferredSize(labelSize);
 			eventTextField = new JTextField();
-			eventTextField.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
+			eventTextField.setPreferredSize(textFieldSize);
 			JLabel lab2 = new JLabel("Start Time");
+			lab2.setPreferredSize(labelSize);
 			startTextField = new JTextField();
-			startTextField.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
+			startTextField.setPreferredSize(textFieldSize);
 			JLabel lab3 = new JLabel("End Time");
+			lab3.setPreferredSize(labelSize);
 			endTextField = new JTextField();
-			endTextField.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
-			JButton savePreset = new JButton();
-			JButton cancelPreset = new JButton();
+			endTextField.setPreferredSize(textFieldSize);
+			savePreset = new JButton("####");
+			savePreset.setPreferredSize(new Dimension(90, 30));
+			cancelPreset = new JButton("Cancel");
+			cancelPreset.setPreferredSize(new Dimension(80, 30));
 			JPanel pan2 = new JPanel();
-			pan2.setPreferredSize(new Dimension(300, 150));
+			pan2.setPreferredSize(new Dimension(250, 190));
 			SpringLayout layout2 = new SpringLayout();
 			pan2.setLayout(layout2);
 
@@ -954,29 +968,36 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			pan2.add(jcb);
 			layout2.putConstraint(SpringLayout.WEST, col, 5, SpringLayout.WEST, pan2);
 			layout2.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.NORTH, pan2);
-			layout2.putConstraint(SpringLayout.WEST, jcb, 14, SpringLayout.EAST, col);
+			layout2.putConstraint(SpringLayout.WEST, jcb, 5, SpringLayout.EAST, col);
 			layout2.putConstraint(SpringLayout.NORTH, jcb, 5, SpringLayout.NORTH, pan2);
 
 			pan2.add(lab1);
 			pan2.add(eventTextField);
 			layout2.putConstraint(SpringLayout.WEST, lab1, 5, SpringLayout.WEST, pan2);
 			layout2.putConstraint(SpringLayout.NORTH, lab1, 30, SpringLayout.NORTH, col);
-			layout2.putConstraint(SpringLayout.WEST, eventTextField, 10, SpringLayout.EAST, lab1);
+			layout2.putConstraint(SpringLayout.WEST, eventTextField, 5, SpringLayout.EAST, lab1);
 			layout2.putConstraint(SpringLayout.NORTH, eventTextField, 30, SpringLayout.NORTH, jcb);
 
 			pan2.add(lab2);
 			pan2.add(startTextField);
 			layout2.putConstraint(SpringLayout.WEST, lab2, 5, SpringLayout.WEST, pan2);
 			layout2.putConstraint(SpringLayout.NORTH, lab2, 24, SpringLayout.NORTH, lab1);
-			layout2.putConstraint(SpringLayout.WEST, startTextField, 18, SpringLayout.EAST, lab2);
+			layout2.putConstraint(SpringLayout.WEST, startTextField, 5, SpringLayout.EAST, lab2);
 			layout2.putConstraint(SpringLayout.NORTH, startTextField, 24, SpringLayout.NORTH, eventTextField);
 
 			pan2.add(lab3);
 			pan2.add(endTextField);
 			layout2.putConstraint(SpringLayout.WEST, lab3, 5, SpringLayout.WEST, pan2);
 			layout2.putConstraint(SpringLayout.NORTH, lab3, 24, SpringLayout.NORTH, lab2);
-			layout2.putConstraint(SpringLayout.WEST, endTextField, 25, SpringLayout.EAST, lab3);
+			layout2.putConstraint(SpringLayout.WEST, endTextField, 5, SpringLayout.EAST, lab3);
 			layout2.putConstraint(SpringLayout.NORTH, endTextField, 24, SpringLayout.NORTH, startTextField);
+
+			pan2.add(savePreset);
+			pan2.add(cancelPreset);
+			layout2.putConstraint(SpringLayout.EAST, cancelPreset, -50, SpringLayout.EAST, pan2);
+			layout2.putConstraint(SpringLayout.NORTH, cancelPreset, 24, SpringLayout.NORTH, endTextField);
+			layout2.putConstraint(SpringLayout.EAST, savePreset, -5, SpringLayout.WEST, cancelPreset);
+			layout2.putConstraint(SpringLayout.NORTH, savePreset, 24, SpringLayout.NORTH, endTextField);
 
 			pan.add(pan2);
 			layout.putConstraint(SpringLayout.WEST, pan2, 120, SpringLayout.EAST, top);
@@ -1009,8 +1030,16 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			}
 			presetEventMenu = false;
 			screen.setVisible(true);
+		} else if (e.getSource() == savePreset) {
+			
+		} else if (e.getSource() == cancelPreset) {
+			
 		} else if (e.getSource() == addPresetBut) {
-			if (preset.getSelectedIndex() == -1) {
+			if (presetState.changeState("add")) {
+				preset.setEditable(true);
+				preset.setSelectedItem("Adding Event");
+				savePreset.setText("Add");
+				preset.setEditable(false);
 				eventTextField.setText("");
 				startTextField.setText("");
 				endTextField.setText("");
@@ -1031,7 +1060,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		} else if (e.getSource() == colorsBut) {
 			System.out.println("Color Button");
 			JPanel pan = new JPanel();
-			pan.setPreferredSize(new Dimension(70, 80));
+			pan.setPreferredSize(new Dimension(50, 65));
 			SpringLayout layout = new SpringLayout();
 			pan.setLayout(layout);
 
@@ -1039,7 +1068,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			jcb.updateBox(colorOptions);
 			jcb.setSelectedIndex(0);
 			// jcb.setBounds(100, 20, 140, 30);
-			jcb.setPreferredSize(new Dimension(70, 40));
+			jcb.setPreferredSize(new Dimension(100, 40));
 			jcb.setFocusable(false);
 			jcb.setBorder(BorderFactory.createLineBorder((Color) jcb.getSelectedItem(), 200));
 			jcb.setForeground(null);
@@ -1053,8 +1082,11 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				}
 			}
 
+			Dimension labelSize = new Dimension(75, 20);
 			JLabel col = new JLabel("Event Color");
+			col.setPreferredSize(labelSize);
 			JLabel lab1 = new JLabel("Add/Delete");
+			lab1.setPreferredSize(labelSize);
 			addColorBut = new JButton("+");
 			addColorBut.setPreferredSize(new Dimension(40, 40));
 			addColorBut.setFont(new Font("Comic Sans", Font.BOLD, 25));
@@ -1068,20 +1100,20 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 			pan.add(col);
 			pan.add(lab1);
-			layout.putConstraint(SpringLayout.WEST, col, 5, SpringLayout.WEST, pan);
-			layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.NORTH, pan);
-			layout.putConstraint(SpringLayout.WEST, lab1, 14, SpringLayout.EAST, col);
+			layout.putConstraint(SpringLayout.EAST, lab1, -15, SpringLayout.EAST, pan);
 			layout.putConstraint(SpringLayout.NORTH, lab1, 5, SpringLayout.NORTH, pan);
+			layout.putConstraint(SpringLayout.WEST, col, 15, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.NORTH, pan);
 
 			pan.add(jcb);
 			pan.add(addColorBut);
 			pan.add(deleteColorBut);
-			layout.putConstraint(SpringLayout.WEST, jcb, 5, SpringLayout.WEST, pan);
-			layout.putConstraint(SpringLayout.NORTH, jcb, 30, SpringLayout.NORTH, col);
-			layout.putConstraint(SpringLayout.WEST, addColorBut, 5, SpringLayout.EAST, jcb);
-			layout.putConstraint(SpringLayout.NORTH, addColorBut, 30, SpringLayout.NORTH, lab1);
-			layout.putConstraint(SpringLayout.WEST, deleteColorBut, 5, SpringLayout.EAST, addColorBut);
-			layout.putConstraint(SpringLayout.NORTH, deleteColorBut, 30, SpringLayout.NORTH, lab1);
+			layout.putConstraint(SpringLayout.EAST, deleteColorBut, -15, SpringLayout.EAST, pan);
+			layout.putConstraint(SpringLayout.NORTH, deleteColorBut, 20, SpringLayout.NORTH, lab1);
+			layout.putConstraint(SpringLayout.EAST, addColorBut, -10, SpringLayout.WEST, deleteColorBut);
+			layout.putConstraint(SpringLayout.NORTH, addColorBut, 20, SpringLayout.NORTH, lab1);
+			layout.putConstraint(SpringLayout.WEST, jcb, 15, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, jcb, 20, SpringLayout.NORTH, col);
 
 			boolean tryEvent = true;
 			while (tryEvent) {
@@ -1173,22 +1205,27 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		} else {
 			for (int i = 0; i < 366; i++) {
 				if (e.getSource() == buttons[i]) {
-					int textFieldSizeX = 151;
-					int textFieldSizeZ = 20;
+					Dimension textFieldSize = new Dimension(151, 20);
+					Dimension labelSize = new Dimension(75, 20);
 
 					JLabel col = new JLabel("Event Color");
+					col.setPreferredSize(labelSize);
 					JLabel pre = new JLabel("Preset Event");
+					pre.setPreferredSize(labelSize);
 					JLabel lab1 = new JLabel("Event Name");
+					lab1.setPreferredSize(labelSize);
 					eventTextField = new JTextField();
-					eventTextField.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
+					eventTextField.setPreferredSize(textFieldSize);
 					JLabel lab2 = new JLabel("Start Time");
+					lab2.setPreferredSize(labelSize);
 					startTextField = new JTextField();
-					startTextField.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
+					startTextField.setPreferredSize(textFieldSize);
 					JLabel lab3 = new JLabel("End Time");
+					lab3.setPreferredSize(labelSize);
 					endTextField = new JTextField();
-					endTextField.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
+					endTextField.setPreferredSize(textFieldSize);
 					JPanel pan = new JPanel();
-					pan.setPreferredSize(new Dimension(100, 150));
+					pan.setPreferredSize(new Dimension(100, 135));
 					SpringLayout layout = new SpringLayout();
 					pan.setLayout(layout);
 
@@ -1216,7 +1253,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					pan.add(jcb);
 					layout.putConstraint(SpringLayout.WEST, col, 5, SpringLayout.WEST, pan);
 					layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.NORTH, pan);
-					layout.putConstraint(SpringLayout.WEST, jcb, 14, SpringLayout.EAST, col);
+					layout.putConstraint(SpringLayout.WEST, jcb, 5, SpringLayout.EAST, col);
 					layout.putConstraint(SpringLayout.NORTH, jcb, 5, SpringLayout.NORTH, pan);
 
 					pan.add(pre);
@@ -1230,28 +1267,29 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					pan.add(eventTextField);
 					layout.putConstraint(SpringLayout.WEST, lab1, 5, SpringLayout.WEST, pan);
 					layout.putConstraint(SpringLayout.NORTH, lab1, 30, SpringLayout.NORTH, pre);
-					layout.putConstraint(SpringLayout.WEST, eventTextField, 10, SpringLayout.EAST, lab1);
+					layout.putConstraint(SpringLayout.WEST, eventTextField, 5, SpringLayout.EAST, lab1);
 					layout.putConstraint(SpringLayout.NORTH, eventTextField, 30, SpringLayout.NORTH, preset);
 
 					pan.add(lab2);
 					pan.add(startTextField);
 					layout.putConstraint(SpringLayout.WEST, lab2, 5, SpringLayout.WEST, pan);
 					layout.putConstraint(SpringLayout.NORTH, lab2, 24, SpringLayout.NORTH, lab1);
-					layout.putConstraint(SpringLayout.WEST, startTextField, 18, SpringLayout.EAST, lab2);
+					layout.putConstraint(SpringLayout.WEST, startTextField, 5, SpringLayout.EAST, lab2);
 					layout.putConstraint(SpringLayout.NORTH, startTextField, 24, SpringLayout.NORTH, eventTextField);
 
 					pan.add(lab3);
 					pan.add(endTextField);
 					layout.putConstraint(SpringLayout.WEST, lab3, 5, SpringLayout.WEST, pan);
 					layout.putConstraint(SpringLayout.NORTH, lab3, 24, SpringLayout.NORTH, lab2);
-					layout.putConstraint(SpringLayout.WEST, endTextField, 25, SpringLayout.EAST, lab3);
+					layout.putConstraint(SpringLayout.WEST, endTextField, 5, SpringLayout.EAST, lab3);
 					layout.putConstraint(SpringLayout.NORTH, endTextField, 24, SpringLayout.NORTH, startTextField);
 
 					boolean tryEvent = true;
 					while (tryEvent) {
 						tryEvent = false;
-						int optionSelected = JOptionPane.showConfirmDialog(screen, pan, "Add Event",
-								JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+						String[] options = { "Add", "Cancel" };
+						int optionSelected = JOptionPane.showOptionDialog(screen, pan, "Add Event",
+								JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
 						System.out.println(optionSelected);
 						if (optionSelected == 0) {
 							try {
@@ -1285,8 +1323,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	}
 
 	/**
+	 * Return the JColorBox of the ui
 	 * 
-	 * @return
+	 * @return jcb the JColorBox
 	 */
 	public JColorBox getJCB() {
 		jcb = new JColorBox(getColorOptions());

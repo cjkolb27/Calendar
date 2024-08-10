@@ -288,22 +288,27 @@ public class DatePanel implements ActionListener {
 			DateButton current = head.next;
 			while (current != null) {
 				if (e.getSource() == current.getButton()) {
-					int textFieldSizeX = 151;
-					int textFieldSizeZ = 20;
+					Dimension textFieldSize = new Dimension(151, 20);
+					Dimension labelSize = new Dimension(75, 20);
 
 					JLabel col = new JLabel("Event Color");
+					col.setPreferredSize(labelSize);
 					JLabel pre = new JLabel("Preset Event");
+					pre.setPreferredSize(labelSize);
 					JLabel lab1 = new JLabel("Event Name");
+					lab1.setPreferredSize(labelSize);
 					jtf1 = new JTextField(current.getEvent());
-					jtf1.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
+					jtf1.setPreferredSize(textFieldSize);
 					JLabel lab2 = new JLabel("Start Time");
+					lab2.setPreferredSize(labelSize);
 					jtf2 = new JTextField(current.start);
-					jtf2.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
+					jtf2.setPreferredSize(textFieldSize);
 					JLabel lab3 = new JLabel("End Time");
+					lab3.setPreferredSize(labelSize);
 					jtf3 = new JTextField(current.end);
-					jtf3.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
+					jtf3.setPreferredSize(textFieldSize);
 					JPanel pan = new JPanel();
-					pan.setPreferredSize(new Dimension(100, 150));
+					pan.setPreferredSize(new Dimension(100, 135));
 					SpringLayout layout = new SpringLayout();
 					pan.setLayout(layout);
 
@@ -333,7 +338,7 @@ public class DatePanel implements ActionListener {
 					pan.add(jcb);
 					layout.putConstraint(SpringLayout.WEST, col, 5, SpringLayout.WEST, pan);
 					layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.NORTH, pan);
-					layout.putConstraint(SpringLayout.WEST, jcb, 14, SpringLayout.EAST, col);
+					layout.putConstraint(SpringLayout.WEST, jcb, 5, SpringLayout.EAST, col);
 					layout.putConstraint(SpringLayout.NORTH, jcb, 5, SpringLayout.NORTH, pan);
 
 					pan.add(pre);
@@ -347,21 +352,21 @@ public class DatePanel implements ActionListener {
 					pan.add(jtf1);
 					layout.putConstraint(SpringLayout.WEST, lab1, 5, SpringLayout.WEST, pan);
 					layout.putConstraint(SpringLayout.NORTH, lab1, 30, SpringLayout.NORTH, pre);
-					layout.putConstraint(SpringLayout.WEST, jtf1, 10, SpringLayout.EAST, lab1);
+					layout.putConstraint(SpringLayout.WEST, jtf1, 5, SpringLayout.EAST, lab1);
 					layout.putConstraint(SpringLayout.NORTH, jtf1, 30, SpringLayout.NORTH, presets);
 
 					pan.add(lab2);
 					pan.add(jtf2);
 					layout.putConstraint(SpringLayout.WEST, lab2, 5, SpringLayout.WEST, pan);
 					layout.putConstraint(SpringLayout.NORTH, lab2, 24, SpringLayout.NORTH, lab1);
-					layout.putConstraint(SpringLayout.WEST, jtf2, 18, SpringLayout.EAST, lab2);
+					layout.putConstraint(SpringLayout.WEST, jtf2, 5, SpringLayout.EAST, lab2);
 					layout.putConstraint(SpringLayout.NORTH, jtf2, 24, SpringLayout.NORTH, jtf1);
 
 					pan.add(lab3);
 					pan.add(jtf3);
 					layout.putConstraint(SpringLayout.WEST, lab3, 5, SpringLayout.WEST, pan);
 					layout.putConstraint(SpringLayout.NORTH, lab3, 24, SpringLayout.NORTH, lab2);
-					layout.putConstraint(SpringLayout.WEST, jtf3, 25, SpringLayout.EAST, lab3);
+					layout.putConstraint(SpringLayout.WEST, jtf3, 5, SpringLayout.EAST, lab3);
 					layout.putConstraint(SpringLayout.NORTH, jtf3, 24, SpringLayout.NORTH, jtf2);
 
 					boolean tryEvent = true;
