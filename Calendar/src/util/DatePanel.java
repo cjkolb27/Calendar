@@ -39,6 +39,8 @@ public class DatePanel implements ActionListener {
 	private int month;
 	/** Year of event */
 	private int year;
+	/** Color box of the panel */
+	private JColorBox jcb;
 	/** Panels for each day in the year */
 	private JPanel panel;
 	/** First dateLabel */
@@ -197,7 +199,6 @@ public class DatePanel implements ActionListener {
 		DateButton current = head;
 		while (current.next != null) {
 			if (current.next.getStartTime() == startTime) {
-				System.out.println("Removed");
 				getPanel().remove(current.next.getButton());
 				current.next = current.next.next;
 				size--;
@@ -205,7 +206,6 @@ public class DatePanel implements ActionListener {
 				addAllButtons();
 				current = head;
 				while (current.next != null) {
-					System.out.println(current.next.startTime);
 					current = current.next;
 				}
 				return;
@@ -278,20 +278,19 @@ public class DatePanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == presets) {
-			System.out.println("Preset " + presets.getSelectedItem());
 			jtf1.setText(currentUI.getPresetOptions().getPresets()[presets.getSelectedIndex()].getName());
 			jtf2.setText(currentUI.getPresetOptions().getPresets()[presets.getSelectedIndex()].getStart());
 			jtf3.setText(currentUI.getPresetOptions().getPresets()[presets.getSelectedIndex()].getEnd());
+			jcb.setSelectedItem(currentUI.getPresetOptions().getPresets()[presets.getSelectedIndex()].getColor());
+			// System.out.println(currentUI.getPresetOptions().getPresets()[presets.getSelectedIndex()].getColor());
 			presets.setSelectedIndex(-1);
 		} else {
-			System.out.println("Action");
 			DateButton current = head.next;
 			while (current != null) {
 				if (e.getSource() == current.getButton()) {
 					int textFieldSizeX = 151;
 					int textFieldSizeZ = 20;
 
-					System.out.println("Button pressed");
 					JLabel col = new JLabel("Event Color");
 					JLabel pre = new JLabel("Preset Event");
 					JLabel lab1 = new JLabel("Event Name");
@@ -308,7 +307,7 @@ public class DatePanel implements ActionListener {
 					SpringLayout layout = new SpringLayout();
 					pan.setLayout(layout);
 
-					JColorBox jcb = currentUI.getJCB();
+					jcb = currentUI.getJCB();
 					jcb.setSelectedItem(current.getColor());
 					// jcb.setBounds(100, 20, 140, 30);
 					jcb.setPreferredSize(new Dimension(30, 20));
@@ -318,7 +317,6 @@ public class DatePanel implements ActionListener {
 
 					Component[] c = jcb.getComponents();
 					for (Component res : c) {
-						System.out.println("Component: " + res);
 						if (res instanceof AbstractButton) {
 							if (res.isVisible()) {
 								res.setVisible(false);
@@ -373,9 +371,10 @@ public class DatePanel implements ActionListener {
 						Color selectedColor = new Color(255, 153, 161);
 						int optionSelected = JOptionPane.showOptionDialog(currentUI.getScreen(), pan, "Edit Event",
 								JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, choices[0]);
-						System.out.println(optionSelected);
 						try {
-							selectedColor = currentUI.getColorOptions().getColors()[jcb.getSelectedIndex()];
+							// selectedColor =
+							// currentUI.getColorOptions().getColors()[jcb.getSelectedIndex()];
+							selectedColor = (Color) jcb.getSelectedItem();
 						} catch (Exception e2) {
 							selectedColor = new Color(255, 153, 161);
 						}

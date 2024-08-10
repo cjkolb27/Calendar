@@ -184,12 +184,15 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private double scrollLocation;
 	/** Keeps track of scroll bar height */
 	private double scrollHeight;
+	/** Determining if the preset is coming from the preset event menu */
+	private boolean presetEventMenu;
 
 	/**
 	 * Creates the GUI for the user to interact with the CalendarManager
 	 */
 	public UI() {
 		super();
+		presetEventMenu = false;
 		colorOptions = new ColorData("mtf", System.getProperty("user.home") + File.separator + "Documents"
 				+ File.separator + "CalendarData" + File.separator + "Colors.txt");
 		presetOptions = new PresetData(System.getProperty("user.home") + File.separator + "Documents" + File.separator
@@ -652,6 +655,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 	private void setScreenWindow() {
 		// System.out.println("Setting something");
+		presetEventMenu = false;
 		screen.dispose();
 		screen.setVisible(false);
 		env = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -797,13 +801,26 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == preset) {
-			System.out.println("Preset " + preset.getSelectedItem());
-			eventTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getName());
-			startTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getStart());
-			endTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getEnd());
-			preset.setSelectedIndex(-1);
+			if (presetEventMenu) {
+				if (preset.getSelectedIndex() == -1) {
+					eventTextField.setText("");
+					startTextField.setText("");
+					endTextField.setText("");
+				} else {
+					eventTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getName());
+					startTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getStart());
+					endTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getEnd());
+					jcb.setSelectedItem(presetOptions.getPresets()[preset.getSelectedIndex()].getColor());
+				}
+			} else {
+				System.out.println("Preset " + preset.getSelectedItem());
+				eventTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getName());
+				startTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getStart());
+				endTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getEnd());
+				jcb.setSelectedItem(presetOptions.getPresets()[preset.getSelectedIndex()].getColor());
+				preset.setSelectedIndex(-1);
+			}
 		} else if (e.getSource() == jcb) {
-			System.out.println("Changed Color");
 			colorOptions.moveToFront((Color) jcb.getSelectedItem());
 			jcb.updateBox(colorOptions);
 		} else if (e.getSource() == loadCalendar) {
@@ -860,34 +877,161 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			screen.setVisible(true);
 		} else if (e.getSource() == presetsBut) {
 			System.out.println("Presets Button");
+			presetEventMenu = true;
+			addPresetBut = new JButton("+");
+			deletePresetBut = new JButton("-");
+			addPresetBut.setPreferredSize(new Dimension(20, 20));
+			addPresetBut.setMargin(new Insets(0, 0, 0, 0));
+			addPresetBut.setFocusable(false);
+			addPresetBut.setFont(new Font("Comic Sans", Font.BOLD, 15));
+			addPresetBut.addActionListener(this);
+			deletePresetBut.setPreferredSize(new Dimension(20, 20));
+			deletePresetBut.setMargin(new Insets(0, 0, 0, 0));
+			deletePresetBut.setFocusable(false);
+			deletePresetBut.setFont(new Font("Comic Sans", Font.BOLD, 15));
+			deletePresetBut.addActionListener(this);
 			JPanel pan = new JPanel();
-			pan.setPreferredSize(new Dimension(150, 100));
+			pan.setPreferredSize(new Dimension(400, 120));
 			SpringLayout layout = new SpringLayout();
 			pan.setLayout(layout);
+
+			JLabel top = new JLabel("Events");
+			top.setPreferredSize(new Dimension(40, 20));
+			preset = new JComboBox<>(presetOptions.getStringPresets());
+			preset.setSelectedIndex(-1);
+			preset.setFocusable(false);
+			preset.addActionListener(this);
+
+			pan.add(top);
+			pan.add(preset);
+			layout.putConstraint(SpringLayout.WEST, top, 5, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, top, 5, SpringLayout.NORTH, pan);
+			layout.putConstraint(SpringLayout.WEST, preset, 5, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, preset, 25, SpringLayout.NORTH, top);
+
+			pan.add(addPresetBut);
+			pan.add(deletePresetBut);
+			layout.putConstraint(SpringLayout.WEST, addPresetBut, 5, SpringLayout.EAST, top);
+			layout.putConstraint(SpringLayout.NORTH, addPresetBut, 5, SpringLayout.NORTH, pan);
+			layout.putConstraint(SpringLayout.WEST, deletePresetBut, 5, SpringLayout.EAST, addPresetBut);
+			layout.putConstraint(SpringLayout.NORTH, deletePresetBut, 5, SpringLayout.NORTH, pan);
+
+			int textFieldSizeX = 151;
+			int textFieldSizeZ = 20;
+			JLabel col = new JLabel("Event Color");
+			JLabel lab1 = new JLabel("Event Name");
+			eventTextField = new JTextField();
+			eventTextField.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
+			JLabel lab2 = new JLabel("Start Time");
+			startTextField = new JTextField();
+			startTextField.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
+			JLabel lab3 = new JLabel("End Time");
+			endTextField = new JTextField();
+			endTextField.setPreferredSize(new Dimension(textFieldSizeX, textFieldSizeZ));
+			JButton savePreset = new JButton();
+			JButton cancelPreset = new JButton();
+			JPanel pan2 = new JPanel();
+			pan2.setPreferredSize(new Dimension(300, 150));
+			SpringLayout layout2 = new SpringLayout();
+			pan2.setLayout(layout2);
+
+			jcb = new JColorBox(getColorOptions());
+			jcb.setSelectedIndex(0);
+			jcb.setPreferredSize(new Dimension(30, 20));
+			jcb.setFocusable(false);
+			jcb.setBorder(BorderFactory.createLineBorder((Color) jcb.getSelectedItem(), 200));
+			jcb.setForeground(null);
+			jcb.addActionListener(this);
+
+			Component[] c = jcb.getComponents();
+			for (Component res : c) {
+				if (res instanceof AbstractButton && res.isVisible()) {
+					res.setVisible(false);
+				}
+			}
+
+			pan2.add(col);
+			pan2.add(jcb);
+			layout2.putConstraint(SpringLayout.WEST, col, 5, SpringLayout.WEST, pan2);
+			layout2.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.NORTH, pan2);
+			layout2.putConstraint(SpringLayout.WEST, jcb, 14, SpringLayout.EAST, col);
+			layout2.putConstraint(SpringLayout.NORTH, jcb, 5, SpringLayout.NORTH, pan2);
+
+			pan2.add(lab1);
+			pan2.add(eventTextField);
+			layout2.putConstraint(SpringLayout.WEST, lab1, 5, SpringLayout.WEST, pan2);
+			layout2.putConstraint(SpringLayout.NORTH, lab1, 30, SpringLayout.NORTH, col);
+			layout2.putConstraint(SpringLayout.WEST, eventTextField, 10, SpringLayout.EAST, lab1);
+			layout2.putConstraint(SpringLayout.NORTH, eventTextField, 30, SpringLayout.NORTH, jcb);
+
+			pan2.add(lab2);
+			pan2.add(startTextField);
+			layout2.putConstraint(SpringLayout.WEST, lab2, 5, SpringLayout.WEST, pan2);
+			layout2.putConstraint(SpringLayout.NORTH, lab2, 24, SpringLayout.NORTH, lab1);
+			layout2.putConstraint(SpringLayout.WEST, startTextField, 18, SpringLayout.EAST, lab2);
+			layout2.putConstraint(SpringLayout.NORTH, startTextField, 24, SpringLayout.NORTH, eventTextField);
+
+			pan2.add(lab3);
+			pan2.add(endTextField);
+			layout2.putConstraint(SpringLayout.WEST, lab3, 5, SpringLayout.WEST, pan2);
+			layout2.putConstraint(SpringLayout.NORTH, lab3, 24, SpringLayout.NORTH, lab2);
+			layout2.putConstraint(SpringLayout.WEST, endTextField, 25, SpringLayout.EAST, lab3);
+			layout2.putConstraint(SpringLayout.NORTH, endTextField, 24, SpringLayout.NORTH, startTextField);
+
+			pan.add(pan2);
+			layout.putConstraint(SpringLayout.WEST, pan2, 120, SpringLayout.EAST, top);
+			layout.putConstraint(SpringLayout.NORTH, pan2, 0, SpringLayout.NORTH, pan);
 
 			boolean tryEvent = true;
 			while (tryEvent) {
 				tryEvent = false;
-				int optionSelected = JOptionPane.showConfirmDialog(screen, pan, "Add/Remove Preset",
-						JOptionPane.CLOSED_OPTION, JOptionPane.PLAIN_MESSAGE);
+				String[] something = { "Close" };
+				int optionSelected = JOptionPane.showOptionDialog(screen, pan, "Add/Remove Preset",
+						JOptionPane.CLOSED_OPTION, JOptionPane.PLAIN_MESSAGE, null, something, something[0]);
+				// int optionSelected = JOptionPane.showConfirmDialog(screen, pan, "Add/Remove
+				// Preset",
+				// JOptionPane.CLOSED_OPTION, JOptionPane.PLAIN_MESSAGE);
 				System.out.println(optionSelected);
 				if (optionSelected == 0) {
 					try {
 						screen.setVisible(true);
 						screen.repaint();
 						screen.validate();
+						presetEventMenu = false;
 						return;
 					} catch (Exception e1) {
 						JOptionPane.showMessageDialog(screen, e1.getMessage());
 						tryEvent = true;
 					}
+				} else {
+					tryEvent = true;
 				}
 			}
+			presetEventMenu = false;
 			screen.setVisible(true);
+		} else if (e.getSource() == addPresetBut) {
+			if (preset.getSelectedIndex() == -1) {
+				eventTextField.setText("");
+				startTextField.setText("");
+				endTextField.setText("");
+			}
+		} else if (e.getSource() == deletePresetBut) {
+			if (preset.getSelectedIndex() == -1) {
+				return;
+			} else {
+				presetOptions.getPresets()[preset.getSelectedIndex()].getName();
+				presetOptions.removePreset(presetOptions.getPresets()[preset.getSelectedIndex()].getName(),
+						presetOptions.getPresets()[preset.getSelectedIndex()].getStart(),
+						presetOptions.getPresets()[preset.getSelectedIndex()].getEnd());
+				preset = new JComboBox<>(presetOptions.getStringPresets());
+				preset.setSelectedIndex(-1);
+				preset.setFocusable(false);
+				preset.addActionListener(this);
+			}
 		} else if (e.getSource() == colorsBut) {
 			System.out.println("Color Button");
 			JPanel pan = new JPanel();
-			pan.setPreferredSize(new Dimension(150, 100));
+			pan.setPreferredSize(new Dimension(70, 80));
 			SpringLayout layout = new SpringLayout();
 			pan.setLayout(layout);
 
@@ -902,7 +1046,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 			Component[] c = jcb.getComponents();
 			for (Component res : c) {
-				System.out.println("Component: " + res);
 				if (res instanceof AbstractButton) {
 					if (res.isVisible()) {
 						res.setVisible(false);
@@ -970,7 +1113,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			if (jcc != null) {
 				colorOptions.addColor(jcc);
 				jcb.updateBox(colorOptions);
-				System.out.println("Try Adding");
 			}
 		} else if (e.getSource() == deleteColorBut) {
 			colorOptions.removeColor((Color) jcb.getSelectedItem());
@@ -1031,7 +1173,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		} else {
 			for (int i = 0; i < 366; i++) {
 				if (e.getSource() == buttons[i]) {
-					System.out.println("Button Listener " + i);
 					int textFieldSizeX = 151;
 					int textFieldSizeZ = 20;
 
@@ -1061,7 +1202,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
 					Component[] c = jcb.getComponents();
 					for (Component res : c) {
-						System.out.println("Component: " + res);
 						if (res instanceof AbstractButton && res.isVisible()) {
 							res.setVisible(false);
 						}

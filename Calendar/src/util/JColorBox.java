@@ -62,7 +62,6 @@ public class JColorBox extends JComboBox {
 	@Override
 	public void setSelectedItem(Object anObject) {
 		super.setSelectedItem(anObject);
-		System.out.println((Color) anObject);
 		setBorder(BorderFactory.createLineBorder((Color) anObject, 200));
 		setBackground((Color) anObject);
 	}
