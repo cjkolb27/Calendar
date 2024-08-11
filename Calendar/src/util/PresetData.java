@@ -70,8 +70,9 @@ public class PresetData {
 		PresetItems[] newItems = new PresetItems[size + 1];
 		boolean added = false;
 		for (int i = 0; i < size; i++) {
-			if (presets[i].getName() == newPreset.getName() && presets[i].getStartInt() == newPreset.getStartInt()
-					&& presets[i].getEnd() == newPreset.getEnd()) {
+			if (presets[i].getName().equals(newPreset.getName()) && presets[i].getStartInt() == newPreset.getStartInt()
+					&& presets[i].getEnd().equals(newPreset.getEnd())
+					&& presets[i].getColor().equals(newPreset.getColor())) {
 				throw new IllegalArgumentException("Event Already Exists");
 			}
 			if (!added) {
@@ -105,8 +106,9 @@ public class PresetData {
 	 * @param name  the name of the event
 	 * @param start the start time of the event
 	 * @param end   the end time of the event
+	 * @param color the color of the event
 	 */
-	public void removePreset(String name, String start, String end) {
+	public void removePreset(String name, String start, String end, Color color) {
 		if (size <= 1) {
 			throw new IllegalArgumentException("Can't remove last preset");
 		}
@@ -115,7 +117,7 @@ public class PresetData {
 		for (int i = 0; i < size; i++) {
 			if (i < size - 1) {
 				if (!foundPreset && presets[i].getName().equals(name) && presets[i].getStart().equals(start)
-						&& presets[i].getEnd().equals(end)) {
+						&& presets[i].getEnd().equals(end) && presets[i].getColor().equals(color)) {
 					foundPreset = true;
 				} else if (foundPreset) {
 					newPresets[i - 1] = presets[i];
@@ -142,13 +144,23 @@ public class PresetData {
 		}
 	}
 
+	public boolean duplicatePreset(String name, String start, String end, Color color) {
+		PresetItems newPreset = new PresetItems(name, start, end, color);
+		for (int i = 0; i < size; i++) {
+			if (presets[i].getName().equals(newPreset.getName()) && presets[i].getStartInt() == newPreset.getStartInt()
+					&& presets[i].getEnd().equals(newPreset.getEnd())
+					&& presets[i].getColor().equals(newPreset.getColor())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	/**
 	 * Sets the string of preset events
 	 */
 	private void setStringPresets() {
-		if (stringPresets == null) {
-			stringPresets = new String[size];
-		}
+		stringPresets = new String[size];
 		for (int i = 0; i < size; i++) {
 			stringPresets[i] = presets[i].getName() + " " + presets[i].getStart() + "-" + presets[i].getEnd();
 		}

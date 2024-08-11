@@ -50,6 +50,7 @@ import util.DatePanel;
 import util.JColorBox;
 import util.PresetData;
 import util.PresetStateMachine;
+import util.PresetStateMachine.PresetState;
 import util.SortedDateList;
 
 /**
@@ -809,15 +810,28 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == preset) {
 			if (presetEventMenu) {
+				preset.removeActionListener(this);
 				if (preset.getSelectedIndex() == -1) {
+					preset.addActionListener(this);
 					return;
 				}
 				if (presetState.changeState("selected")) {
+					addPresetBut.setEnabled(true);
+					deletePresetBut.setEnabled(true);
+					eventTextField.setEnabled(true);
+					startTextField.setEnabled(true);
+					endTextField.setEnabled(true);
+					jcb.setEnabled(true);
+					savePreset.setEnabled(true);
+					cancelPreset.setEnabled(true);
+
+					System.out.println("Current State4: " + presetState.getState());
 					savePreset.setText("Update");
 					eventTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getName());
 					startTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getStart());
 					endTextField.setText(presetOptions.getPresets()[preset.getSelectedIndex()].getEnd());
 					jcb.setSelectedItem(presetOptions.getPresets()[preset.getSelectedIndex()].getColor());
+					preset.addActionListener(this);
 				}
 			} else {
 				System.out.println("Preset " + preset.getSelectedItem());
@@ -888,16 +902,20 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			presetEventMenu = true;
 			addPresetBut = new JButton("+");
 			deletePresetBut = new JButton("-");
+			deletePresetBut.setEnabled(false);
+
 			addPresetBut.setPreferredSize(new Dimension(20, 20));
 			addPresetBut.setMargin(new Insets(0, 0, 0, 0));
 			addPresetBut.setFocusable(false);
 			addPresetBut.setFont(new Font("Comic Sans", Font.BOLD, 15));
 			addPresetBut.addActionListener(this);
+
 			deletePresetBut.setPreferredSize(new Dimension(20, 20));
 			deletePresetBut.setMargin(new Insets(0, 0, 0, 0));
 			deletePresetBut.setFocusable(false);
 			deletePresetBut.setFont(new Font("Comic Sans", Font.BOLD, 15));
 			deletePresetBut.addActionListener(this);
+
 			JPanel pan = new JPanel();
 			pan.setPreferredSize(new Dimension(400, 150));
 			SpringLayout layout = new SpringLayout();
@@ -906,6 +924,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			JLabel top = new JLabel("Events");
 			top.setPreferredSize(new Dimension(40, 20));
 			preset = new JComboBox<>(presetOptions.getStringPresets());
+			preset.setPreferredSize(new Dimension(160, 30));
 			preset.setSelectedIndex(-1);
 			preset.setFocusable(false);
 			preset.addActionListener(this);
@@ -932,24 +951,35 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			lab1.setPreferredSize(labelSize);
 			eventTextField = new JTextField();
 			eventTextField.setPreferredSize(textFieldSize);
+			eventTextField.setEnabled(false);
 			JLabel lab2 = new JLabel("Start Time");
 			lab2.setPreferredSize(labelSize);
 			startTextField = new JTextField();
 			startTextField.setPreferredSize(textFieldSize);
+			startTextField.setEnabled(false);
 			JLabel lab3 = new JLabel("End Time");
 			lab3.setPreferredSize(labelSize);
 			endTextField = new JTextField();
 			endTextField.setPreferredSize(textFieldSize);
-			savePreset = new JButton("####");
+			endTextField.setEnabled(false);
+
+			savePreset = new JButton("Save");
+			savePreset.setEnabled(false);
+			savePreset.addActionListener(this);
 			savePreset.setPreferredSize(new Dimension(90, 30));
+
 			cancelPreset = new JButton("Cancel");
+			cancelPreset.setEnabled(false);
+			cancelPreset.addActionListener(this);
 			cancelPreset.setPreferredSize(new Dimension(80, 30));
+
 			JPanel pan2 = new JPanel();
 			pan2.setPreferredSize(new Dimension(250, 190));
 			SpringLayout layout2 = new SpringLayout();
 			pan2.setLayout(layout2);
 
 			jcb = new JColorBox(getColorOptions());
+			jcb.setEnabled(false);
 			jcb.setSelectedIndex(0);
 			jcb.setPreferredSize(new Dimension(30, 20));
 			jcb.setFocusable(false);
@@ -1009,33 +1039,160 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				String[] something = { "Close" };
 				int optionSelected = JOptionPane.showOptionDialog(screen, pan, "Add/Remove Preset",
 						JOptionPane.CLOSED_OPTION, JOptionPane.PLAIN_MESSAGE, null, something, something[0]);
-				// int optionSelected = JOptionPane.showConfirmDialog(screen, pan, "Add/Remove
-				// Preset",
-				// JOptionPane.CLOSED_OPTION, JOptionPane.PLAIN_MESSAGE);
 				System.out.println(optionSelected);
-				if (optionSelected == 0) {
-					try {
-						screen.setVisible(true);
-						screen.repaint();
-						screen.validate();
-						presetEventMenu = false;
-						return;
-					} catch (Exception e1) {
-						JOptionPane.showMessageDialog(screen, e1.getMessage());
-						tryEvent = true;
-					}
-				} else {
+				try {
+					screen.setVisible(true);
+					screen.repaint();
+					screen.validate();
+					presetEventMenu = false;
+					return;
+				} catch (Exception e1) {
+					JOptionPane.showMessageDialog(screen, e1.getMessage());
 					tryEvent = true;
 				}
 			}
 			presetEventMenu = false;
 			screen.setVisible(true);
 		} else if (e.getSource() == savePreset) {
-			
+			PresetState current = presetState.getState();
+			if (presetState.changeState("save")) {
+				if (current == PresetState.adding) {
+					System.out.println("Current State: " + presetState.getState());
+					try {
+						EventData newEvent = new EventData(eventTextField.getText(), startTextField.getText(),
+								endTextField.getText(), 1, 1, 1, 2, 2, 2);
+						presetOptions.addPreset(newEvent.getName(), newEvent.getStartTime(), newEvent.getEndTime(),
+								(Color) jcb.getSelectedItem());
+						int index = -1;
+						String newPresetString = newEvent.getName() + " " + newEvent.getStartTime() + "-"
+								+ newEvent.getEndTime();
+						for (int i = 0; i < presetOptions.getSize(); i++) {
+							if (presetOptions.getStringPresets()[i].equals(newPresetString)) {
+								index = i;
+								i = presetOptions.getSize();
+							}
+						}
+						preset.removeActionListener(this);
+						preset.removeAllItems();
+						for (int i = 0; i < presetOptions.getSize(); i++) {
+							preset.addItem(presetOptions.getStringPresets()[i]);
+						}
+						addPresetBut.setEnabled(true);
+						deletePresetBut.setEnabled(true);
+						eventTextField.setEnabled(true);
+						startTextField.setEnabled(true);
+						endTextField.setEnabled(true);
+						jcb.setEnabled(true);
+						savePreset.setEnabled(true);
+						cancelPreset.setEnabled(true);
+
+						startTextField.setText(newEvent.getStartTime());
+						endTextField.setText(newEvent.getEndTime());
+						preset.setSelectedIndex(index);
+						preset.setFocusable(false);
+						preset.addActionListener(this);
+
+					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(screen, e1.getMessage());
+					}
+				} else if (current == PresetState.selected) {
+					try {
+						System.out.println("Current State5: " + presetState.getState());
+						int presetIndex = preset.getSelectedIndex();
+						EventData newEvent = new EventData(eventTextField.getText(), startTextField.getText(),
+								endTextField.getText(), 1, 1, 1, 2, 2, 2);
+						if (presetOptions.duplicatePreset(newEvent.getName(), newEvent.getStartTime(),
+								newEvent.getEndTime(), (Color) jcb.getSelectedItem())) {
+							presetOptions.removePreset(presetOptions.getPresets()[presetIndex].getName(),
+									presetOptions.getPresets()[presetIndex].getStart(),
+									presetOptions.getPresets()[presetIndex].getEnd(),
+									presetOptions.getPresets()[presetIndex].getColor());
+							presetOptions.addPreset(newEvent.getName(), newEvent.getStartTime(), newEvent.getEndTime(),
+									(Color) jcb.getSelectedItem());
+							int index = -1;
+							String newPresetString = newEvent.getName() + " " + newEvent.getStartTime() + "-"
+									+ newEvent.getEndTime();
+							for (int i = 0; i < presetOptions.getSize(); i++) {
+								System.out.println(presetOptions.getStringPresets()[i]);
+								if (presetOptions.getStringPresets()[i].equals(newPresetString)) {
+									index = i;
+									i = presetOptions.getSize();
+								}
+							}
+							System.out.println(index);
+							preset.removeActionListener(this);
+							preset.removeAllItems();
+							for (int i = 0; i < presetOptions.getSize(); i++) {
+								preset.addItem(presetOptions.getStringPresets()[i]);
+							}
+							addPresetBut.setEnabled(true);
+							deletePresetBut.setEnabled(true);
+							eventTextField.setEnabled(true);
+							startTextField.setEnabled(true);
+							endTextField.setEnabled(true);
+							jcb.setEnabled(true);
+							savePreset.setEnabled(true);
+							cancelPreset.setEnabled(true);
+
+							preset.setSelectedIndex(index);
+							preset.setFocusable(false);
+							preset.addActionListener(this);
+							return;
+						}
+						System.out.println("Duplicate Preset Found");
+					} catch (Exception e2) {
+						JOptionPane.showMessageDialog(screen, e2.getMessage());
+						return;
+					}
+				}
+			}
 		} else if (e.getSource() == cancelPreset) {
-			
+			if (presetState.changeState("cancel")) {
+				if (presetState.getState() == PresetState.selected) {
+					int index = preset.getSelectedIndex();
+					addPresetBut.setEnabled(true);
+					deletePresetBut.setEnabled(true);
+					eventTextField.setEnabled(true);
+					startTextField.setEnabled(true);
+					endTextField.setEnabled(true);
+					jcb.setEnabled(true);
+					savePreset.setEnabled(true);
+					cancelPreset.setEnabled(true);
+
+					eventTextField.setText(presetOptions.getPresets()[index].getName());
+					startTextField.setText(presetOptions.getPresets()[index].getStart());
+					endTextField.setText(presetOptions.getPresets()[index].getEnd());
+					jcb.setSelectedItem(presetOptions.getPresets()[index].getColor());
+				} else {
+					addPresetBut.setEnabled(true);
+					deletePresetBut.setEnabled(false);
+					eventTextField.setEnabled(false);
+					startTextField.setEnabled(false);
+					endTextField.setEnabled(false);
+					jcb.setEnabled(false);
+					savePreset.setEnabled(false);
+					cancelPreset.setEnabled(false);
+
+					eventTextField.setText("");
+					startTextField.setText("");
+					endTextField.setText("");
+					preset.removeActionListener(this);
+					preset.setSelectedIndex(-1);
+					preset.addActionListener(this);
+					jcb.setSelectedIndex(0);
+				}
+			}
 		} else if (e.getSource() == addPresetBut) {
 			if (presetState.changeState("add")) {
+				addPresetBut.setEnabled(false);
+				deletePresetBut.setEnabled(false);
+				eventTextField.setEnabled(true);
+				startTextField.setEnabled(true);
+				endTextField.setEnabled(true);
+				jcb.setEnabled(true);
+				savePreset.setEnabled(true);
+				cancelPreset.setEnabled(true);
+
 				preset.setEditable(true);
 				preset.setSelectedItem("Adding Event");
 				savePreset.setText("Add");
@@ -1047,12 +1204,30 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		} else if (e.getSource() == deletePresetBut) {
 			if (preset.getSelectedIndex() == -1) {
 				return;
-			} else {
-				presetOptions.getPresets()[preset.getSelectedIndex()].getName();
+			} else if (presetState.changeState("remove")) {
 				presetOptions.removePreset(presetOptions.getPresets()[preset.getSelectedIndex()].getName(),
 						presetOptions.getPresets()[preset.getSelectedIndex()].getStart(),
-						presetOptions.getPresets()[preset.getSelectedIndex()].getEnd());
-				preset = new JComboBox<>(presetOptions.getStringPresets());
+						presetOptions.getPresets()[preset.getSelectedIndex()].getEnd(),
+						presetOptions.getPresets()[preset.getSelectedIndex()].getColor());
+				eventTextField.setText("");
+				startTextField.setText("");
+				endTextField.setText("");
+				jcb.setSelectedIndex(0);
+
+				addPresetBut.setEnabled(true);
+				deletePresetBut.setEnabled(false);
+				eventTextField.setEnabled(false);
+				startTextField.setEnabled(false);
+				endTextField.setEnabled(false);
+				jcb.setEnabled(false);
+				savePreset.setEnabled(false);
+				cancelPreset.setEnabled(false);
+
+				preset.removeActionListener(this);
+				preset.removeAllItems();
+				for (int i = 0; i < presetOptions.getSize(); i++) {
+					preset.addItem(presetOptions.getStringPresets()[i]);
+				}
 				preset.setSelectedIndex(-1);
 				preset.setFocusable(false);
 				preset.addActionListener(this);

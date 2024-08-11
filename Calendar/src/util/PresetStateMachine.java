@@ -25,7 +25,6 @@ public class PresetStateMachine {
 	 * @return boolean, true if state changed, false if not
 	 */
 	public boolean changeState(String input) {
-		System.out.println("Current State: " + currentState);
 		if (currentState == PresetState.start) {
 			if ("add".equals(input)) {
 				currentState = PresetState.adding;
