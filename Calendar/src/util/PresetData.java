@@ -14,7 +14,7 @@ import java.util.Scanner;
 public class PresetData {
 	/** List of PresetItems */
 	private PresetItems[] presets;
-	/** */
+	/** String versions of presets to view in JComboBoxes */
 	private String[] stringPresets;
 	/** File used for loading and saving presets */
 	private String presetFile;
@@ -144,15 +144,27 @@ public class PresetData {
 		}
 	}
 
+	/**
+	 * Checks if a preset is a duplicate. Returns true if there isn't a duplicate,
+	 * false if there is a duplicate.
+	 * 
+	 * @param name  the name of the event
+	 * @param start the start time of the event
+	 * @param end   the end time of the event
+	 * @param color the color of the event
+	 * @return boolean true if not duplicate, false if duplicate
+	 */
 	public boolean duplicatePreset(String name, String start, String end, Color color) {
 		PresetItems newPreset = new PresetItems(name, start, end, color);
 		for (int i = 0; i < size; i++) {
 			if (presets[i].getName().equals(newPreset.getName()) && presets[i].getStartInt() == newPreset.getStartInt()
 					&& presets[i].getEnd().equals(newPreset.getEnd())
 					&& presets[i].getColor().equals(newPreset.getColor())) {
+				System.out.println("Duplicate Preset Found");
 				return false;
 			}
 		}
+		System.out.println("No Duplicate");
 		return true;
 	}
 

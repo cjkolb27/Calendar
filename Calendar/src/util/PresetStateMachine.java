@@ -69,6 +69,16 @@ public class PresetStateMachine {
 	}
 
 	/**
+	 * Sets the current state to state. This is used for reverting state changes if
+	 * there is an error
+	 * 
+	 * @param state the state to set
+	 */
+	public void setState(PresetState state) {
+		currentState = state;
+	}
+
+	/**
 	 * Returns the current state
 	 * 
 	 * @return currentState the PresetState of the machine
