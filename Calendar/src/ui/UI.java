@@ -61,7 +61,6 @@ import util.SortedDateList;
  */
 public class UI extends JFrame implements ActionListener, MouseWheelListener {
 
-	public static JOptionPane pane;
 	/** Default Serial Version UID */
 	private static final long serialVersionUID = 1L;
 	/** Settings window state */
@@ -1043,11 +1042,15 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			boolean tryEvent = true;
 			while (tryEvent) {
 				tryEvent = false;
-				String[] something = { "Close" };
-				int optionSelected = JOptionPane.showOptionDialog(screen, pan, "Add/Remove Preset",
-						JOptionPane.CLOSED_OPTION, JOptionPane.PLAIN_MESSAGE, null, something, something[0]);
-				System.out.println(optionSelected);
 				try {
+					String[] something = { "Close" };
+					JOptionPane pane = new JOptionPane(pan, JOptionPane.PLAIN_MESSAGE, JOptionPane.CLOSED_OPTION,
+							null, something, something[0]);
+					JDialog dialog = pane.createDialog(screen, "Add/Remove Preset");
+					dialog.setLocation(westPanel.getLocationOnScreen().x + 233,
+							presetsBut.getLocationOnScreen().y - 190);
+					dialog.setVisible(true);
+					dialog.dispose();
 					screen.setVisible(true);
 					screen.repaint();
 					screen.validate();
@@ -1300,32 +1303,34 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			boolean tryEvent = true;
 			while (tryEvent) {
 				tryEvent = false;
-				int optionSelected = JOptionPane.showConfirmDialog(screen, pan, "Add/Remove Color",
-						JOptionPane.CLOSED_OPTION, JOptionPane.PLAIN_MESSAGE);
-				System.out.println(optionSelected);
-				if (optionSelected == 0) {
-					try {
-						screen.setVisible(true);
-						screen.repaint();
-						screen.validate();
-						addColorBut.removeActionListener(this);
-						deleteColorBut.removeActionListener(this);
-						return;
-					} catch (Exception e1) {
-						JOptionPane.showMessageDialog(screen, e1.getMessage());
-						tryEvent = true;
-					}
+				try {
+					JOptionPane pane = new JOptionPane(pan, JOptionPane.PLAIN_MESSAGE, JOptionPane.CLOSED_OPTION);
+					JDialog dialog = pane.createDialog(screen, "Add/Remove Color");
+					dialog.setLocation(westPanel.getLocationOnScreen().x + 233, colorsBut.getLocationOnScreen().y - 95);
+					dialog.setVisible(true);
+					dialog.dispose();
+					screen.setVisible(true);
+					screen.repaint();
+					screen.validate();
+					addColorBut.removeActionListener(this);
+					deleteColorBut.removeActionListener(this);
+					return;
+				} catch (Exception e1) {
+					JOptionPane.showMessageDialog(screen, e1.getMessage());
+					tryEvent = true;
 				}
-				addColorBut.removeActionListener(this);
-				deleteColorBut.removeActionListener(this);
 			}
-			screen.setVisible(true);
 		} else if (e.getSource() == addColorBut) {
 			new JColorChooser();
-			Color jcc = JColorChooser.showDialog(this, "Color Selector", panelColor);
-			System.out.println(jcc);
-			if (jcc != null) {
-				colorOptions.addColor(jcc);
+			JColorChooser jcc = new JColorChooser();
+			JOptionPane pane = new JOptionPane(jcc, JOptionPane.PLAIN_MESSAGE, JOptionPane.CLOSED_OPTION);
+			JDialog dialog = pane.createDialog(screen, "Add Color");
+			dialog.setLocation(westPanel.getLocationOnScreen().x + 233, colorsBut.getLocationOnScreen().y - 343);
+			dialog.setVisible(true);
+			dialog.dispose();
+			System.out.println(jcc.getColor() + " " + pane.getValue());
+			if (jcc != null && pane.getValue() != null) {
+				colorOptions.addColor(jcc.getColor());
 				jcb.updateBox(colorOptions);
 			}
 		} else if (e.getSource() == deleteColorBut) {
@@ -1609,10 +1614,11 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					while (tryEvent) {
 						tryEvent = false;
 						String[] options = { "Add", "Cancel" };
-						pane = new JOptionPane(pan, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null,
-								options, options[0]);
+						JOptionPane pane = new JOptionPane(pan, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
+								null, options, options[0]);
 						JDialog dialog = pane.createDialog(screen, "Add Event");
-						dialog.setLocation(screen.getX() + 240, screen.getY() + 163);
+						dialog.setLocation(westPanel.getLocationOnScreen().x + 233,
+								westPanel.getLocationOnScreen().y + 107);
 						dialog.setVisible(true);
 						dialog.dispose();
 						System.out.println("Dialog: " + pane.getValue());
