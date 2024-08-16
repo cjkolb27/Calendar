@@ -901,7 +901,131 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			System.exit(0);
 		} else if (e.getSource() == newEventBut) {
 			System.out.println("New Event Button");
+			Dimension textFieldSize = new Dimension(151, 20);
+			Dimension labelSize = new Dimension(75, 20);
+
+			JLabel col = new JLabel("Event Color");
+			col.setPreferredSize(labelSize);
+			JLabel pre = new JLabel("Preset Event");
+			pre.setPreferredSize(labelSize);
+			JLabel lab1 = new JLabel("Event Name");
+			lab1.setPreferredSize(labelSize);
+			eventTextField = new JTextField();
+			eventTextField.setPreferredSize(textFieldSize);
+			JLabel lab2 = new JLabel("Start Time");
+			lab2.setPreferredSize(labelSize);
+			startTextField = new JTextField();
+			startTextField.setPreferredSize(textFieldSize);
+			JLabel lab3 = new JLabel("End Time");
+			lab3.setPreferredSize(labelSize);
+			endTextField = new JTextField();
+			endTextField.setPreferredSize(textFieldSize);
+			JPanel pan = new JPanel();
+			pan.setPreferredSize(new Dimension(100, 135));
+			SpringLayout layout = new SpringLayout();
+			pan.setLayout(layout);
+
+			jcb = new JColorBox(getColorOptions());
+			jcb.setSelectedIndex(0);
+			jcb.setPreferredSize(new Dimension(30, 20));
+			jcb.setFocusable(false);
+			jcb.setBorder(BorderFactory.createLineBorder((Color) jcb.getSelectedItem(), 200));
+			jcb.setForeground(null);
+			jcb.addActionListener(this);
+
+			Component[] c = jcb.getComponents();
+			for (Component res : c) {
+				if (res instanceof AbstractButton && res.isVisible()) {
+					res.setVisible(false);
+				}
+			}
+
+			preset = new JComboBox<>(presetOptions.getStringPresets());
+			preset.setPreferredSize(textFieldSize);
+			preset.setSelectedIndex(-1);
+			preset.setFocusable(false);
+			preset.addActionListener(this);
+
+			pan.add(col);
+			pan.add(jcb);
+			layout.putConstraint(SpringLayout.WEST, col, 5, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.NORTH, pan);
+			layout.putConstraint(SpringLayout.WEST, jcb, 5, SpringLayout.EAST, col);
+			layout.putConstraint(SpringLayout.NORTH, jcb, 5, SpringLayout.NORTH, pan);
+
+			pan.add(pre);
+			pan.add(preset);
+			layout.putConstraint(SpringLayout.WEST, pre, 5, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, pre, 30, SpringLayout.NORTH, col);
+			layout.putConstraint(SpringLayout.WEST, preset, 5, SpringLayout.EAST, pre);
+			layout.putConstraint(SpringLayout.NORTH, preset, 30, SpringLayout.NORTH, jcb);
+
+			pan.add(lab1);
+			pan.add(eventTextField);
+			layout.putConstraint(SpringLayout.WEST, lab1, 5, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, lab1, 30, SpringLayout.NORTH, pre);
+			layout.putConstraint(SpringLayout.WEST, eventTextField, 5, SpringLayout.EAST, lab1);
+			layout.putConstraint(SpringLayout.NORTH, eventTextField, 30, SpringLayout.NORTH, preset);
+
+			pan.add(lab2);
+			pan.add(startTextField);
+			layout.putConstraint(SpringLayout.WEST, lab2, 5, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, lab2, 24, SpringLayout.NORTH, lab1);
+			layout.putConstraint(SpringLayout.WEST, startTextField, 5, SpringLayout.EAST, lab2);
+			layout.putConstraint(SpringLayout.NORTH, startTextField, 24, SpringLayout.NORTH, eventTextField);
+
+			pan.add(lab3);
+			pan.add(endTextField);
+			layout.putConstraint(SpringLayout.WEST, lab3, 5, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, lab3, 24, SpringLayout.NORTH, lab2);
+			layout.putConstraint(SpringLayout.WEST, endTextField, 5, SpringLayout.EAST, lab3);
+			layout.putConstraint(SpringLayout.NORTH, endTextField, 24, SpringLayout.NORTH, startTextField);
+
+			boolean tryEvent = true;
+			while (tryEvent) {
+				tryEvent = false;
+				String[] options = { "Add", "Cancel" };
+				JOptionPane pane = new JOptionPane(pan, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null,
+						options, options[0]);
+				JDialog dialog = pane.createDialog(screen, "Add Event");
+				dialog.setLocation(westPanel.getLocationOnScreen().x + 233, westPanel.getLocationOnScreen().y + 107);
+				dialog.setVisible(true);
+				dialog.dispose();
+				System.out.println("Dialog: " + pane.getValue());
+				if (pane.getValue() != null && pane.getValue().equals(options[0])) {
+					try {
+						System.out.println(yearOfCalendar);
+						int buttonIndex = 0;
+						int daysCount = 0;
+						for (int j = 0; j < scrollMonth; j++) {
+							daysCount = daysCount + daysPerMonth[j];
+						}
+						// buttonIndex = daysCount + buttonCount - 1;
+						if (scrollMonth >= 1 && daysPerMonth[1] == 28) {
+							buttonIndex++;
+						}
+						EventData newEvent = manager.createEvent((String) eventTextField.getText(),
+								(String) startTextField.getText(), (String) endTextField.getText(),
+								datePanel[buttonIndex].getDay(), datePanel[buttonIndex].getMonth(),
+								datePanel[buttonIndex].getYear(), ((Color) jcb.getSelectedItem()).getRed(),
+								((Color) jcb.getSelectedItem()).getGreen(), ((Color) jcb.getSelectedItem()).getBlue());
+						datePanel[buttonIndex].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
+								newEvent.getEndTime(), datePanel[buttonIndex].getDay(),
+								datePanel[buttonIndex].getMonth(), datePanel[buttonIndex].getYear(), newEvent.getName(),
+								newEvent.getColor().getRed(), newEvent.getColor().getGreen(),
+								newEvent.getColor().getBlue());
+						screen.setVisible(true);
+						screen.repaint();
+						screen.validate();
+						return;
+					} catch (Exception e1) {
+						JOptionPane.showMessageDialog(screen, e1.getMessage());
+						tryEvent = true;
+					}
+				}
+			}
 			screen.setVisible(true);
+			return;
 		} else if (e.getSource() == presetsBut) {
 			System.out.println("Presets Button");
 			presetState = new PresetStateMachine();
@@ -1044,8 +1168,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				tryEvent = false;
 				try {
 					String[] something = { "Close" };
-					JOptionPane pane = new JOptionPane(pan, JOptionPane.PLAIN_MESSAGE, JOptionPane.CLOSED_OPTION,
-							null, something, something[0]);
+					JOptionPane pane = new JOptionPane(pan, JOptionPane.PLAIN_MESSAGE, JOptionPane.CLOSED_OPTION, null,
+							something, something[0]);
 					JDialog dialog = pane.createDialog(screen, "Add/Remove Preset");
 					dialog.setLocation(westPanel.getLocationOnScreen().x + 233,
 							presetsBut.getLocationOnScreen().y - 190);
