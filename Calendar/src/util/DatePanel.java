@@ -76,6 +76,16 @@ public class DatePanel implements ActionListener {
 	}
 
 	/**
+	 * Returns the date of the calendar as a string with day/month/year as the
+	 * format
+	 * 
+	 * @return String the string of the current time
+	 */
+	public String getDateString() {
+		return month + "/" + day + "/" + year;
+	}
+
+	/**
 	 * Returns the JPanel
 	 * 
 	 * @return panel the panel of DatePanel
@@ -374,8 +384,9 @@ public class DatePanel implements ActionListener {
 						tryEvent = false;
 						String[] choices = { "Update", "Delete", "Cancel" };
 						Color selectedColor = new Color(255, 153, 161);
-						int optionSelected = JOptionPane.showOptionDialog(currentUI.getScreen(), pan, "Edit Event",
-								JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices, choices[0]);
+						int optionSelected = JOptionPane.showOptionDialog(currentUI.getScreen(), pan,
+								"Edit Event (" + getDateString() + ")", JOptionPane.YES_NO_CANCEL_OPTION,
+								JOptionPane.PLAIN_MESSAGE, null, choices, choices[0]);
 						try {
 							// selectedColor =
 							// currentUI.getColorOptions().getColors()[jcb.getSelectedIndex()];

@@ -15,6 +15,8 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
@@ -27,6 +29,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -59,7 +62,7 @@ import util.SortedDateList;
  * 
  * @author Caleb Kolb
  */
-public class UI extends JFrame implements ActionListener, MouseWheelListener {
+public class UI extends JFrame implements ActionListener, MouseWheelListener, ItemListener {
 
 	/** Default Serial Version UID */
 	private static final long serialVersionUID = 1L;
@@ -131,6 +134,24 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 	private JButton savePreset;
 	/** Used for canceling preset options */
 	private JButton cancelPreset;
+	/** Check box for no repeats */
+	private JCheckBox noRepCB;
+	/** Check box for Sunday repeats */
+	private JCheckBox sunCB;
+	/** Check box for Monday repeats */
+	private JCheckBox monCB;
+	/** Check box for Tuesday repeats */
+	private JCheckBox tueCB;
+	/** Check box for Wednesday repeats */
+	private JCheckBox wedCB;
+	/** Check box for Thursday repeats */
+	private JCheckBox thuCB;
+	/** Check box for Friday repeats */
+	private JCheckBox friCB;
+	/** Check box for Saturday repeats */
+	private JCheckBox satCB;
+	/** Check box for specific repeats */
+	private JCheckBox speCB;
 	/** All presets of an event */
 	private JComboBox<String> preset;
 	/** Color combo box */
@@ -806,6 +827,94 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 		}
 	}
 
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		if (e.getSource() == noRepCB) {
+			System.out.println("No");
+			if (noRepCB.getSelectedObjects() != null) {
+				sunCB.setSelected(false);
+				sunCB.setEnabled(false);
+				monCB.setSelected(false);
+				monCB.setEnabled(false);
+				tueCB.setSelected(false);
+				tueCB.setEnabled(false);
+				wedCB.setSelected(false);
+				wedCB.setEnabled(false);
+				thuCB.setSelected(false);
+				thuCB.setEnabled(false);
+				friCB.setSelected(false);
+				friCB.setEnabled(false);
+				satCB.setSelected(false);
+				satCB.setEnabled(false);
+				speCB.setSelected(false);
+			} else {
+				sunCB.setSelected(false);
+				sunCB.setEnabled(true);
+				monCB.setSelected(false);
+				monCB.setEnabled(true);
+				tueCB.setSelected(false);
+				tueCB.setEnabled(true);
+				wedCB.setSelected(false);
+				wedCB.setEnabled(true);
+				thuCB.setSelected(false);
+				thuCB.setEnabled(true);
+				friCB.setSelected(false);
+				friCB.setEnabled(true);
+				satCB.setSelected(false);
+				satCB.setEnabled(true);
+			}
+		} else if (e.getSource() == sunCB) {
+			System.out.println("Sun");
+		} else if (e.getSource() == monCB) {
+			System.out.println("Mon");
+		} else if (e.getSource() == tueCB) {
+			System.out.println("Tue");
+		} else if (e.getSource() == wedCB) {
+			System.out.println("Wed");
+		} else if (e.getSource() == thuCB) {
+			System.out.println("Thu");
+		} else if (e.getSource() == friCB) {
+			System.out.println("Fri");
+		} else if (e.getSource() == satCB) {
+			System.out.println("Sat");
+		} else if (e.getSource() == speCB) {
+			System.out.println("Spe");
+			if (speCB.getSelectedObjects() != null) {
+				noRepCB.setSelected(false);
+				sunCB.setSelected(false);
+				sunCB.setEnabled(false);
+				monCB.setSelected(false);
+				monCB.setEnabled(false);
+				tueCB.setSelected(false);
+				tueCB.setEnabled(false);
+				wedCB.setSelected(false);
+				wedCB.setEnabled(false);
+				thuCB.setSelected(false);
+				thuCB.setEnabled(false);
+				friCB.setSelected(false);
+				friCB.setEnabled(false);
+				satCB.setSelected(false);
+				satCB.setEnabled(false);
+			} else {
+				noRepCB.setSelected(true);
+				sunCB.setSelected(false);
+				sunCB.setEnabled(false);
+				monCB.setSelected(false);
+				monCB.setEnabled(false);
+				tueCB.setSelected(false);
+				tueCB.setEnabled(false);
+				wedCB.setSelected(false);
+				wedCB.setEnabled(false);
+				thuCB.setSelected(false);
+				thuCB.setEnabled(false);
+				friCB.setSelected(false);
+				friCB.setEnabled(false);
+				satCB.setSelected(false);
+				satCB.setEnabled(false);
+			}
+		}
+	}
+
 	/**
 	 * This method is used to perform actions when a button is pressed in the
 	 * program. All major buttons on the panel use this method
@@ -903,7 +1012,43 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			System.out.println("New Event Button");
 			Dimension textFieldSize = new Dimension(151, 20);
 			Dimension labelSize = new Dimension(75, 20);
+			Dimension checkSize = new Dimension(50, 20);
 
+			noRepCB = new JCheckBox("<html>" + "N/A" + "</html>");
+			noRepCB.setPreferredSize(checkSize);
+			noRepCB.setSelected(true);
+			noRepCB.addItemListener(this);
+			sunCB = new JCheckBox("<html>" + "Sun" + "</html>");
+			sunCB.setPreferredSize(checkSize);
+			sunCB.setEnabled(false);
+			sunCB.addItemListener(this);
+			monCB = new JCheckBox("<html>" + "Mon" + "</html>");
+			monCB.setPreferredSize(checkSize);
+			monCB.setEnabled(false);
+			monCB.addItemListener(this);
+			tueCB = new JCheckBox("<html>" + "Tue" + "</html>");
+			tueCB.setPreferredSize(checkSize);
+			tueCB.setEnabled(false);
+			tueCB.addItemListener(this);
+			wedCB = new JCheckBox("<html>" + "Wed" + "</html>");
+			wedCB.setPreferredSize(checkSize);
+			wedCB.setEnabled(false);
+			wedCB.addItemListener(this);
+			thuCB = new JCheckBox("<html>" + "Thu" + "</html>");
+			thuCB.setPreferredSize(checkSize);
+			thuCB.setEnabled(false);
+			thuCB.addItemListener(this);
+			friCB = new JCheckBox("<html>" + "Fri" + "</html>");
+			friCB.setPreferredSize(checkSize);
+			friCB.setEnabled(false);
+			friCB.addItemListener(this);
+			satCB = new JCheckBox("<html>" + "Sat" + "</html>");
+			satCB.setPreferredSize(checkSize);
+			satCB.setEnabled(false);
+			satCB.addItemListener(this);
+			speCB = new JCheckBox("<html>" + "Custome" + "</html>");
+			speCB.setPreferredSize(new Dimension(90, 20));
+			speCB.addItemListener(this);
 			JLabel col = new JLabel("Event Color");
 			col.setPreferredSize(labelSize);
 			JLabel pre = new JLabel("Preset Event");
@@ -921,7 +1066,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			endTextField = new JTextField();
 			endTextField.setPreferredSize(textFieldSize);
 			JPanel pan = new JPanel();
-			pan.setPreferredSize(new Dimension(100, 135));
+			pan.setPreferredSize(new Dimension(479, 170));
 			SpringLayout layout = new SpringLayout();
 			pan.setLayout(layout);
 
@@ -946,37 +1091,65 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 			preset.setFocusable(false);
 			preset.addActionListener(this);
 
+			pan.add(noRepCB);
+			layout.putConstraint(SpringLayout.WEST, noRepCB, 5, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, noRepCB, 5, SpringLayout.NORTH, pan);
+			pan.add(sunCB);
+			layout.putConstraint(SpringLayout.WEST, sunCB, 0, SpringLayout.EAST, noRepCB);
+			layout.putConstraint(SpringLayout.NORTH, sunCB, 5, SpringLayout.NORTH, pan);
+			pan.add(monCB);
+			layout.putConstraint(SpringLayout.WEST, monCB, 0, SpringLayout.EAST, sunCB);
+			layout.putConstraint(SpringLayout.NORTH, monCB, 5, SpringLayout.NORTH, pan);
+			pan.add(tueCB);
+			layout.putConstraint(SpringLayout.WEST, tueCB, 0, SpringLayout.EAST, monCB);
+			layout.putConstraint(SpringLayout.NORTH, tueCB, 5, SpringLayout.NORTH, pan);
+			pan.add(wedCB);
+			layout.putConstraint(SpringLayout.WEST, wedCB, 0, SpringLayout.EAST, tueCB);
+			layout.putConstraint(SpringLayout.NORTH, wedCB, 5, SpringLayout.NORTH, pan);
+			pan.add(thuCB);
+			layout.putConstraint(SpringLayout.WEST, thuCB, 0, SpringLayout.EAST, wedCB);
+			layout.putConstraint(SpringLayout.NORTH, thuCB, 5, SpringLayout.NORTH, pan);
+			pan.add(friCB);
+			layout.putConstraint(SpringLayout.WEST, friCB, 0, SpringLayout.EAST, thuCB);
+			layout.putConstraint(SpringLayout.NORTH, friCB, 5, SpringLayout.NORTH, pan);
+			pan.add(satCB);
+			layout.putConstraint(SpringLayout.WEST, satCB, 0, SpringLayout.EAST, friCB);
+			layout.putConstraint(SpringLayout.NORTH, satCB, 5, SpringLayout.NORTH, pan);
+			pan.add(speCB);
+			layout.putConstraint(SpringLayout.WEST, speCB, 0, SpringLayout.EAST, satCB);
+			layout.putConstraint(SpringLayout.NORTH, speCB, 5, SpringLayout.NORTH, pan);
+
 			pan.add(col);
 			pan.add(jcb);
-			layout.putConstraint(SpringLayout.WEST, col, 5, SpringLayout.WEST, pan);
-			layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.NORTH, pan);
+			layout.putConstraint(SpringLayout.WEST, col, 124, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.SOUTH, noRepCB);
 			layout.putConstraint(SpringLayout.WEST, jcb, 5, SpringLayout.EAST, col);
-			layout.putConstraint(SpringLayout.NORTH, jcb, 5, SpringLayout.NORTH, pan);
+			layout.putConstraint(SpringLayout.NORTH, jcb, 5, SpringLayout.SOUTH, noRepCB);
 
 			pan.add(pre);
 			pan.add(preset);
-			layout.putConstraint(SpringLayout.WEST, pre, 5, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.WEST, pre, 124, SpringLayout.WEST, pan);
 			layout.putConstraint(SpringLayout.NORTH, pre, 30, SpringLayout.NORTH, col);
 			layout.putConstraint(SpringLayout.WEST, preset, 5, SpringLayout.EAST, pre);
 			layout.putConstraint(SpringLayout.NORTH, preset, 30, SpringLayout.NORTH, jcb);
 
 			pan.add(lab1);
 			pan.add(eventTextField);
-			layout.putConstraint(SpringLayout.WEST, lab1, 5, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.WEST, lab1, 124, SpringLayout.WEST, pan);
 			layout.putConstraint(SpringLayout.NORTH, lab1, 30, SpringLayout.NORTH, pre);
 			layout.putConstraint(SpringLayout.WEST, eventTextField, 5, SpringLayout.EAST, lab1);
 			layout.putConstraint(SpringLayout.NORTH, eventTextField, 30, SpringLayout.NORTH, preset);
 
 			pan.add(lab2);
 			pan.add(startTextField);
-			layout.putConstraint(SpringLayout.WEST, lab2, 5, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.WEST, lab2, 124, SpringLayout.WEST, pan);
 			layout.putConstraint(SpringLayout.NORTH, lab2, 24, SpringLayout.NORTH, lab1);
 			layout.putConstraint(SpringLayout.WEST, startTextField, 5, SpringLayout.EAST, lab2);
 			layout.putConstraint(SpringLayout.NORTH, startTextField, 24, SpringLayout.NORTH, eventTextField);
 
 			pan.add(lab3);
 			pan.add(endTextField);
-			layout.putConstraint(SpringLayout.WEST, lab3, 5, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.WEST, lab3, 124, SpringLayout.WEST, pan);
 			layout.putConstraint(SpringLayout.NORTH, lab3, 24, SpringLayout.NORTH, lab2);
 			layout.putConstraint(SpringLayout.WEST, endTextField, 5, SpringLayout.EAST, lab3);
 			layout.putConstraint(SpringLayout.NORTH, endTextField, 24, SpringLayout.NORTH, startTextField);
@@ -987,8 +1160,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 				String[] options = { "Add", "Cancel" };
 				JOptionPane pane = new JOptionPane(pan, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null,
 						options, options[0]);
-				JDialog dialog = pane.createDialog(screen, "Add Event");
-				dialog.setLocation(westPanel.getLocationOnScreen().x + 233, westPanel.getLocationOnScreen().y + 107);
+				JDialog dialog = pane.createDialog(screen, "Advanced Event Adder");
+				dialog.setLocation(westPanel.getLocationOnScreen().x + 233, westPanel.getLocationOnScreen().y + 30);
 				dialog.setVisible(true);
 				dialog.dispose();
 				System.out.println("Dialog: " + pane.getValue());
@@ -1605,8 +1778,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 					while (tryEvent) {
 						tryEvent = false;
 						String[] options = { "Add", "Cancel" };
-						int optionSelected = JOptionPane.showOptionDialog(screen, pan, "Add Event",
-								JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+						int optionSelected = JOptionPane.showOptionDialog(screen, pan,
+								"Add Event (" + datePanel[i].getDateString() + ")", JOptionPane.OK_CANCEL_OPTION,
+								JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
 						System.out.println(optionSelected);
 						if (optionSelected == 0) {
 							try {
@@ -1740,7 +1914,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener {
 						String[] options = { "Add", "Cancel" };
 						JOptionPane pane = new JOptionPane(pan, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION,
 								null, options, options[0]);
-						JDialog dialog = pane.createDialog(screen, "Add Event");
+						JDialog dialog = pane.createDialog(screen,
+								"Add Event (" + datePanel[buttonIndex].getDateString() + ")");
 						dialog.setLocation(westPanel.getLocationOnScreen().x + 233,
 								westPanel.getLocationOnScreen().y + 107);
 						dialog.setVisible(true);
