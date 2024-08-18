@@ -45,7 +45,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
+import javax.swing.plaf.ColorUIResource;
 
 import events.EventData;
 import manager.CalendarManager;
@@ -183,13 +185,19 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	/** All preset options */
 	private static PresetData presetOptions;
 	/** Scroll Frame color */
-	private static Color panelColor = new Color(20, 20, 20);
+	private static Color scrollPanelColor = new Color(20, 20, 20);
 	/** Odd month color */
 	private static Color oddMonthColor = new Color(38, 38, 38);
 	/** Even month color */
 	private static Color evenMonthColor = new Color(26, 26, 26, 255);
 	/** Event color */
 	private static Color eventColor = new Color(255, 153, 161);
+	/** All other panels in calendar color */
+	private static Color panelColor = Color.DARK_GRAY;
+	/** Color of text */
+	private static Color textColor = Color.WHITE;
+	/** Option Panel Color */
+	private static Color optionPaneColor = new Color(30, 30, 30);
 	/** File menu title */
 	private static final String FILE_MENU_TITLE = "File";
 	/** Load calendar title */
@@ -222,6 +230,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	 */
 	public UI() {
 		super();
+		// UIManager UI = new UIManager();
+		UIManager.put("OptionPane.background", new ColorUIResource(optionPaneColor));
+		UIManager.put("Panel.background", optionPaneColor);
 		presetEventMenu = false;
 		colorOptions = new ColorData("mtf", System.getProperty("user.home") + File.separator + "Documents"
 				+ File.separator + "CalendarData" + File.separator + "Colors.txt");
@@ -240,7 +251,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		screen.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		screen.setLayout(new BorderLayout());
 		screen.setTitle(PROGRAM_TITLE);
-		screen.setBackground(panelColor);
+		screen.setBackground(scrollPanelColor);
 
 		panel = new JPanel(new GridLayout(54, 7, 1, 1));
 		panel.setBorder(BorderFactory.createEtchedBorder());
@@ -339,7 +350,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private void setUpScreen() {
 		scrollFrame = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollFrame.setBackground(panelColor);
+		scrollFrame.setBackground(scrollPanelColor);
 		scrollFrame.setBorder(BorderFactory.createEtchedBorder());
 		scrollFrame.getVerticalScrollBar().setUnitIncrement(20);
 		scrollFrame.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0));
@@ -348,13 +359,13 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		northPanel = new JPanel(new GridLayout(2, 1, 0, 0));
 		northPanel.setLayout(new BoxLayout(northPanel, BoxLayout.PAGE_AXIS));
 		westPanel = new JPanel();
-		northPanel.setBackground(Color.DARK_GRAY);
-		westPanel.setBackground(Color.DARK_GRAY);
+		northPanel.setBackground(panelColor);
+		westPanel.setBackground(panelColor);
 		northPanel.setPreferredSize(new Dimension(1, 100));
 		westPanel.setPreferredSize(new Dimension(265, 1));
 		month = new JLabel("<html>" + ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar + "</html>");
 		month.setFont(new Font("Comic Sans", Font.BOLD, 40));
-		month.setForeground(Color.WHITE);
+		month.setForeground(textColor);
 		JPanel yearSelecter = new JPanel(new FlowLayout());
 		yearSelecter.setBackground(null);
 		yearSelecter.setPreferredSize(new Dimension(50, 50));
@@ -367,7 +378,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				lastYear.addActionListener(this);
 				lastYear.setFont(new Font("Comic Sans", Font.BOLD, 40));
 				lastYear.setBackground(null);
-				lastYear.setForeground(Color.WHITE);
+				lastYear.setForeground(textColor);
 				lastYear.setBorderPainted(false);
 				lastYear.setFocusable(false);
 				lastYear.setPreferredSize(new Dimension(40, 40));
@@ -382,7 +393,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				nextYear.addActionListener(this);
 				nextYear.setFont(new Font("Comic Sans", Font.BOLD, 40));
 				nextYear.setBackground(null);
-				nextYear.setForeground(Color.WHITE);
+				nextYear.setForeground(textColor);
 				nextYear.setBorderPainted(false);
 				nextYear.setFocusable(false);
 				nextYear.setPreferredSize(new Dimension(40, 40));
@@ -402,7 +413,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			} else
 				weekDay = new JLabel(DAYSOFWEEKNAMES[i]);
 			weekDay.setFont(new Font("Comic Sans", Font.BOLD, 20));
-			weekDay.setForeground(Color.WHITE);
+			weekDay.setForeground(textColor);
 			week.add(weekDay);
 		}
 		northPanel.add(week);
@@ -448,7 +459,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		monthSmall = new JLabel(ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar);
 		monthSmall.setFont(new Font("Comic Sans", Font.BOLD, 20));
 		monthSmall.setAlignmentX(Component.CENTER_ALIGNMENT);
-		monthSmall.setForeground(Color.WHITE);
+		monthSmall.setForeground(textColor);
 		westPanel.add(monthSmall);
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 10), new Dimension(0, 10)));
 		westPanel.add(smallCalendar);
@@ -489,7 +500,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 					} else
 						smallMonthButtons[i].setBackground(oddMonthColor);
 					smallMonthButtons[i].setFont(new Font("Comic Sans", Font.BOLD, 15));
-					smallMonthButtons[i].setForeground(Color.WHITE);
+					smallMonthButtons[i].setForeground(textColor);
 					smallMonthButtons[i].setEnabled(true);
 				}
 				smallCalendar.add(smallMonthButtons[i]);
@@ -525,7 +536,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 					smallMonthButtons[i].setMargin(new Insets(0, 0, 0, 0));
 					smallMonthButtons[i].setFocusable(false);
 					smallMonthButtons[i].setFont(new Font("Comic Sans", Font.BOLD, 15));
-					smallMonthButtons[i].setForeground(Color.WHITE);
+					smallMonthButtons[i].setForeground(textColor);
 					smallMonthButtons[i].setPreferredSize(new Dimension(30, 30));
 					smallMonthButtons[i].addActionListener(this);
 				}
@@ -543,7 +554,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		scrollFrame.remove(panel);
 		scrollFrame = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollFrame.setBackground(panelColor);
+		scrollFrame.setBackground(scrollPanelColor);
 		scrollFrame.setBorder(BorderFactory.createEtchedBorder());
 		scrollFrame.getVerticalScrollBar().setUnitIncrement(20);
 		scrollFrame.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0));
@@ -649,7 +660,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 					label.setForeground(eventColor);
 					buttons[currentDay].setBorder(new LineBorder(eventColor, 2));
 				} else {
-					label.setForeground(Color.WHITE);
+					label.setForeground(textColor);
 					buttons[currentDay].setBorder(BorderFactory.createEtchedBorder());
 				}
 				buttons[currentDay].setLayout(new BorderLayout());
@@ -685,7 +696,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		panel.setLayout(new GridLayout(totalWeeks, 7, 1, 1));
 		panel.setAlignmentX(SwingConstants.CENTER);
 		panel.setAlignmentY(SwingConstants.BOTTOM);
-		panel.setBackground(panelColor);
+		panel.setBackground(scrollPanelColor);
 	}
 
 	private void setScreenWindow() {
@@ -737,28 +748,28 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private void createMenuBar() {
 		menuBar = new JMenuBar();
 		menu = new JMenu(FILE_MENU_TITLE);
-		menu.setBackground(Color.DARK_GRAY);
-		menu.setForeground(Color.WHITE);
+		menu.setBackground(panelColor);
+		menu.setForeground(textColor);
 		loadCalendar = new JMenuItem(LOADCAL);
 		editSettings = new JMenuItem(EDITSET);
 		quit = new JMenuItem("Quit");
 
 		loadCalendar.addActionListener(this);
-		loadCalendar.setBackground(Color.DARK_GRAY);
-		loadCalendar.setForeground(Color.WHITE);
+		loadCalendar.setBackground(panelColor);
+		loadCalendar.setForeground(textColor);
 		editSettings.addActionListener(this);
-		editSettings.setBackground(Color.DARK_GRAY);
-		editSettings.setForeground(Color.WHITE);
+		editSettings.setBackground(panelColor);
+		editSettings.setForeground(textColor);
 		quit.addActionListener(this);
-		quit.setBackground(Color.DARK_GRAY);
-		quit.setForeground(Color.WHITE);
+		quit.setBackground(panelColor);
+		quit.setForeground(textColor);
 
 		menu.add(loadCalendar);
 		menu.add(editSettings);
 		menu.add(quit);
 		menuBar.add(menu);
-		menuBar.setBackground(Color.DARK_GRAY);
-		menuBar.setForeground(Color.WHITE);
+		menuBar.setBackground(panelColor);
+		menuBar.setForeground(textColor);
 		menuBar.setBorder(BorderFactory.createBevelBorder(0));
 		screen.setJMenuBar(menuBar);
 	}
@@ -832,85 +843,110 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		if (e.getSource() == noRepCB) {
 			System.out.println("No");
 			if (noRepCB.getSelectedObjects() != null) {
+				noRepCB.setEnabled(false);
 				sunCB.setSelected(false);
-				sunCB.setEnabled(false);
 				monCB.setSelected(false);
-				monCB.setEnabled(false);
 				tueCB.setSelected(false);
-				tueCB.setEnabled(false);
 				wedCB.setSelected(false);
-				wedCB.setEnabled(false);
 				thuCB.setSelected(false);
-				thuCB.setEnabled(false);
 				friCB.setSelected(false);
-				friCB.setEnabled(false);
 				satCB.setSelected(false);
-				satCB.setEnabled(false);
 				speCB.setSelected(false);
-			} else {
-				sunCB.setSelected(false);
-				sunCB.setEnabled(true);
-				monCB.setSelected(false);
-				monCB.setEnabled(true);
-				tueCB.setSelected(false);
-				tueCB.setEnabled(true);
-				wedCB.setSelected(false);
-				wedCB.setEnabled(true);
-				thuCB.setSelected(false);
-				thuCB.setEnabled(true);
-				friCB.setSelected(false);
-				friCB.setEnabled(true);
-				satCB.setSelected(false);
-				satCB.setEnabled(true);
 			}
 		} else if (e.getSource() == sunCB) {
 			System.out.println("Sun");
+			if (sunCB.getSelectedObjects() != null) {
+				speCB.setSelected(false);
+				noRepCB.setEnabled(true);
+				noRepCB.setSelected(false);
+			} else if (monCB.getSelectedObjects() == null && tueCB.getSelectedObjects() == null
+					&& wedCB.getSelectedObjects() == null && thuCB.getSelectedObjects() == null
+					&& friCB.getSelectedObjects() == null && satCB.getSelectedObjects() == null) {
+				noRepCB.setSelected(true);
+			}
 		} else if (e.getSource() == monCB) {
 			System.out.println("Mon");
+			if (monCB.getSelectedObjects() != null) {
+				speCB.setSelected(false);
+				noRepCB.setEnabled(true);
+				noRepCB.setSelected(false);
+			} else if (sunCB.getSelectedObjects() == null && tueCB.getSelectedObjects() == null
+					&& wedCB.getSelectedObjects() == null && thuCB.getSelectedObjects() == null
+					&& friCB.getSelectedObjects() == null && satCB.getSelectedObjects() == null) {
+				noRepCB.setSelected(true);
+			}
 		} else if (e.getSource() == tueCB) {
 			System.out.println("Tue");
+			if (tueCB.getSelectedObjects() != null) {
+				speCB.setSelected(false);
+				noRepCB.setEnabled(true);
+				noRepCB.setSelected(false);
+			} else if (sunCB.getSelectedObjects() == null && monCB.getSelectedObjects() == null
+					&& wedCB.getSelectedObjects() == null && thuCB.getSelectedObjects() == null
+					&& friCB.getSelectedObjects() == null && satCB.getSelectedObjects() == null) {
+				noRepCB.setSelected(true);
+			}
 		} else if (e.getSource() == wedCB) {
 			System.out.println("Wed");
+			if (wedCB.getSelectedObjects() != null) {
+				speCB.setSelected(false);
+				noRepCB.setEnabled(true);
+				noRepCB.setSelected(false);
+			} else if (sunCB.getSelectedObjects() == null && monCB.getSelectedObjects() == null
+					&& tueCB.getSelectedObjects() == null && thuCB.getSelectedObjects() == null
+					&& friCB.getSelectedObjects() == null && satCB.getSelectedObjects() == null) {
+				noRepCB.setSelected(true);
+			}
 		} else if (e.getSource() == thuCB) {
 			System.out.println("Thu");
+			if (thuCB.getSelectedObjects() != null) {
+				speCB.setSelected(false);
+				noRepCB.setEnabled(true);
+				noRepCB.setSelected(false);
+			} else if (sunCB.getSelectedObjects() == null && monCB.getSelectedObjects() == null
+					&& tueCB.getSelectedObjects() == null && wedCB.getSelectedObjects() == null
+					&& friCB.getSelectedObjects() == null && satCB.getSelectedObjects() == null) {
+				noRepCB.setSelected(true);
+			}
 		} else if (e.getSource() == friCB) {
 			System.out.println("Fri");
+			if (friCB.getSelectedObjects() != null) {
+				speCB.setSelected(false);
+				noRepCB.setEnabled(true);
+				noRepCB.setSelected(false);
+			} else if (sunCB.getSelectedObjects() == null && monCB.getSelectedObjects() == null
+					&& tueCB.getSelectedObjects() == null && wedCB.getSelectedObjects() == null
+					&& thuCB.getSelectedObjects() == null && satCB.getSelectedObjects() == null) {
+				noRepCB.setSelected(true);
+			}
 		} else if (e.getSource() == satCB) {
 			System.out.println("Sat");
+			if (satCB.getSelectedObjects() != null) {
+				speCB.setSelected(false);
+				noRepCB.setEnabled(true);
+				noRepCB.setSelected(false);
+			} else if (sunCB.getSelectedObjects() == null && monCB.getSelectedObjects() == null
+					&& tueCB.getSelectedObjects() == null && wedCB.getSelectedObjects() == null
+					&& thuCB.getSelectedObjects() == null && friCB.getSelectedObjects() == null) {
+				noRepCB.setSelected(true);
+			}
 		} else if (e.getSource() == speCB) {
 			System.out.println("Spe");
 			if (speCB.getSelectedObjects() != null) {
+				noRepCB.setEnabled(true);
 				noRepCB.setSelected(false);
 				sunCB.setSelected(false);
-				sunCB.setEnabled(false);
 				monCB.setSelected(false);
-				monCB.setEnabled(false);
 				tueCB.setSelected(false);
-				tueCB.setEnabled(false);
 				wedCB.setSelected(false);
-				wedCB.setEnabled(false);
 				thuCB.setSelected(false);
-				thuCB.setEnabled(false);
 				friCB.setSelected(false);
-				friCB.setEnabled(false);
 				satCB.setSelected(false);
-				satCB.setEnabled(false);
 			} else {
+				noRepCB.removeItemListener(this);
 				noRepCB.setSelected(true);
-				sunCB.setSelected(false);
-				sunCB.setEnabled(false);
-				monCB.setSelected(false);
-				monCB.setEnabled(false);
-				tueCB.setSelected(false);
-				tueCB.setEnabled(false);
-				wedCB.setSelected(false);
-				wedCB.setEnabled(false);
-				thuCB.setSelected(false);
-				thuCB.setEnabled(false);
-				friCB.setSelected(false);
-				friCB.setEnabled(false);
-				satCB.setSelected(false);
-				satCB.setEnabled(false);
+				noRepCB.setEnabled(false);
+				noRepCB.addItemListener(this);
 			}
 		}
 	}
@@ -1017,58 +1053,76 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			noRepCB = new JCheckBox("<html>" + "N/A" + "</html>");
 			noRepCB.setPreferredSize(checkSize);
 			noRepCB.setSelected(true);
+			noRepCB.setEnabled(false);
 			noRepCB.addItemListener(this);
+			noRepCB.setBackground(optionPaneColor);
+			noRepCB.setForeground(textColor);
 			sunCB = new JCheckBox("<html>" + "Sun" + "</html>");
 			sunCB.setPreferredSize(checkSize);
-			sunCB.setEnabled(false);
 			sunCB.addItemListener(this);
+			sunCB.setBackground(optionPaneColor);
+			sunCB.setForeground(textColor);
 			monCB = new JCheckBox("<html>" + "Mon" + "</html>");
 			monCB.setPreferredSize(checkSize);
-			monCB.setEnabled(false);
 			monCB.addItemListener(this);
+			monCB.setBackground(optionPaneColor);
+			monCB.setForeground(textColor);
 			tueCB = new JCheckBox("<html>" + "Tue" + "</html>");
 			tueCB.setPreferredSize(checkSize);
-			tueCB.setEnabled(false);
 			tueCB.addItemListener(this);
+			tueCB.setBackground(optionPaneColor);
+			tueCB.setForeground(textColor);
 			wedCB = new JCheckBox("<html>" + "Wed" + "</html>");
 			wedCB.setPreferredSize(checkSize);
-			wedCB.setEnabled(false);
 			wedCB.addItemListener(this);
+			wedCB.setBackground(optionPaneColor);
+			wedCB.setForeground(textColor);
 			thuCB = new JCheckBox("<html>" + "Thu" + "</html>");
 			thuCB.setPreferredSize(checkSize);
-			thuCB.setEnabled(false);
 			thuCB.addItemListener(this);
+			thuCB.setBackground(optionPaneColor);
+			thuCB.setForeground(textColor);
 			friCB = new JCheckBox("<html>" + "Fri" + "</html>");
 			friCB.setPreferredSize(checkSize);
-			friCB.setEnabled(false);
 			friCB.addItemListener(this);
+			friCB.setBackground(optionPaneColor);
+			friCB.setForeground(textColor);
 			satCB = new JCheckBox("<html>" + "Sat" + "</html>");
 			satCB.setPreferredSize(checkSize);
-			satCB.setEnabled(false);
 			satCB.addItemListener(this);
+			satCB.setBackground(optionPaneColor);
+			satCB.setForeground(textColor);
 			speCB = new JCheckBox("<html>" + "Custome" + "</html>");
 			speCB.setPreferredSize(new Dimension(90, 20));
 			speCB.addItemListener(this);
+			speCB.setBackground(optionPaneColor);
+			speCB.setForeground(textColor);
 			JLabel col = new JLabel("Event Color");
 			col.setPreferredSize(labelSize);
+			col.setForeground(textColor);
 			JLabel pre = new JLabel("Preset Event");
 			pre.setPreferredSize(labelSize);
+			pre.setForeground(textColor);
 			JLabel lab1 = new JLabel("Event Name");
 			lab1.setPreferredSize(labelSize);
+			lab1.setForeground(textColor);
 			eventTextField = new JTextField();
 			eventTextField.setPreferredSize(textFieldSize);
 			JLabel lab2 = new JLabel("Start Time");
 			lab2.setPreferredSize(labelSize);
+			lab2.setForeground(textColor);
 			startTextField = new JTextField();
 			startTextField.setPreferredSize(textFieldSize);
 			JLabel lab3 = new JLabel("End Time");
 			lab3.setPreferredSize(labelSize);
+			lab3.setForeground(textColor);
 			endTextField = new JTextField();
 			endTextField.setPreferredSize(textFieldSize);
 			JPanel pan = new JPanel();
 			pan.setPreferredSize(new Dimension(479, 170));
 			SpringLayout layout = new SpringLayout();
 			pan.setLayout(layout);
+			pan.setBackground(optionPaneColor);
 
 			jcb = new JColorBox(getColorOptions());
 			jcb.setSelectedIndex(0);
@@ -1160,7 +1214,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				String[] options = { "Add", "Cancel" };
 				JOptionPane pane = new JOptionPane(pan, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null,
 						options, options[0]);
+				pane.setBackground(optionPaneColor);
 				JDialog dialog = pane.createDialog(screen, "Advanced Event Adder");
+				// dialog.setBackground(scrollPanelColor);
 				dialog.setLocation(westPanel.getLocationOnScreen().x + 233, westPanel.getLocationOnScreen().y + 30);
 				dialog.setVisible(true);
 				dialog.dispose();
@@ -1226,6 +1282,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 
 			JLabel top = new JLabel("Events");
 			top.setPreferredSize(new Dimension(40, 20));
+			top.setForeground(textColor);
 			preset = new JComboBox<>(presetOptions.getStringPresets());
 			preset.setPreferredSize(new Dimension(160, 30));
 			preset.setSelectedIndex(-1);
@@ -1250,18 +1307,22 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			Dimension labelSize = new Dimension(75, 20);
 			JLabel col = new JLabel("Event Color");
 			col.setPreferredSize(labelSize);
+			col.setForeground(textColor);
 			JLabel lab1 = new JLabel("Event Name");
 			lab1.setPreferredSize(labelSize);
+			lab1.setForeground(textColor);
 			eventTextField = new JTextField();
 			eventTextField.setPreferredSize(textFieldSize);
 			eventTextField.setEnabled(false);
 			JLabel lab2 = new JLabel("Start Time");
 			lab2.setPreferredSize(labelSize);
+			lab2.setForeground(textColor);
 			startTextField = new JTextField();
 			startTextField.setPreferredSize(textFieldSize);
 			startTextField.setEnabled(false);
 			JLabel lab3 = new JLabel("End Time");
 			lab3.setPreferredSize(labelSize);
+			lab3.setForeground(textColor);
 			endTextField = new JTextField();
 			endTextField.setPreferredSize(textFieldSize);
 			endTextField.setEnabled(false);
@@ -1567,8 +1628,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			Dimension labelSize = new Dimension(75, 20);
 			JLabel col = new JLabel("Event Color");
 			col.setPreferredSize(labelSize);
+			col.setForeground(textColor);
 			JLabel lab1 = new JLabel("Add/Delete");
 			lab1.setPreferredSize(labelSize);
+			lab1.setForeground(textColor);
 			addColorBut = new JButton("+");
 			addColorBut.setPreferredSize(new Dimension(40, 40));
 			addColorBut.setFont(new Font("Comic Sans", Font.BOLD, 25));
@@ -1699,18 +1762,23 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 
 					JLabel col = new JLabel("Event Color");
 					col.setPreferredSize(labelSize);
+					col.setForeground(textColor);
 					JLabel pre = new JLabel("Preset Event");
 					pre.setPreferredSize(labelSize);
+					pre.setForeground(textColor);
 					JLabel lab1 = new JLabel("Event Name");
 					lab1.setPreferredSize(labelSize);
+					lab1.setForeground(textColor);
 					eventTextField = new JTextField();
 					eventTextField.setPreferredSize(textFieldSize);
 					JLabel lab2 = new JLabel("Start Time");
 					lab2.setPreferredSize(labelSize);
+					lab2.setForeground(textColor);
 					startTextField = new JTextField();
 					startTextField.setPreferredSize(textFieldSize);
 					JLabel lab3 = new JLabel("End Time");
 					lab3.setPreferredSize(labelSize);
+					lab3.setForeground(textColor);
 					endTextField = new JTextField();
 					endTextField.setPreferredSize(textFieldSize);
 					JPanel pan = new JPanel();
@@ -1833,18 +1901,23 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 
 					JLabel col = new JLabel("Event Color");
 					col.setPreferredSize(labelSize);
+					col.setForeground(textColor);
 					JLabel pre = new JLabel("Preset Event");
 					pre.setPreferredSize(labelSize);
+					pre.setForeground(textColor);
 					JLabel lab1 = new JLabel("Event Name");
 					lab1.setPreferredSize(labelSize);
+					lab1.setForeground(textColor);
 					eventTextField = new JTextField();
 					eventTextField.setPreferredSize(textFieldSize);
 					JLabel lab2 = new JLabel("Start Time");
 					lab2.setPreferredSize(labelSize);
+					lab2.setForeground(textColor);
 					startTextField = new JTextField();
 					startTextField.setPreferredSize(textFieldSize);
 					JLabel lab3 = new JLabel("End Time");
 					lab3.setPreferredSize(labelSize);
+					lab3.setForeground(textColor);
 					endTextField = new JTextField();
 					endTextField.setPreferredSize(textFieldSize);
 					JPanel pan = new JPanel();
@@ -1963,6 +2036,15 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	}
 
 	/**
+	 * Retuns the color of text
+	 * 
+	 * @return textColor the color of the text
+	 */
+	public Color getTextColor() {
+		return textColor;
+	}
+
+	/**
 	 * Returns an array of all preset events
 	 * 
 	 * @return presetEvents an array of strings of all presets
@@ -2024,8 +2106,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	 */
 	private String getFileName(boolean load) {
 		JFileChooser fchooser = new JFileChooser("C:\\Users\\Caleb\\Documents\\CalendarData");
-		fchooser.setBackground(Color.DARK_GRAY);
-		fchooser.setForeground(Color.WHITE);
+		fchooser.setBackground(panelColor);
+		fchooser.setForeground(textColor);
 		int returnVal = Integer.MIN_VALUE;
 		if (load) {
 			returnVal = fchooser.showOpenDialog(screen);

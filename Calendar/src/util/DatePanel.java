@@ -303,18 +303,23 @@ public class DatePanel implements ActionListener {
 
 					JLabel col = new JLabel("Event Color");
 					col.setPreferredSize(labelSize);
+					col.setForeground(currentUI.getTextColor());
 					JLabel pre = new JLabel("Preset Event");
 					pre.setPreferredSize(labelSize);
+					pre.setForeground(currentUI.getTextColor());
 					JLabel lab1 = new JLabel("Event Name");
 					lab1.setPreferredSize(labelSize);
+					lab1.setForeground(currentUI.getTextColor());
 					jtf1 = new JTextField(current.getEvent());
 					jtf1.setPreferredSize(textFieldSize);
 					JLabel lab2 = new JLabel("Start Time");
 					lab2.setPreferredSize(labelSize);
+					lab2.setForeground(currentUI.getTextColor());
 					jtf2 = new JTextField(current.start);
 					jtf2.setPreferredSize(textFieldSize);
 					JLabel lab3 = new JLabel("End Time");
 					lab3.setPreferredSize(labelSize);
+					lab3.setForeground(currentUI.getTextColor());
 					jtf3 = new JTextField(current.end);
 					jtf3.setPreferredSize(textFieldSize);
 					JPanel pan = new JPanel();
@@ -340,6 +345,7 @@ public class DatePanel implements ActionListener {
 					}
 
 					presets = new JComboBox<>(currentUI.getPresetOptions().getStringPresets());
+					presets.setPreferredSize(textFieldSize);
 					presets.setSelectedIndex(-1);
 					presets.setFocusable(false);
 					presets.addActionListener(this);
