@@ -103,13 +103,13 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	/** Holds strings for all presetEvents */
 	private static String[] presetEvents;
 	/** Days per month */
-	private static int[] daysPerMonth = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	private int[] daysPerMonth = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 	/** Weeks per month */
-	private static int[] startWeekPerMonth = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	private int[] startWeekPerMonth = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	/** Position of week that changes month JLabel */
-	private static int[] transitionWeek = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	private int[] transitionWeek = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 	/** Each start day of each month from 1 to 7 */
-	private static int[] startDayPerMonth = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	private int[] startDayPerMonth = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	/** Small Month Buttons */
 	private JButton[] smallMonthButtons;
 	/** Buttons for every calendar day */
@@ -602,6 +602,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		for (int i = 0; i < 12; i++) {
 			cal.set(yearOfCalendar, i, 1);
 			startDayPerMonth[i] = cal.get(Calendar.DAY_OF_WEEK);
+			System.out.println(startDayPerMonth[i]);
 			int days = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 			if (i == 0) {
 				for (int j = 0; j < cal.get(Calendar.DAY_OF_WEEK) - 1; j++) {
