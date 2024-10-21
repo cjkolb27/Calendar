@@ -933,9 +933,18 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			}
 		} else if (e.getSource() == speCB) {
 			System.out.println("Spe");
+			System.out.println("Soemthing: " + speCB.getSelectedObjects());
 			if (speCB.getSelectedObjects() != null) {
-				noRepCB.setEnabled(true);
-				noRepCB.setSelected(false);
+				//noRepCB.setEnabled(false);
+				sunCB.setEnabled(false);
+				monCB.setEnabled(false);
+				tueCB.setEnabled(false);
+				wedCB.setEnabled(false);
+				thuCB.setEnabled(false);
+				friCB.setEnabled(false);
+				satCB.setEnabled(false);
+				//noRepCB.setSelected(false);
+
 				sunCB.setSelected(false);
 				monCB.setSelected(false);
 				tueCB.setSelected(false);
@@ -943,7 +952,17 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				thuCB.setSelected(false);
 				friCB.setSelected(false);
 				satCB.setSelected(false);
+				
+				//noRepCB.setEnabled(true);
+				sunCB.setEnabled(true);
+				monCB.setEnabled(true);
+				tueCB.setEnabled(true);
+				wedCB.setEnabled(true);
+				thuCB.setEnabled(true);
+				friCB.setEnabled(true);
+				satCB.setEnabled(true);
 			} else {
+				System.out.println("AJKJHSFKJF");
 				noRepCB.removeItemListener(this);
 				noRepCB.setSelected(true);
 				noRepCB.setEnabled(false);
