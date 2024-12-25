@@ -82,7 +82,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private JPanel northPanel;
 	/** West Panel */
 	private JPanel westPanel;
-	/** Srolling panel */
+	/** Panel for holding days on new event panel */
+	private JPanel dayPanel;
+	/** Scrolling panel */
 	private JPanel calendarScrollingPan;
 	/** Environment Graphics */
 	private static GraphicsEnvironment env;
@@ -844,6 +846,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		if (e.getSource() == noRepCB) {
 			System.out.println("No");
 			if (noRepCB.getSelectedObjects() != null) {
+				newEventNA();
 				noRepCB.setEnabled(false);
 				sunCB.setSelected(false);
 				monCB.setSelected(false);
@@ -853,6 +856,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				friCB.setSelected(false);
 				satCB.setSelected(false);
 				speCB.setSelected(false);
+			} else {
+				newEventWeekDays();
 			}
 		} else if (e.getSource() == sunCB) {
 			System.out.println("Sun");
@@ -935,15 +940,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			System.out.println("Spe");
 			System.out.println("Soemthing: " + speCB.getSelectedObjects());
 			if (speCB.getSelectedObjects() != null) {
-				//noRepCB.setEnabled(false);
-				sunCB.setEnabled(false);
-				monCB.setEnabled(false);
-				tueCB.setEnabled(false);
-				wedCB.setEnabled(false);
-				thuCB.setEnabled(false);
-				friCB.setEnabled(false);
-				satCB.setEnabled(false);
-				//noRepCB.setSelected(false);
+				noRepCB.setEnabled(true);
+				noRepCB.removeItemListener(this);
 
 				sunCB.setSelected(false);
 				monCB.setSelected(false);
@@ -953,22 +951,73 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				friCB.setSelected(false);
 				satCB.setSelected(false);
 				
-				//noRepCB.setEnabled(true);
-				sunCB.setEnabled(true);
-				monCB.setEnabled(true);
-				tueCB.setEnabled(true);
-				wedCB.setEnabled(true);
-				thuCB.setEnabled(true);
-				friCB.setEnabled(true);
-				satCB.setEnabled(true);
+				noRepCB.addItemListener(this);
+				noRepCB.setSelected(false);
+				newEventCustome();
 			} else {
-				System.out.println("AJKJHSFKJF");
+				System.out.println("extra");
 				noRepCB.removeItemListener(this);
 				noRepCB.setSelected(true);
 				noRepCB.setEnabled(false);
 				noRepCB.addItemListener(this);
+				newEventNA();
 			}
 		}
+	}
+	
+	/**
+	 * Used to set panel for no specific days selected
+	 */
+	public void newEventNA() {
+		dayPanel.removeAll();
+		dayPanel.revalidate();
+		dayPanel.repaint();
+		SpringLayout layout = new SpringLayout();
+		dayPanel.setLayout(layout);
+		dayPanel.setPreferredSize(new Dimension(479, 40));
+		JLabel lab = new JLabel("Event Date");
+		lab.setPreferredSize(new Dimension(65, 20));
+		lab.setForeground(textColor);
+		dayPanel.add(lab);
+		JTextField tf1 = new JTextField();
+		tf1.setPreferredSize(new Dimension(79, 20));
+		JTextField tf2 = new JTextField();
+		tf2.setPreferredSize(new Dimension(79, 20));
+		dayPanel.add(tf1);
+		dayPanel.add(tf2);
+		
+		layout.putConstraint(SpringLayout.WEST, lab, 200, SpringLayout.WEST, dayPanel);
+		layout.putConstraint(SpringLayout.NORTH, lab, 5, SpringLayout.NORTH, dayPanel);
+		layout.putConstraint(SpringLayout.WEST, tf1, 1, SpringLayout.EAST, lab);
+		layout.putConstraint(SpringLayout.NORTH, tf1, 0, SpringLayout.NORTH, lab);
+		layout.putConstraint(SpringLayout.WEST, tf2, 5, SpringLayout.EAST, tf1);
+		layout.putConstraint(SpringLayout.NORTH, tf2, 0, SpringLayout.NORTH, tf1);
+	}
+	
+	/**
+	 * Used to set panel for specific days selected
+	 */
+	public void newEventWeekDays() {
+		dayPanel.removeAll();
+		dayPanel.revalidate();
+		dayPanel.repaint();
+		JLabel col = new JLabel("Days thing");
+		col.setPreferredSize(new Dimension(79, 20));
+		col.setForeground(textColor);
+		dayPanel.add(col);
+	}
+	
+	/**
+	 * Used to set panel for custom days selected
+	 */
+	public void newEventCustome() {
+		dayPanel.removeAll();
+		dayPanel.revalidate();
+		dayPanel.repaint();
+		JLabel col = new JLabel("Custome thing");
+		col.setPreferredSize(new Dimension(79, 20));
+		col.setForeground(textColor);
+		dayPanel.add(col);
 	}
 
 	/**
@@ -981,6 +1030,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == preset) {
 			if (presetEventMenu) {
+				System.out.println("Preset Thingy Is being Called");
 				preset.removeActionListener(this);
 				if (preset.getSelectedIndex() == -1) {
 					preset.addActionListener(this);
@@ -1117,6 +1167,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			speCB.addItemListener(this);
 			speCB.setBackground(optionPaneColor);
 			speCB.setForeground(textColor);
+			
+			dayPanel = new JPanel();
+			newEventNA();
+			
 			JLabel col = new JLabel("Event Color");
 			col.setPreferredSize(labelSize);
 			col.setForeground(textColor);
@@ -1139,7 +1193,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			endTextField = new JTextField();
 			endTextField.setPreferredSize(textFieldSize);
 			JPanel pan = new JPanel();
-			pan.setPreferredSize(new Dimension(479, 170));
+			pan.setPreferredSize(new Dimension(479, 300));
 			SpringLayout layout = new SpringLayout();
 			pan.setLayout(layout);
 			pan.setBackground(optionPaneColor);
@@ -1192,13 +1246,17 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			pan.add(speCB);
 			layout.putConstraint(SpringLayout.WEST, speCB, 0, SpringLayout.EAST, satCB);
 			layout.putConstraint(SpringLayout.NORTH, speCB, 5, SpringLayout.NORTH, pan);
+			
+			pan.add(dayPanel);
+			layout.putConstraint(SpringLayout.WEST, dayPanel, 0, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, dayPanel, 5, SpringLayout.SOUTH, noRepCB);
 
 			pan.add(col);
 			pan.add(jcb);
 			layout.putConstraint(SpringLayout.WEST, col, 124, SpringLayout.WEST, pan);
-			layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.SOUTH, noRepCB);
+			layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.SOUTH, dayPanel);
 			layout.putConstraint(SpringLayout.WEST, jcb, 5, SpringLayout.EAST, col);
-			layout.putConstraint(SpringLayout.NORTH, jcb, 5, SpringLayout.SOUTH, noRepCB);
+			layout.putConstraint(SpringLayout.NORTH, jcb, 5, SpringLayout.SOUTH, dayPanel);
 
 			pan.add(pre);
 			pan.add(preset);
@@ -1445,10 +1503,15 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			PresetState current = presetState.getState();
 			if (presetState.changeState("save")) {
 				if (current == PresetState.adding) {
-					System.out.println("Current State: " + presetState.getState());
 					try {
+						System.out.println("Current State: " + current);
 						EventData newEvent = new EventData(eventTextField.getText(), startTextField.getText(),
 								endTextField.getText(), 1, 1, 1, 2, 2, 2);
+						if (!presetOptions.duplicatePreset(newEvent.getName(), newEvent.getStartTime(),
+								newEvent.getEndTime(), (Color) jcb.getSelectedItem())) {
+							System.out.println(":[");
+							return;
+						}
 						presetOptions.addPreset(newEvent.getName(), newEvent.getStartTime(), newEvent.getEndTime(),
 								(Color) jcb.getSelectedItem());
 						int index = -1;
@@ -1479,7 +1542,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 						preset.setSelectedIndex(index);
 						preset.setFocusable(false);
 						preset.addActionListener(this);
-
+						savePreset.setText("Update");
 					} catch (Exception e1) {
 						JOptionPane.showMessageDialog(screen, e1.getMessage());
 						presetState.setState(current);
