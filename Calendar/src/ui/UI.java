@@ -1409,8 +1409,11 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 							} catch (Exception e2) {
 								throw new IllegalArgumentException("Invalid Date.");
 							}
-							for (int j = 0; j < naMonth.getSelectedIndex(); j++) {
-								daysCount = daysCount + daysPerMonth[j];
+							for (int i = 0; i < naMonth.getSelectedIndex(); i++) {
+								if (i == 0 && daysPerMonth[1] == 28) {
+									daysCount = daysCount + 1;
+								}
+								daysCount = daysCount + daysPerMonth[i];
 							}
 							buttonIndex = daysCount + Integer.parseInt(naDay.getText()) - 1;
 							EventData newEvent = manager.createEvent((String) eventTextField.getText(),
@@ -1426,6 +1429,97 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 									newEvent.getColor().getBlue());
 						} else if (noRepCB.getSelectedObjects() == null && speCB.getSelectedObjects() == null) {
 							System.out.println("Weeks was selected.");
+							int startMonthInt = 0;
+							for (int i = 0; i < 12; i++) {
+								if (ALLMONTHNAMES[i].substring(0, 3)
+										.equals(startWeek.getSelectedItem().toString().substring(0, 3))) {
+									startMonthInt = i;
+									i = 12;
+								}
+							}
+
+							int endMonthInt = 0;
+							for (int i = 0; i < 12; i++) {
+								if (ALLMONTHNAMES[i].substring(0, 3)
+										.equals(endWeek.getSelectedItem().toString().substring(0, 3))) {
+									endMonthInt = i;
+									i = 12;
+								}
+							}
+
+							int startInt = 0;
+							if (startWeek.getSelectedItem().toString().length() == 6) {
+								startInt = Integer.parseInt(startWeek.getSelectedItem().toString().substring(4, 6));
+							} else {
+								startInt = Integer.parseInt(startWeek.getSelectedItem().toString().substring(4, 5));
+							}
+
+							int endInt = 0;
+							if (endWeek.getSelectedItem().toString().length() == 6) {
+								endInt = Integer.parseInt(endWeek.getSelectedItem().toString().substring(4, 6));
+							} else {
+								endInt = Integer.parseInt(endWeek.getSelectedItem().toString().substring(4, 5));
+							}
+
+							System.out.println("Start Month: " + startMonthInt + " Start Day: " + startInt
+									+ " End Month: " + endMonthInt + " End Day: " + endInt);
+
+							for (int i = 0; i < startMonthInt; i++) {
+								daysCount = daysCount + daysPerMonth[i];
+							}
+							buttonIndex = daysCount + startInt - 1;
+
+							int endButtonIndex = 0;
+							daysCount = 0;
+							for (int i = 0; i < endMonthInt; i++) {
+								if (i == 0 && daysPerMonth[1] == 28) {
+									daysCount = daysCount + 1;
+								}
+								daysCount = daysCount + daysPerMonth[i];
+							}
+							endButtonIndex = daysCount + endInt - 1;
+
+							boolean[] selectedDays = new boolean[7];
+							selectedDays[0] = sunCB.getSelectedObjects() != null;
+							selectedDays[1] = monCB.getSelectedObjects() != null;
+							selectedDays[2] = tueCB.getSelectedObjects() != null;
+							selectedDays[3] = wedCB.getSelectedObjects() != null;
+							selectedDays[4] = thuCB.getSelectedObjects() != null;
+							selectedDays[5] = friCB.getSelectedObjects() != null;
+							selectedDays[6] = satCB.getSelectedObjects() != null;
+
+							System.out.println("Dates: " + selectedDays[0] + " " + selectedDays[1] + " "
+									+ selectedDays[2] + " " + selectedDays[3] + " " + selectedDays[4] + " "
+									+ selectedDays[5] + " " + selectedDays[6]);
+
+							for (int i = buttonIndex; i < endButtonIndex; i++) {
+								try {
+									Calendar cal = Calendar.getInstance();
+									if (datePanel[i] != null) {
+										cal.set(yearOfCalendar, datePanel[i].getMonth() - 1, datePanel[i].getDay());
+										System.out.println(yearOfCalendar + " " + datePanel[i].getMonth() + " "
+												+ datePanel[i].getDay() + " " + cal.get(Calendar.DAY_OF_WEEK));
+										if (selectedDays[cal.get(Calendar.DAY_OF_WEEK) - 1]) {
+											EventData newEvent = manager.createEvent((String) eventTextField.getText(),
+													(String) startTextField.getText(), (String) endTextField.getText(),
+													datePanel[i].getDay(), datePanel[i].getMonth(),
+													datePanel[i].getYear(), ((Color) jcb.getSelectedItem()).getRed(),
+													((Color) jcb.getSelectedItem()).getGreen(),
+													((Color) jcb.getSelectedItem()).getBlue());
+											datePanel[i].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
+													newEvent.getEndTime(), datePanel[i].getDay(),
+													datePanel[i].getMonth(), datePanel[i].getYear(), newEvent.getName(),
+													newEvent.getColor().getRed(), newEvent.getColor().getGreen(),
+													newEvent.getColor().getBlue());
+										}
+									}
+								} catch (Exception e3) {
+									// Nothing
+									System.out.println("Conflict on: " + datePanel[i].getMonth() + "/"
+											+ datePanel[i].getDay() + "/" + yearOfCalendar);
+								}
+
+							}
 						} else {
 							System.out.println("Custome was selected.");
 						}
