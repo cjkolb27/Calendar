@@ -20,6 +20,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 
@@ -104,6 +105,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private static String[] settings;
 	/** Holds strings for all presetEvents */
 	private static String[] presetEvents;
+	/** Holds the first days of each week for each month */
+	private static String[] monthAndDay;
+	/** Font for all JTextFields, JComboBoxes, and JLabels */
+	private static final Font TEXTFIELDFONT = new Font("Comic Sans", Font.PLAIN, 18);
 	/** Days per month */
 	private int[] daysPerMonth = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 	/** Weeks per month */
@@ -158,6 +163,14 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private JCheckBox speCB;
 	/** All presets of an event */
 	private JComboBox<String> preset;
+	/** No Answer Day date */
+	private JTextField naDay;
+	/** No Answer Month date */
+	private JComboBox<String> naMonth;
+	/** Start Week */
+	private JComboBox<String> startWeek;
+	/** End Week */
+	private JComboBox<String> endWeek;
 	/** Color combo box */
 	private JColorBox jcb;
 	/** Event text field */
@@ -207,9 +220,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	/** Edit Settings title */
 	private static final String EDITSET = "Edit Settings";
 	/** Label for holding the month name */
-	private JLabel month;
+	private JLabel monthLabel;
 	/** Label for holding the month name */
-	private JLabel monthSmall;
+	private JLabel monthSmallLabel;
 	/** Year of calendar */
 	private int yearOfCalendar;
 	/** Month of calendar */
@@ -365,9 +378,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		westPanel.setBackground(panelColor);
 		northPanel.setPreferredSize(new Dimension(1, 100));
 		westPanel.setPreferredSize(new Dimension(265, 1));
-		month = new JLabel("<html>" + ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar + "</html>");
-		month.setFont(new Font("Comic Sans", Font.BOLD, 40));
-		month.setForeground(textColor);
+		monthLabel = new JLabel("<html>" + ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar + "</html>");
+		monthLabel.setFont(new Font("Comic Sans", Font.BOLD, 40));
+		monthLabel.setForeground(textColor);
 		JPanel yearSelecter = new JPanel(new FlowLayout());
 		yearSelecter.setBackground(null);
 		yearSelecter.setPreferredSize(new Dimension(50, 50));
@@ -388,7 +401,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				yearSelecter.add(lastYear);
 				northPanel.add(space);
 			} else if (i == 3) {
-				yearSelecter.add(month);
+				yearSelecter.add(monthLabel);
 				northPanel.add(yearSelecter);
 			} else if (i == 4) {
 				nextYear = new JButton("<html>" + "\u2192" + "</html>");
@@ -458,11 +471,11 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 60), new Dimension(0, 60)));
 		westPanel.add(newEventBut);
-		monthSmall = new JLabel(ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar);
-		monthSmall.setFont(new Font("Comic Sans", Font.BOLD, 20));
-		monthSmall.setAlignmentX(Component.CENTER_ALIGNMENT);
-		monthSmall.setForeground(textColor);
-		westPanel.add(monthSmall);
+		monthSmallLabel = new JLabel(ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar);
+		monthSmallLabel.setFont(new Font("Comic Sans", Font.BOLD, 20));
+		monthSmallLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		monthSmallLabel.setForeground(textColor);
+		westPanel.add(monthSmallLabel);
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 10), new Dimension(0, 10)));
 		westPanel.add(smallCalendar);
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 1), new Dimension(0, 1000)));
@@ -700,6 +713,33 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		panel.setAlignmentX(SwingConstants.CENTER);
 		panel.setAlignmentY(SwingConstants.BOTTOM);
 		panel.setBackground(scrollPanelColor);
+
+		monthAndDay = new String[totalWeeks + 1];
+		Calendar cal2 = Calendar.getInstance();
+		cal2.set(yearOfCalendar, 11, 31);
+		if (cal2.get(Calendar.DAY_OF_WEEK) == 1) {
+			monthAndDay = new String[totalWeeks];
+		} else {
+			monthAndDay[totalWeeks] = "Dec/31";
+		}
+		monthAndDay[0] = "Jan/1";
+		cal2.set(yearOfCalendar, 0, 1);
+		System.out.println(cal2.get(Calendar.DAY_OF_WEEK));
+		int offset = cal2.get(Calendar.DAY_OF_WEEK);
+		int daysCounted = 0 + (offset * -1) + 9;
+		int month = 0;
+		offset = 1;
+		while (month < 12) {
+			if (daysPerMonth[month] < daysCounted) {
+				daysCounted -= daysPerMonth[month];
+				month++;
+			} else {
+				monthAndDay[offset] = ALLMONTHNAMES[month].substring(0, 3) + "/" + daysCounted;
+				System.out.println(monthAndDay[offset]);
+				daysCounted += 7;
+				offset++;
+			}
+		}
 	}
 
 	private void setScreenWindow() {
@@ -788,8 +828,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 					if ((buttons[transitionWeek[i]].getVisibleRect().height
 							* buttons[transitionWeek[i]].getVisibleRect().width) != 0) {
 						scrollMonth = i;
-						month.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
-						monthSmall.setText(ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar);
+						monthLabel.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
+						monthSmallLabel.setText(ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar);
 						createSmallCalendar(scrollMonth);
 						System.gc();
 						screen.setVisible(true);
@@ -803,8 +843,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 					if ((buttons[transitionWeek[i]].getVisibleRect().height
 							* buttons[transitionWeek[i]].getVisibleRect().width) != 0) {
 						scrollMonth = i;
-						month.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
-						monthSmall.setText(ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar);
+						monthLabel.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
+						monthSmallLabel.setText(ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar);
 						createSmallCalendar(scrollMonth);
 						System.gc();
 						screen.setVisible(true);
@@ -814,8 +854,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			}
 			if (scrollMonth != 11 && scrollLocation == scrollHeight) {
 				scrollMonth = 11;
-				month.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
-				monthSmall.setText(ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar);
+				monthLabel.setText("<html>" + ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar + "</html>");
+				monthSmallLabel.setText(ALLMONTHNAMES[scrollMonth] + " " + yearOfCalendar);
 				createSmallCalendar(scrollMonth);
 				System.gc();
 				screen.setVisible(true);
@@ -950,7 +990,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				thuCB.setSelected(false);
 				friCB.setSelected(false);
 				satCB.setSelected(false);
-				
+
 				noRepCB.addItemListener(this);
 				noRepCB.setSelected(false);
 				newEventCustome();
@@ -964,7 +1004,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			}
 		}
 	}
-	
+
 	/**
 	 * Used to set panel for no specific days selected
 	 */
@@ -975,25 +1015,36 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		SpringLayout layout = new SpringLayout();
 		dayPanel.setLayout(layout);
 		dayPanel.setPreferredSize(new Dimension(479, 40));
+
 		JLabel lab = new JLabel("Event Date");
-		lab.setPreferredSize(new Dimension(65, 20));
+		lab.setPreferredSize(new Dimension(100, 30));
 		lab.setForeground(textColor);
+		lab.setFont(TEXTFIELDFONT);
 		dayPanel.add(lab);
-		JTextField tf1 = new JTextField();
-		tf1.setPreferredSize(new Dimension(79, 20));
-		JTextField tf2 = new JTextField();
-		tf2.setPreferredSize(new Dimension(79, 20));
-		dayPanel.add(tf1);
-		dayPanel.add(tf2);
-		
-		layout.putConstraint(SpringLayout.WEST, lab, 200, SpringLayout.WEST, dayPanel);
+
+		String[] allMonths = new String[12];
+		for (int i = 0; i < 12; i++) {
+			allMonths[i] = ALLMONTHNAMES[i].substring(0, 3);
+		}
+		naMonth = new JComboBox<>(allMonths);
+		naMonth.setFont(TEXTFIELDFONT);
+		naMonth.setPreferredSize(new Dimension(70, 30));
+		naMonth.setSelectedIndex(scrollMonth);
+		naDay = new JTextField();
+		naDay.setFont(TEXTFIELDFONT);
+		naDay.setPreferredSize(new Dimension(79, 30));
+		naDay.setFont(TEXTFIELDFONT);
+		dayPanel.add(naMonth);
+		dayPanel.add(naDay);
+
+		layout.putConstraint(SpringLayout.WEST, lab, 115, SpringLayout.WEST, dayPanel);
 		layout.putConstraint(SpringLayout.NORTH, lab, 5, SpringLayout.NORTH, dayPanel);
-		layout.putConstraint(SpringLayout.WEST, tf1, 1, SpringLayout.EAST, lab);
-		layout.putConstraint(SpringLayout.NORTH, tf1, 0, SpringLayout.NORTH, lab);
-		layout.putConstraint(SpringLayout.WEST, tf2, 5, SpringLayout.EAST, tf1);
-		layout.putConstraint(SpringLayout.NORTH, tf2, 0, SpringLayout.NORTH, tf1);
+		layout.putConstraint(SpringLayout.WEST, naMonth, 14, SpringLayout.EAST, lab);
+		layout.putConstraint(SpringLayout.NORTH, naMonth, 0, SpringLayout.NORTH, lab);
+		layout.putConstraint(SpringLayout.WEST, naDay, 5, SpringLayout.EAST, naMonth);
+		layout.putConstraint(SpringLayout.NORTH, naDay, 0, SpringLayout.NORTH, naMonth);
 	}
-	
+
 	/**
 	 * Used to set panel for specific days selected
 	 */
@@ -1001,12 +1052,32 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		dayPanel.removeAll();
 		dayPanel.revalidate();
 		dayPanel.repaint();
-		JLabel col = new JLabel("Days thing");
-		col.setPreferredSize(new Dimension(79, 20));
-		col.setForeground(textColor);
-		dayPanel.add(col);
+		SpringLayout layout = new SpringLayout();
+		dayPanel.setLayout(layout);
+		dayPanel.setPreferredSize(new Dimension(479, 40));
+		startWeek = new JComboBox<>(monthAndDay);
+		startWeek.setFont(TEXTFIELDFONT);
+		startWeek.setPreferredSize(new Dimension(80, 30));
+		endWeek = new JComboBox<>(monthAndDay);
+		endWeek.setFont(TEXTFIELDFONT);
+		endWeek.setPreferredSize(new Dimension(80, 30));
+		
+		JLabel lab = new JLabel("Event Date");
+		lab.setPreferredSize(new Dimension(100, 30));
+		lab.setForeground(textColor);
+		lab.setFont(TEXTFIELDFONT);
+		dayPanel.add(lab);
+		dayPanel.add(startWeek);
+		dayPanel.add(endWeek);
+
+		layout.putConstraint(SpringLayout.WEST, lab, 115, SpringLayout.WEST, dayPanel);
+		layout.putConstraint(SpringLayout.NORTH, lab, 5, SpringLayout.NORTH, dayPanel);
+		layout.putConstraint(SpringLayout.WEST, startWeek, 14, SpringLayout.EAST, lab);
+		layout.putConstraint(SpringLayout.NORTH, startWeek, 0, SpringLayout.NORTH, lab);
+		layout.putConstraint(SpringLayout.WEST, endWeek, 0, SpringLayout.EAST, startWeek);
+		layout.putConstraint(SpringLayout.NORTH, endWeek, 0, SpringLayout.NORTH, startWeek);
 	}
-	
+
 	/**
 	 * Used to set panel for custom days selected
 	 */
@@ -1116,9 +1187,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			System.exit(0);
 		} else if (e.getSource() == newEventBut) {
 			System.out.println("New Event Button");
-			Dimension textFieldSize = new Dimension(151, 20);
-			Dimension labelSize = new Dimension(75, 20);
-			Dimension checkSize = new Dimension(50, 20);
+			Dimension textFieldSize = new Dimension(151, 30);
+			Dimension labelSize = new Dimension(110, 30);
+			Dimension checkSize = new Dimension(50, 30);
 
 			noRepCB = new JCheckBox("<html>" + "N/A" + "</html>");
 			noRepCB.setPreferredSize(checkSize);
@@ -1163,35 +1234,43 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			satCB.setBackground(optionPaneColor);
 			satCB.setForeground(textColor);
 			speCB = new JCheckBox("<html>" + "Custome" + "</html>");
-			speCB.setPreferredSize(new Dimension(90, 20));
+			speCB.setPreferredSize(new Dimension(90, 30));
 			speCB.addItemListener(this);
 			speCB.setBackground(optionPaneColor);
 			speCB.setForeground(textColor);
-			
+
 			dayPanel = new JPanel();
 			newEventNA();
-			
+
 			JLabel col = new JLabel("Event Color");
 			col.setPreferredSize(labelSize);
 			col.setForeground(textColor);
+			col.setFont(TEXTFIELDFONT);
 			JLabel pre = new JLabel("Preset Event");
 			pre.setPreferredSize(labelSize);
 			pre.setForeground(textColor);
+			pre.setFont(TEXTFIELDFONT);
 			JLabel lab1 = new JLabel("Event Name");
 			lab1.setPreferredSize(labelSize);
 			lab1.setForeground(textColor);
+			lab1.setFont(TEXTFIELDFONT);
 			eventTextField = new JTextField();
 			eventTextField.setPreferredSize(textFieldSize);
+			eventTextField.setFont(TEXTFIELDFONT);
 			JLabel lab2 = new JLabel("Start Time");
 			lab2.setPreferredSize(labelSize);
 			lab2.setForeground(textColor);
+			lab2.setFont(TEXTFIELDFONT);
 			startTextField = new JTextField();
 			startTextField.setPreferredSize(textFieldSize);
+			startTextField.setFont(TEXTFIELDFONT);
 			JLabel lab3 = new JLabel("End Time");
 			lab3.setPreferredSize(labelSize);
 			lab3.setForeground(textColor);
+			lab3.setFont(TEXTFIELDFONT);
 			endTextField = new JTextField();
 			endTextField.setPreferredSize(textFieldSize);
+			endTextField.setFont(TEXTFIELDFONT);
 			JPanel pan = new JPanel();
 			pan.setPreferredSize(new Dimension(479, 300));
 			SpringLayout layout = new SpringLayout();
@@ -1199,8 +1278,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			pan.setBackground(optionPaneColor);
 
 			jcb = new JColorBox(getColorOptions());
+			jcb.setFont(TEXTFIELDFONT);
 			jcb.setSelectedIndex(0);
-			jcb.setPreferredSize(new Dimension(30, 20));
+			jcb.setPreferredSize(new Dimension(30, 30));
 			jcb.setFocusable(false);
 			jcb.setBorder(BorderFactory.createLineBorder((Color) jcb.getSelectedItem(), 200));
 			jcb.setForeground(null);
@@ -1214,6 +1294,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			}
 
 			preset = new JComboBox<>(presetOptions.getStringPresets());
+			preset.setFont(TEXTFIELDFONT);
 			preset.setPreferredSize(textFieldSize);
 			preset.setSelectedIndex(-1);
 			preset.setFocusable(false);
@@ -1246,45 +1327,46 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			pan.add(speCB);
 			layout.putConstraint(SpringLayout.WEST, speCB, 0, SpringLayout.EAST, satCB);
 			layout.putConstraint(SpringLayout.NORTH, speCB, 5, SpringLayout.NORTH, pan);
-			
+
 			pan.add(dayPanel);
 			layout.putConstraint(SpringLayout.WEST, dayPanel, 0, SpringLayout.WEST, pan);
 			layout.putConstraint(SpringLayout.NORTH, dayPanel, 5, SpringLayout.SOUTH, noRepCB);
 
 			pan.add(col);
 			pan.add(jcb);
-			layout.putConstraint(SpringLayout.WEST, col, 124, SpringLayout.WEST, pan);
+			int height = 35;
+			layout.putConstraint(SpringLayout.WEST, col, 115, SpringLayout.WEST, pan);
 			layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.SOUTH, dayPanel);
 			layout.putConstraint(SpringLayout.WEST, jcb, 5, SpringLayout.EAST, col);
 			layout.putConstraint(SpringLayout.NORTH, jcb, 5, SpringLayout.SOUTH, dayPanel);
 
 			pan.add(pre);
 			pan.add(preset);
-			layout.putConstraint(SpringLayout.WEST, pre, 124, SpringLayout.WEST, pan);
-			layout.putConstraint(SpringLayout.NORTH, pre, 30, SpringLayout.NORTH, col);
+			layout.putConstraint(SpringLayout.WEST, pre, 115, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, pre, height, SpringLayout.NORTH, col);
 			layout.putConstraint(SpringLayout.WEST, preset, 5, SpringLayout.EAST, pre);
-			layout.putConstraint(SpringLayout.NORTH, preset, 30, SpringLayout.NORTH, jcb);
+			layout.putConstraint(SpringLayout.NORTH, preset, height, SpringLayout.NORTH, jcb);
 
 			pan.add(lab1);
 			pan.add(eventTextField);
-			layout.putConstraint(SpringLayout.WEST, lab1, 124, SpringLayout.WEST, pan);
-			layout.putConstraint(SpringLayout.NORTH, lab1, 30, SpringLayout.NORTH, pre);
+			layout.putConstraint(SpringLayout.WEST, lab1, 115, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, lab1, height, SpringLayout.NORTH, pre);
 			layout.putConstraint(SpringLayout.WEST, eventTextField, 5, SpringLayout.EAST, lab1);
-			layout.putConstraint(SpringLayout.NORTH, eventTextField, 30, SpringLayout.NORTH, preset);
+			layout.putConstraint(SpringLayout.NORTH, eventTextField, height, SpringLayout.NORTH, preset);
 
 			pan.add(lab2);
 			pan.add(startTextField);
-			layout.putConstraint(SpringLayout.WEST, lab2, 124, SpringLayout.WEST, pan);
-			layout.putConstraint(SpringLayout.NORTH, lab2, 24, SpringLayout.NORTH, lab1);
+			layout.putConstraint(SpringLayout.WEST, lab2, 115, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, lab2, height, SpringLayout.NORTH, lab1);
 			layout.putConstraint(SpringLayout.WEST, startTextField, 5, SpringLayout.EAST, lab2);
-			layout.putConstraint(SpringLayout.NORTH, startTextField, 24, SpringLayout.NORTH, eventTextField);
+			layout.putConstraint(SpringLayout.NORTH, startTextField, height, SpringLayout.NORTH, eventTextField);
 
 			pan.add(lab3);
 			pan.add(endTextField);
-			layout.putConstraint(SpringLayout.WEST, lab3, 124, SpringLayout.WEST, pan);
-			layout.putConstraint(SpringLayout.NORTH, lab3, 24, SpringLayout.NORTH, lab2);
+			layout.putConstraint(SpringLayout.WEST, lab3, 115, SpringLayout.WEST, pan);
+			layout.putConstraint(SpringLayout.NORTH, lab3, height, SpringLayout.NORTH, lab2);
 			layout.putConstraint(SpringLayout.WEST, endTextField, 5, SpringLayout.EAST, lab3);
-			layout.putConstraint(SpringLayout.NORTH, endTextField, 24, SpringLayout.NORTH, startTextField);
+			layout.putConstraint(SpringLayout.NORTH, endTextField, height, SpringLayout.NORTH, startTextField);
 
 			boolean tryEvent = true;
 			while (tryEvent) {
@@ -1298,7 +1380,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				dialog.setLocation(westPanel.getLocationOnScreen().x + 233, westPanel.getLocationOnScreen().y + 30);
 				dialog.setVisible(true);
 				dialog.dispose();
-				System.out.println("Dialog: " + pane.getValue());
+				System.out.println("Dialog:2 " + pane.getValue());
 				if (pane.getValue() != null && pane.getValue().equals(options[0])) {
 					try {
 						System.out.println(yearOfCalendar);
@@ -1795,8 +1877,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 					monthOfCalendar = Calendar.getInstance().get(Calendar.MONTH);
 					scrollMonth = monthOfCalendar;
 				}
-				month.setText("<html>" + ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar + "</html>");
-				monthSmall.setText(ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar);
+				monthLabel.setText("<html>" + ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar + "</html>");
+				monthSmallLabel.setText(ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar);
 				screen.setVisible(true);
 				scrollFrame.getVerticalScrollBar().setValue(scrollFrame.getVerticalScrollBar().getMaximum());
 				if (Calendar.getInstance().get(Calendar.YEAR) == yearOfCalendar) {
@@ -1824,8 +1906,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 					monthOfCalendar = Calendar.getInstance().get(Calendar.MONTH);
 					scrollMonth = monthOfCalendar;
 				}
-				month.setText("<html>" + ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar + "</html>");
-				monthSmall.setText(ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar);
+				monthLabel.setText("<html>" + ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar + "</html>");
+				monthSmallLabel.setText(ALLMONTHNAMES[monthOfCalendar] + " " + yearOfCalendar);
 				screen.setVisible(true);
 				scrollFrame.getVerticalScrollBar().setValue(0);
 				if (Calendar.getInstance().get(Calendar.YEAR) == yearOfCalendar) {
@@ -2076,7 +2158,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 								westPanel.getLocationOnScreen().y + 107);
 						dialog.setVisible(true);
 						dialog.dispose();
-						System.out.println("Dialog: " + pane.getValue());
+						System.out.println("Dialog:1 " + pane.getValue());
 						if (pane.getValue() != null && pane.getValue().equals(options[0])) {
 							try {
 								System.out.println(yearOfCalendar);

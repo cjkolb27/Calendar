@@ -39,9 +39,9 @@ public class CalendarManager {
 		allSettings = new String[2];
 		eventYearList = new SortedDateList<EventData>();
 		year = Year.now().getValue();
+		loadSettings();
 		path = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "CalendarData"
 				+ File.separator + year + ".txt";
-		loadSettings();
 		System.out.println(path);
 		try {
 			new File(path).createNewFile();
