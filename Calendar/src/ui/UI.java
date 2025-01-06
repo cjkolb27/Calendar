@@ -20,7 +20,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Iterator;
 
@@ -35,6 +35,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -49,6 +50,7 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.plaf.ColorUIResource;
+import javax.swing.text.NumberFormatter;
 
 import events.EventData;
 import manager.CalendarManager;
@@ -722,7 +724,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		} else {
 			monthAndDay[totalWeeks] = "Dec/31";
 		}
-		monthAndDay[0] = "Jan/1";
+		monthAndDay[0] = "<html>" + "Jan/1" + "</html>";
 		cal2.set(yearOfCalendar, 0, 1);
 		System.out.println(cal2.get(Calendar.DAY_OF_WEEK));
 		int offset = cal2.get(Calendar.DAY_OF_WEEK);
@@ -1030,10 +1032,15 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		naMonth.setFont(TEXTFIELDFONT);
 		naMonth.setPreferredSize(new Dimension(70, 30));
 		naMonth.setSelectedIndex(scrollMonth);
-		naDay = new JTextField();
+
+		NumberFormatter formatter = new NumberFormatter();
+		formatter.setValueClass(Integer.class);
+		naDay = new JFormattedTextField(formatter);
 		naDay.setFont(TEXTFIELDFONT);
 		naDay.setPreferredSize(new Dimension(79, 30));
 		naDay.setFont(TEXTFIELDFONT);
+		Calendar cal = Calendar.getInstance();
+		naDay.setText(cal.get(Calendar.DAY_OF_MONTH) + "");
 		dayPanel.add(naMonth);
 		dayPanel.add(naDay);
 
@@ -1057,11 +1064,18 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		dayPanel.setPreferredSize(new Dimension(479, 40));
 		startWeek = new JComboBox<>(monthAndDay);
 		startWeek.setFont(TEXTFIELDFONT);
-		startWeek.setPreferredSize(new Dimension(80, 30));
-		endWeek = new JComboBox<>(monthAndDay);
+		startWeek.setPreferredSize(new Dimension(90, 30));
+
+		Calendar cal = Calendar.getInstance();
+		cal.setMinimalDaysInFirstWeek(4);
+		System.out.println("Week in year: " + cal.get(Calendar.WEEK_OF_YEAR));
+		startWeek.setSelectedIndex(cal.get(Calendar.WEEK_OF_YEAR) - 1);
+
+		endWeek = new JComboBox<>(Arrays.asList(monthAndDay).subList(cal.get(Calendar.WEEK_OF_YEAR), monthAndDay.length)
+				.toArray(new String[0]));
 		endWeek.setFont(TEXTFIELDFONT);
-		endWeek.setPreferredSize(new Dimension(80, 30));
-		
+		endWeek.setPreferredSize(new Dimension(90, 30));
+
 		JLabel lab = new JLabel("Event Date");
 		lab.setPreferredSize(new Dimension(100, 30));
 		lab.setForeground(textColor);
@@ -1383,26 +1397,38 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				System.out.println("Dialog:2 " + pane.getValue());
 				if (pane.getValue() != null && pane.getValue().equals(options[0])) {
 					try {
-						System.out.println(yearOfCalendar);
-						int buttonIndex = 0;
 						int daysCount = 0;
-						for (int j = 0; j < scrollMonth; j++) {
-							daysCount = daysCount + daysPerMonth[j];
+						int buttonIndex = 0;
+						if (noRepCB != null && noRepCB.getSelectedObjects() != null) {
+							System.out.println("NA was selected.");
+							try {
+								if (daysPerMonth[naMonth.getSelectedIndex()] < Integer.parseInt(naDay.getText())
+										|| Integer.parseInt(naDay.getText()) < 1) {
+									throw new IllegalArgumentException();
+								}
+							} catch (Exception e2) {
+								throw new IllegalArgumentException("Invalid Date.");
+							}
+							for (int j = 0; j < naMonth.getSelectedIndex(); j++) {
+								daysCount = daysCount + daysPerMonth[j];
+							}
+							buttonIndex = daysCount + Integer.parseInt(naDay.getText()) - 1;
+							EventData newEvent = manager.createEvent((String) eventTextField.getText(),
+									(String) startTextField.getText(), (String) endTextField.getText(),
+									datePanel[buttonIndex].getDay(), datePanel[buttonIndex].getMonth(),
+									datePanel[buttonIndex].getYear(), ((Color) jcb.getSelectedItem()).getRed(),
+									((Color) jcb.getSelectedItem()).getGreen(),
+									((Color) jcb.getSelectedItem()).getBlue());
+							datePanel[buttonIndex].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
+									newEvent.getEndTime(), datePanel[buttonIndex].getDay(),
+									datePanel[buttonIndex].getMonth(), datePanel[buttonIndex].getYear(),
+									newEvent.getName(), newEvent.getColor().getRed(), newEvent.getColor().getGreen(),
+									newEvent.getColor().getBlue());
+						} else if (noRepCB.getSelectedObjects() == null && speCB.getSelectedObjects() == null) {
+							System.out.println("Weeks was selected.");
+						} else {
+							System.out.println("Custome was selected.");
 						}
-						// buttonIndex = daysCount + buttonCount - 1;
-						if (scrollMonth >= 1 && daysPerMonth[1] == 28) {
-							buttonIndex++;
-						}
-						EventData newEvent = manager.createEvent((String) eventTextField.getText(),
-								(String) startTextField.getText(), (String) endTextField.getText(),
-								datePanel[buttonIndex].getDay(), datePanel[buttonIndex].getMonth(),
-								datePanel[buttonIndex].getYear(), ((Color) jcb.getSelectedItem()).getRed(),
-								((Color) jcb.getSelectedItem()).getGreen(), ((Color) jcb.getSelectedItem()).getBlue());
-						datePanel[buttonIndex].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
-								newEvent.getEndTime(), datePanel[buttonIndex].getDay(),
-								datePanel[buttonIndex].getMonth(), datePanel[buttonIndex].getYear(), newEvent.getName(),
-								newEvent.getColor().getRed(), newEvent.getColor().getGreen(),
-								newEvent.getColor().getBlue());
 						screen.setVisible(true);
 						screen.repaint();
 						screen.validate();
