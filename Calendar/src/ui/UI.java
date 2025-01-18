@@ -468,6 +468,11 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		colorsBut.addActionListener(this);
 		colorsBut.setFont(new Font("Comic Sans", Font.BOLD, 25));
 		colorsBut.setMaximumSize(new Dimension(220, 40));
+		
+		JPanel dayRange = new JPanel();
+		dayRange.setBackground(Color.WHITE);
+		dayRange.setAlignmentX(Component.CENTER_ALIGNMENT);
+		dayRange.setBounds(5, 5, 5, 5);
 
 		createSmallCalendar(monthOfCalendar);
 
@@ -480,7 +485,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		westPanel.add(monthSmallLabel);
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 10), new Dimension(0, 10)));
 		westPanel.add(smallCalendar);
-		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 1), new Dimension(0, 1000)));
+		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 1), new Dimension(0, 10)));
+		westPanel.add(dayRange);
+		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 1), new Dimension(0, 980)));
 		westPanel.add(presetsBut);
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 50), new Dimension(0, 100)));
 		westPanel.add(colorsBut);
