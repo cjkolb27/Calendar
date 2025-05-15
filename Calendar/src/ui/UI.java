@@ -89,6 +89,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private JPanel dayPanel;
 	/** Scrolling panel */
 	private JPanel calendarScrollingPan;
+	/** Day Schedule */
+	private JPanel dayRange;
 	/** Environment Graphics */
 	private static GraphicsEnvironment env;
 	/** Default environment */
@@ -469,7 +471,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		colorsBut.setFont(new Font("Comic Sans", Font.BOLD, 25));
 		colorsBut.setMaximumSize(new Dimension(220, 40));
 		
-		JPanel dayRange = new JPanel();
+		dayRange = new JPanel();
 		dayRange.setBackground(Color.WHITE);
 		dayRange.setAlignmentX(Component.CENTER_ALIGNMENT);
 		dayRange.setBounds(5, 5, 5, 5);
