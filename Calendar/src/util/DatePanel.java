@@ -496,7 +496,7 @@ public class DatePanel implements ActionListener {
 			setYear(year);
 			this.event = event;
 			// button = new JButton("<html>" + start + " " + event + "</html>");
-			button = new JButton(start + " " + event);
+			button = new JButton(start + "-" + end + " " + event);
 			button.setContentAreaFilled(false);
 			button.setFocusable(false);
 			// button.setBorderPainted(false);
