@@ -44,12 +44,14 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.plaf.ColorUIResource;
+import javax.swing.table.TableColumn;
 import javax.swing.text.NumberFormatter;
 
 import events.EventData;
@@ -471,10 +473,20 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		colorsBut.setFont(new Font("Comic Sans", Font.BOLD, 25));
 		colorsBut.setMaximumSize(new Dimension(220, 40));
 		
+		// Set up day range
 		dayRange = new JPanel();
 		dayRange.setBackground(Color.WHITE);
 		dayRange.setAlignmentX(Component.CENTER_ALIGNMENT);
 		dayRange.setBounds(5, 5, 5, 5);
+		dayRange.setLayout(new GridLayout(24, 1));
+		for (int i = 0; i < 24; i++) {
+			String[][] data = {{"Something" + i}};
+			String[] something = {"Soemthing"};
+			JTable jt = new JTable(data, something);
+			TableColumn col = jt.getColumnModel().getColumn(0);
+			col.setPreferredWidth(30);
+			dayRange.add(jt);
+		}
 
 		createSmallCalendar(monthOfCalendar);
 
