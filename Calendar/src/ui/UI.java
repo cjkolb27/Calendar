@@ -1458,7 +1458,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 									i = 12;
 								}
 							}
-
 							int endMonthInt = 0;
 							for (int i = 0; i < 12; i++) {
 								if (ALLMONTHNAMES[i].substring(0, 3)

@@ -5,19 +5,7 @@
     <includePatterns/>
     <rules>
         <rule>
-            <name>JUnit4TestShouldUseAfterAnnotation</name>
-            <ruleset>Best Practices</ruleset>
-        </rule>
-        <rule>
-            <name>JUnit4TestShouldUseBeforeAnnotation</name>
-            <ruleset>Best Practices</ruleset>
-        </rule>
-        <rule>
-            <name>JUnit4TestShouldUseTestAnnotation</name>
-            <ruleset>Best Practices</ruleset>
-        </rule>
-        <rule>
-            <name>JUnitTestsShouldIncludeAssert</name>
+            <name>AbstractClassWithoutAbstractMethod</name>
             <ruleset>Best Practices</ruleset>
         </rule>
         <rule>
