@@ -473,7 +473,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		colorsBut.setFont(new Font("Comic Sans", Font.BOLD, 25));
 		colorsBut.setMaximumSize(new Dimension(220, 40));
 		
-		// Set up day range
+		// Set up day range 
 		dayRange = new JPanel();
 		dayRange.setBackground(Color.WHITE);
 		dayRange.setAlignmentX(Component.CENTER_ALIGNMENT);
