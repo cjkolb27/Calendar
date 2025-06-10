@@ -8,6 +8,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
+import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
@@ -475,6 +476,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		
 		// Set up day range 
 		dayRange = new JPanel();
+		Graphics g = dayRange.getGraphics();
+		g.drawRect(10, 10, 10, 10);
+		dayRange.paint(g);
 		dayRange.setBackground(Color.WHITE);
 		dayRange.setAlignmentX(Component.CENTER_ALIGNMENT);
 		dayRange.setBounds(5, 5, 5, 5);
