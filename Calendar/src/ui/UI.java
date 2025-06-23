@@ -4,6 +4,7 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -11,6 +12,8 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Toolkit;
@@ -476,20 +479,77 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		
 		// Set up day range 
 		dayRange = new JPanel();
-		Graphics g = dayRange.getGraphics();
-		g.drawRect(10, 10, 10, 10);
-		dayRange.paint(g);
+		
 		dayRange.setBackground(Color.WHITE);
-		dayRange.setAlignmentX(Component.CENTER_ALIGNMENT);
-		dayRange.setBounds(5, 5, 5, 5);
-		dayRange.setLayout(new GridLayout(24, 1));
-		for (int i = 0; i < 24; i++) {
-			String[][] data = {{"Something" + i}};
-			String[] something = {"Soemthing"};
-			JTable jt = new JTable(data, something);
-			TableColumn col = jt.getColumnModel().getColumn(0);
-			col.setPreferredWidth(30);
-			dayRange.add(jt);
+		//dayRange.setAlignmentX(Component.CENTER_ALIGNMENT);
+		//dayRange.setBounds(50, 5, 5, 5);
+		
+		dayRange.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.BOTH;
+//		c.gridx = 0;
+//		c.gridy = 0;
+//		//c.weighty = 0.3; // 30% of vertical space
+//		//c.weightx = 0.1;
+//		c.fill = GridBagConstraints.BOTH;
+//		JButton but1 = new JButton();
+//		but1.setBackground(Color.BLACK);
+//		but1.setPreferredSize(new Dimension(60, 50));
+//		dayRange.add(but1, c);
+//
+//		JButton but2 = new JButton();
+//		but2.setBackground(Color.BLACK);
+//		but2.setPreferredSize(new Dimension(60, 50));
+//		c.gridx = 1;
+//		c.gridy = 1;
+//		//c.weightx = 0.9;
+//		//c.weighty = 0.7; // 70% of vertical space
+//		dayRange.add(but2, c);
+//		for (int i = 0; i < 24; i++) {
+//			String[][] data = {{"Something" + i}};
+//			String[] something = {"Soemthing"};
+//			JTable jt = new JTable(data, something);
+//			TableColumn col = jt.getColumnModel().getColumn(0);
+//			col.setPreferredWidth(30);
+//			dayRange.add(jt);
+//		}
+		
+		c.weightx = 1.0;
+		c.weighty = 1.0;												
+		
+		for (int i = 0; i < 48; i++) {
+			JButton but1 = new JButton();
+			JButton but2 = new JButton();
+			JButton but3 = new JButton();
+			if (i % 2 == 0) {
+				but1.setBackground(Color.BLACK);
+				c.gridx = 0;
+				c.gridy = i;
+				c.gridwidth = 1;
+				c.gridheight = 1;
+				dayRange.add(but1, c);
+				
+				but2.setBackground(Color.BLUE);
+				c.gridx = 1;
+				c.gridy = i;
+				c.gridwidth = 3;
+				c.gridheight = 1;
+				dayRange.add(but2, c);
+				
+				but3.setBackground(Color.BLACK);
+				c.gridx = 4;
+				c.gridy = i;
+				c.gridwidth = 1;
+				c.gridheight = 1;
+				dayRange.add(but3, c);
+			} else {
+				but1.setBackground(Color.GRAY);
+				c.gridx = 0;
+				c.gridy = i;
+				c.gridwidth = 5;
+				c.gridheight = 1;
+				dayRange.add(but1, c);
+			}
 		}
 
 		createSmallCalendar(monthOfCalendar);
