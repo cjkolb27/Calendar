@@ -4,12 +4,10 @@ package ui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
-import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
@@ -48,14 +46,12 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
 import javax.swing.plaf.ColorUIResource;
-import javax.swing.table.TableColumn;
 import javax.swing.text.NumberFormatter;
 
 import events.EventData;
@@ -97,6 +93,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private JPanel calendarScrollingPan;
 	/** Day Schedule */
 	private JPanel dayRange;
+	/** Scroll pane for dayRange*/
+	private JScrollPane dayRangePane;
 	/** Environment Graphics */
 	private static GraphicsEnvironment env;
 	/** Default environment */
@@ -487,72 +485,101 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		dayRange.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
-//		c.gridx = 0;
-//		c.gridy = 0;
-//		//c.weighty = 0.3; // 30% of vertical space
-//		//c.weightx = 0.1;
-//		c.fill = GridBagConstraints.BOTH;
-//		JButton but1 = new JButton();
-//		but1.setBackground(Color.BLACK);
-//		but1.setPreferredSize(new Dimension(60, 50));
-//		dayRange.add(but1, c);
+        //c.insets = new Insets(5, 5, 5, 5);
+        
+//        JButton but1 = new JButton(" ");
+//        c.gridx = 0;
+//        c.gridy = 0;
+//        c.gridwidth = 1;
+//        dayRange.add(but1, c);
 //
-//		JButton but2 = new JButton();
-//		but2.setBackground(Color.BLACK);
-//		but2.setPreferredSize(new Dimension(60, 50));
-//		c.gridx = 1;
-//		c.gridy = 1;
-//		//c.weightx = 0.9;
-//		//c.weighty = 0.7; // 70% of vertical space
-//		dayRange.add(but2, c);
-//		for (int i = 0; i < 24; i++) {
-//			String[][] data = {{"Something" + i}};
-//			String[] something = {"Soemthing"};
-//			JTable jt = new JTable(data, something);
-//			TableColumn col = jt.getColumnModel().getColumn(0);
-//			col.setPreferredWidth(30);
-//			dayRange.add(jt);
-//		}
-		
+//        // Button 2 - 3 columns
+//        JButton but2 = new JButton(" ");
+//        c.gridx = 1;
+//        c.gridy = 0;
+//        c.gridwidth = 3;
+//        dayRange.add(but2, c);
+//
+//        // Button 3 - 1 column
+//        JButton but3 = new JButton(" ");
+//        c.gridx = 4;
+//        c.gridy = 0;
+//        c.gridwidth = 1;
+//        dayRange.add(but3, c);
+//
+//        // Button 4 - entire row (5 columns)
+//        JButton but4 = new JButton(" ");
+//        c.gridx = 0;
+//        c.gridy = 1;
+//        c.gridwidth = 5;
+//        c.gridheight = 16;
+//        dayRange.add(but4, c);
+        
 		c.weightx = 1.0;
-		c.weighty = 1.0;												
+		//c.weighty = 1.0;	
+		
+		for (int i = 0; i < 96; i++) {
+            c.gridx = 1;
+            c.gridy = i;
+            //c.weighty = 0.1;
+            c.gridwidth = 1;
+            c.gridheight = 1;
+            dayRange.add(Box.createVerticalStrut(10), c); // or JLabel(" ") or empty JPanel
+        }
 		
 		for (int i = 0; i < 48; i++) {
 			JButton but1 = new JButton();
+			JLabel jeb = new JLabel();
 			JButton but2 = new JButton();
 			JButton but3 = new JButton();
+			c.gridheight = 1;
 			if (i % 2 == 0) {
-				but1.setBackground(Color.BLACK);
+				if (i < 24) {
+					if (i == 0) {
+						jeb.setText("12 am");
+					} else
+						jeb.setText((i / 2) + " am");
+				} else {
+					if (i == 24) {
+						jeb.setText((i / 2) + " pm");
+					} else
+						jeb.setText(((i / 2) - 12) + " pm");
+				}
 				c.gridx = 0;
-				c.gridy = i;
+				c.gridy = i * 3;
 				c.gridwidth = 1;
-				c.gridheight = 1;
-				dayRange.add(but1, c);
+				dayRange.add(jeb, c);
 				
 				but2.setBackground(Color.BLUE);
 				c.gridx = 1;
-				c.gridy = i;
+				c.gridy = i * 3;
 				c.gridwidth = 3;
-				c.gridheight = 1;
-				dayRange.add(but2, c);
+				if (i == 0) {
+					c.gridheight = 30;
+					dayRange.add(but2, c);
+					c.gridheight = 1;
+				} else
+					dayRange.add(but2, c);
 				
 				but3.setBackground(Color.BLACK);
 				c.gridx = 4;
-				c.gridy = i;
+				c.gridy = i * 3;
 				c.gridwidth = 1;
-				c.gridheight = 1;
 				dayRange.add(but3, c);
 			} else {
 				but1.setBackground(Color.GRAY);
 				c.gridx = 0;
-				c.gridy = i;
+				c.gridy = 1 + ((i - 1) * 3);
 				c.gridwidth = 5;
-				c.gridheight = 1;
+				c.gridheight = 3;
 				dayRange.add(but1, c);
 			}
 		}
 
 		createSmallCalendar(monthOfCalendar);
+		dayRangePane = new JScrollPane(dayRange);
+		dayRangePane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		dayRangePane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 60), new Dimension(0, 60)));
 		westPanel.add(newEventBut);
@@ -564,7 +591,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 10), new Dimension(0, 10)));
 		westPanel.add(smallCalendar);
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 1), new Dimension(0, 10)));
-		westPanel.add(dayRange);
+		westPanel.add(dayRangePane);
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 1), new Dimension(0, 980)));
 		westPanel.add(presetsBut);
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 50), new Dimension(0, 100)));
