@@ -10,8 +10,6 @@ import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.Toolkit;
@@ -46,6 +44,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
@@ -58,6 +57,7 @@ import events.EventData;
 import manager.CalendarManager;
 import util.ColorData;
 import util.DatePanel;
+import util.DatePanel.DateButton;
 import util.JColorBox;
 import util.PresetData;
 import util.PresetStateMachine;
@@ -117,6 +117,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private static String[] monthAndDay;
 	/** Font for all JTextFields, JComboBoxes, and JLabels */
 	private static final Font TEXTFIELDFONT = new Font("Comic Sans", Font.PLAIN, 18);
+	/** Day Range Text Font*/
+	private static final Font DAYRANGEFONT = new Font("Arial", Font.PLAIN, 18);
 	/** Days per month */
 	private int[] daysPerMonth = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 	/** Weeks per month */
@@ -451,6 +453,71 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				.setValue((int) (((double) (scrollFrame.getVerticalScrollBar().getMaximum()) / (double) totalWeeks)
 						* ((double) (startWeekPerMonth[monthOfCalendar] - 1) - .3)));
 	}
+	
+	private void setDayRange(int day, int month) {
+		dayRange = new JPanel();
+		dayRange.setPreferredSize(new Dimension(300, 1450));
+		int count = 0;
+		for (int i = 0; i < month; i++) {
+			if (i == 1 && daysInCalendar == 365) {
+				count++;
+			}
+			count += daysPerMonth[i];
+		}
+		count += day - 1;
+		System.out.println("Count: " + count);
+		
+		dayRange.setBackground(oddMonthColor);
+		
+		SpringLayout dayRangeSpring = new SpringLayout();
+		dayRange.setLayout(dayRangeSpring);
+		
+		for (int i = 0; i < 24; i++) {
+			JLabel jeb = new JLabel();
+			JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
+			sep.setPreferredSize(new Dimension(300, 4));
+			jeb.setFont(DAYRANGEFONT);
+			jeb.setForeground(Color.WHITE);
+			if (i < 12) {
+				if (i == 0) {
+					jeb.setText("12 am");
+				} else
+					jeb.setText(i + " am");
+			} else {
+				if (i == 12) {
+					jeb.setText(i + " pm");
+				} else
+					jeb.setText((i - 12) + " pm");
+			}
+			dayRange.add(jeb);
+			dayRange.add(sep);
+			dayRangeSpring.putConstraint(SpringLayout.WEST, jeb, 5, SpringLayout.WEST, dayRange);
+			dayRangeSpring.putConstraint(SpringLayout.NORTH, jeb, 60 * i, SpringLayout.NORTH, dayRange);
+			dayRangeSpring.putConstraint(SpringLayout.WEST, sep, 10, SpringLayout.EAST, jeb);
+			dayRangeSpring.putConstraint(SpringLayout.NORTH, sep, (60 * i) + 10, SpringLayout.NORTH, dayRange);
+		}
+		int length = datePanel[count].size();
+		DateButton head = datePanel[count].getHead().next();
+		for (int i = 0; i < length; i++) {
+			int startHour = (head.getStartTime() / 100);
+			int startMin = (head.getStartTime() - (startHour * 100)) / 15;
+			int endHour = (head.getEndTime() / 100);
+			int endMin = (head.getEndTime() - (endHour * 100)) / 15;
+			
+			System.out.println("Event Start: " + startHour + " " + startMin + " End: " + endHour + " " + endMin);
+			
+			JButton event = new JButton();
+			event.setText("<html>" + head.getEvent() + "</html>");
+			event.setFont(DAYRANGEFONT);
+			event.setBackground(head.getColor());
+			event.setPreferredSize(new Dimension(165, ((endHour - startHour) * 60) - (startMin * 15) + (endMin * 15)));
+			dayRange.add(event);
+			dayRangeSpring.putConstraint(SpringLayout.WEST, event, 80, SpringLayout.WEST, dayRange);
+			dayRangeSpring.putConstraint(SpringLayout.NORTH, event, (startHour * 60) + 10 + (startMin * 15), SpringLayout.NORTH, dayRange);
+			dayRange.setComponentZOrder(event, 0);
+			head = head.next();
+		}
+	}
 
 	/**
 	 * Sets up the west panel using a BoxLayout to evenly distribute the buttons
@@ -476,110 +543,14 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		colorsBut.setMaximumSize(new Dimension(220, 40));
 		
 		// Set up day range 
-		dayRange = new JPanel();
-		
-		dayRange.setBackground(Color.WHITE);
-		//dayRange.setAlignmentX(Component.CENTER_ALIGNMENT);
-		//dayRange.setBounds(50, 5, 5, 5);
-		
-		dayRange.setLayout(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		c.fill = GridBagConstraints.BOTH;
-        //c.insets = new Insets(5, 5, 5, 5);
-        
-//        JButton but1 = new JButton(" ");
-//        c.gridx = 0;
-//        c.gridy = 0;
-//        c.gridwidth = 1;
-//        dayRange.add(but1, c);
-//
-//        // Button 2 - 3 columns
-//        JButton but2 = new JButton(" ");
-//        c.gridx = 1;
-//        c.gridy = 0;
-//        c.gridwidth = 3;
-//        dayRange.add(but2, c);
-//
-//        // Button 3 - 1 column
-//        JButton but3 = new JButton(" ");
-//        c.gridx = 4;
-//        c.gridy = 0;
-//        c.gridwidth = 1;
-//        dayRange.add(but3, c);
-//
-//        // Button 4 - entire row (5 columns)
-//        JButton but4 = new JButton(" ");
-//        c.gridx = 0;
-//        c.gridy = 1;
-//        c.gridwidth = 5;
-//        c.gridheight = 16;
-//        dayRange.add(but4, c);
-        
-		c.weightx = 1.0;
-		//c.weighty = 1.0;	
-		
-		for (int i = 0; i < 96; i++) {
-            c.gridx = 1;
-            c.gridy = i;
-            //c.weighty = 0.1;
-            c.gridwidth = 1;
-            c.gridheight = 1;
-            dayRange.add(Box.createVerticalStrut(10), c); // or JLabel(" ") or empty JPanel
-        }
-		
-		for (int i = 0; i < 48; i++) {
-			JButton but1 = new JButton();
-			JLabel jeb = new JLabel();
-			JButton but2 = new JButton();
-			JButton but3 = new JButton();
-			c.gridheight = 1;
-			if (i % 2 == 0) {
-				if (i < 24) {
-					if (i == 0) {
-						jeb.setText("12 am");
-					} else
-						jeb.setText((i / 2) + " am");
-				} else {
-					if (i == 24) {
-						jeb.setText((i / 2) + " pm");
-					} else
-						jeb.setText(((i / 2) - 12) + " pm");
-				}
-				c.gridx = 0;
-				c.gridy = i * 3;
-				c.gridwidth = 1;
-				dayRange.add(jeb, c);
-				
-				but2.setBackground(Color.BLUE);
-				c.gridx = 1;
-				c.gridy = i * 3;
-				c.gridwidth = 3;
-				if (i == 0) {
-					c.gridheight = 30;
-					dayRange.add(but2, c);
-					c.gridheight = 1;
-				} else
-					dayRange.add(but2, c);
-				
-				but3.setBackground(Color.BLACK);
-				c.gridx = 4;
-				c.gridy = i * 3;
-				c.gridwidth = 1;
-				dayRange.add(but3, c);
-			} else {
-				but1.setBackground(Color.GRAY);
-				c.gridx = 0;
-				c.gridy = 1 + ((i - 1) * 3);
-				c.gridwidth = 5;
-				c.gridheight = 3;
-				dayRange.add(but1, c);
-			}
-		}
+		setDayRange(Calendar.getInstance().get(Calendar.DAY_OF_MONTH), monthOfCalendar);
 
 		createSmallCalendar(monthOfCalendar);
 		dayRangePane = new JScrollPane(dayRange);
 		dayRangePane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		dayRangePane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		dayRangePane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		dayRangePane.getVerticalScrollBar().setUnitIncrement(32);
+		dayRangePane.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0));
 
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 60), new Dimension(0, 60)));
 		westPanel.add(newEventBut);
@@ -804,7 +775,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				while (currentData != null && currentData.getDay() == j + 1 && currentData.getMonth() == i + 1
 						&& currentData.getYear() == yearOfCalendar) {
 					datePanel[currentDay].addButton(currentData.getStartTime(), currentData.getStartInt(),
-							currentData.getEndTime(), currentData.getDay(), currentData.getMonth(),
+							currentData.getEndTime(), currentData.getEndInt(), currentData.getDay(), currentData.getMonth(),
 							currentData.getYear(), currentData.getName(), currentData.getColor().getRed(),
 							currentData.getColor().getGreen(), currentData.getColor().getBlue());
 
@@ -821,6 +792,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				currentDay++;
 			}
 			daysInCalendar = currentDay;
+		}
+		if (daysPerMonth[1] == 28) {
+			daysInCalendar--;
 		}
 		totalWeeks = currentWeek;
 		panel.setLayout(new GridLayout(totalWeeks, 7, 1, 1));
@@ -1535,7 +1509,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 									((Color) jcb.getSelectedItem()).getGreen(),
 									((Color) jcb.getSelectedItem()).getBlue());
 							datePanel[buttonIndex].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
-									newEvent.getEndTime(), datePanel[buttonIndex].getDay(),
+									newEvent.getEndTime(), newEvent.getEndInt(), datePanel[buttonIndex].getDay(),
 									datePanel[buttonIndex].getMonth(), datePanel[buttonIndex].getYear(),
 									newEvent.getName(), newEvent.getColor().getRed(), newEvent.getColor().getGreen(),
 									newEvent.getColor().getBlue());
@@ -1618,7 +1592,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 													((Color) jcb.getSelectedItem()).getGreen(),
 													((Color) jcb.getSelectedItem()).getBlue());
 											datePanel[i].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
-													newEvent.getEndTime(), datePanel[i].getDay(),
+													newEvent.getEndTime(), newEvent.getEndInt(), datePanel[i].getDay(),
 													datePanel[i].getMonth(), datePanel[i].getYear(), newEvent.getName(),
 													newEvent.getColor().getRed(), newEvent.getColor().getGreen(),
 													newEvent.getColor().getBlue());
@@ -2256,7 +2230,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 										((Color) jcb.getSelectedItem()).getGreen(),
 										((Color) jcb.getSelectedItem()).getBlue());
 								datePanel[i].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
-										newEvent.getEndTime(), datePanel[i].getDay(), datePanel[i].getMonth(),
+										newEvent.getEndTime(), newEvent.getEndInt(), datePanel[i].getDay(), datePanel[i].getMonth(),
 										datePanel[i].getYear(), newEvent.getName(), newEvent.getColor().getRed(),
 										newEvent.getColor().getGreen(), newEvent.getColor().getBlue());
 								screen.setVisible(true);
@@ -2400,7 +2374,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 										((Color) jcb.getSelectedItem()).getGreen(),
 										((Color) jcb.getSelectedItem()).getBlue());
 								datePanel[buttonIndex].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
-										newEvent.getEndTime(), datePanel[buttonIndex].getDay(),
+										newEvent.getEndTime(), newEvent.getEndInt(), datePanel[buttonIndex].getDay(),
 										datePanel[buttonIndex].getMonth(), datePanel[buttonIndex].getYear(),
 										newEvent.getName(), newEvent.getColor().getRed(),
 										newEvent.getColor().getGreen(), newEvent.getColor().getBlue());

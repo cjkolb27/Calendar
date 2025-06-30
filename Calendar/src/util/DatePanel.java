@@ -69,7 +69,7 @@ public class DatePanel implements ActionListener {
 		this.month = month;
 		this.year = year;
 		this.currentUI = currentUI;
-		head = new DateButton(null, 0, null, day, month, year, null, 0, 0, 0);
+		head = new DateButton(null, 0, null, 0, day, month, year, null, 0, 0, 0);
 		panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 		panel.setBackground(null);
@@ -128,6 +128,7 @@ public class DatePanel implements ActionListener {
 	 * @param start     the start time string
 	 * @param startTime the start time as an int
 	 * @param end       the end time string
+	 * @param endTime   the end time as an int
 	 * @param day       the day of the event
 	 * @param month     the month of the event
 	 * @param year      the year of the event
@@ -136,9 +137,9 @@ public class DatePanel implements ActionListener {
 	 * @param green     the green color
 	 * @param blue      the blue color
 	 */
-	public void addButton(String start, int startTime, String end, int day, int month, int year, String event, int red,
-			int green, int blue) {
-		DateButton newLabel = new DateButton(start, startTime, end, day, month, year, event, red, green, blue);
+	public void addButton(String start, int startTime, String end, int endTime, int day, int month, int year,
+			String event, int red, int green, int blue) {
+		DateButton newLabel = new DateButton(start, startTime, end, endTime, day, month, year, event, red, green, blue);
 		newLabel.getButton().addActionListener(this);
 		// newLabel.getButton().setPreferredSize(new Dimension(3, 0));
 		newLabel.getButton().setHorizontalAlignment(SwingConstants.LEFT);
@@ -179,6 +180,7 @@ public class DatePanel implements ActionListener {
 	 * @param originalStartTime the original start time being edited
 	 * @param startTime         the start time as an int
 	 * @param end               the end time string
+	 * @param endTime           the end time as an int
 	 * @param day               the day of the event
 	 * @param month             the month of the event
 	 * @param year              the year of the event
@@ -187,13 +189,13 @@ public class DatePanel implements ActionListener {
 	 * @param green             the green color
 	 * @param blue              the blue color
 	 */
-	public void editButton(String start, int originalStartTime, int startTime, String end, int day, int month, int year,
-			String event, int red, int green, int blue) {
+	public void editButton(String start, int originalStartTime, int startTime, String end, int endTime, int day,
+			int month, int year, String event, int red, int green, int blue) {
 		if (size == 0) {
 			return;
 		}
 		removeButton(originalStartTime);
-		addButton(start, startTime, end, day, month, year, event, red, green, blue);
+		addButton(start, startTime, end, endTime, day, month, year, event, red, green, blue);
 	}
 
 	/**
@@ -407,9 +409,9 @@ public class DatePanel implements ActionListener {
 										jtf1.getText(), jtf2.getText(), jtf3.getText(), getDay(), getMonth(), getYear(),
 										selectedColor.getRed(), selectedColor.getGreen(), selectedColor.getBlue());
 								editButton(newEvent.getStartTime(), current.getStartTime(), newEvent.getStartInt(),
-										newEvent.getEndTime(), getDay(), getMonth(), getYear(), newEvent.getName(),
-										newEvent.getColor().getRed(), newEvent.getColor().getGreen(),
-										newEvent.getColor().getBlue());
+										newEvent.getEndTime(), newEvent.getEndInt(), getDay(), getMonth(), getYear(),
+										newEvent.getName(), newEvent.getColor().getRed(),
+										newEvent.getColor().getGreen(), newEvent.getColor().getBlue());
 								currentUI.getScreen().setVisible(true);
 								currentUI.getScreen().repaint();
 								currentUI.getScreen().validate();
@@ -478,6 +480,7 @@ public class DatePanel implements ActionListener {
 		 * @param start     the start time string
 		 * @param startTime the start time as an int
 		 * @param end       the end time string
+		 * @param endTime   the end time as an int
 		 * @param day       the day of the event
 		 * @param month     the month of the event
 		 * @param year      the year of the event
@@ -486,11 +489,12 @@ public class DatePanel implements ActionListener {
 		 * @param green     the green color
 		 * @param blue      the blue color
 		 */
-		public DateButton(String start, int startTime, String end, int day, int month, int year, String event, int red,
-				int green, int blue) {
+		public DateButton(String start, int startTime, String end, int endTime, int day, int month, int year,
+				String event, int red, int green, int blue) {
 			setStart(start);
 			setStartTime(startTime);
 			setEnd(end);
+			setEndTime(endTime);
 			setDay(day);
 			setMonth(month);
 			setYear(year);
@@ -591,12 +595,48 @@ public class DatePanel implements ActionListener {
 		}
 
 		/**
+		 * Sets the end time int
+		 * 
+		 * @param endTime the end time as an int
+		 */
+		public void setEndTime(int endTime) {
+			this.endTime = endTime;
+		}
+
+		/**
 		 * Gets the start time
 		 * 
 		 * @return startTime the start time of the event
 		 */
 		public int getStartTime() {
 			return startTime;
+		}
+		
+		/**
+		 * Gets the end time
+		 * 
+		 * @return endTime the end time of the event
+		 */
+		public int getEndTime() {
+			return endTime;
+		}
+		
+		/**
+		 * Gets the start time string
+		 * 
+		 * @return startTime the start time of the event as a string
+		 */
+		public String getStart() {
+			return start;
+		}
+		
+		/**
+		 * Gets the end time string
+		 * 
+		 * @return endTime the end time of the event as a string
+		 */
+		public String getEnd() {
+			return end;
 		}
 
 		/**
@@ -624,6 +664,15 @@ public class DatePanel implements ActionListener {
 		 */
 		public Color getColor() {
 			return dateColor;
+		}
+		
+		/**
+		 * Gets the next event
+		 * 
+		 * @return next the event of the day
+		 */
+		public DateButton next() {
+			return next;
 		}
 
 		/**
