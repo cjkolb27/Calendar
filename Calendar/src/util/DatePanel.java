@@ -73,6 +73,7 @@ public class DatePanel implements ActionListener {
 		panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 		panel.setBackground(null);
+		size = 0;
 	}
 
 	/**
@@ -412,6 +413,10 @@ public class DatePanel implements ActionListener {
 										newEvent.getEndTime(), newEvent.getEndInt(), getDay(), getMonth(), getYear(),
 										newEvent.getName(), newEvent.getColor().getRed(),
 										newEvent.getColor().getGreen(), newEvent.getColor().getBlue());
+								if (currentUI.getDayRangeButton() == currentUI.getButtonConversion(newEvent.getDay(), newEvent.getMonth() - 1)) {
+									currentUI.setDayRange(newEvent.getDay(), newEvent.getMonth() - 1);
+									currentUI.getDayRangePane().setViewportView(currentUI.getDayRange());
+								}
 								currentUI.getScreen().setVisible(true);
 								currentUI.getScreen().repaint();
 								currentUI.getScreen().validate();
@@ -427,6 +432,10 @@ public class DatePanel implements ActionListener {
 								currentUI.getManager().removeEvent((double) (year + (((month * 31) + (day)) * .001)),
 										current.getStartTime());
 								removeButton(current.getStartTime());
+								if (currentUI.getDayRangeButton() == currentUI.getButtonConversion(current.getDay(), current.getMonth() - 1)) {
+									currentUI.setDayRange(current.getDay(), current.getMonth() - 1);
+									currentUI.getDayRangePane().setViewportView(currentUI.getDayRange());
+								}
 								currentUI.getScreen().setVisible(true);
 								currentUI.getScreen().repaint();
 								currentUI.getScreen().validate();

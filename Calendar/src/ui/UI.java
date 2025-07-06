@@ -93,7 +93,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private JPanel calendarScrollingPan;
 	/** Day Schedule */
 	private JPanel dayRange;
-	/** Scroll pane for dayRange*/
+	/** Scroll pane for dayRange */
 	private JScrollPane dayRangePane;
 	/** Environment Graphics */
 	private static GraphicsEnvironment env;
@@ -117,7 +117,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private static String[] monthAndDay;
 	/** Font for all JTextFields, JComboBoxes, and JLabels */
 	private static final Font TEXTFIELDFONT = new Font("Comic Sans", Font.PLAIN, 18);
-	/** Day Range Text Font*/
+	/** Day Range Text Font */
 	private static final Font DAYRANGEFONT = new Font("Arial", Font.PLAIN, 18);
 	/** Days per month */
 	private int[] daysPerMonth = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -233,6 +233,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private JLabel monthLabel;
 	/** Label for holding the month name */
 	private JLabel monthSmallLabel;
+	/** Day range scroll */
+	private int dayRangeScroll;
+	/** Day range button count */
+	private int dayRangeButton;
 	/** Year of calendar */
 	private int yearOfCalendar;
 	/** Month of calendar */
@@ -249,6 +253,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private double scrollHeight;
 	/** Determining if the preset is coming from the preset event menu */
 	private boolean presetEventMenu;
+	/** Has set up dayRange */
+	private boolean dayRangeSet;
 
 	/**
 	 * Creates the GUI for the user to interact with the CalendarManager
@@ -453,10 +459,42 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				.setValue((int) (((double) (scrollFrame.getVerticalScrollBar().getMaximum()) / (double) totalWeeks)
 						* ((double) (startWeekPerMonth[monthOfCalendar] - 1) - .3)));
 	}
-	
-	private void setDayRange(int day, int month) {
-		dayRange = new JPanel();
-		dayRange.setPreferredSize(new Dimension(300, 1450));
+
+	/**
+	 * Returns the dayRange
+	 * 
+	 * @return dayRange the day range
+	 */
+	public JPanel getDayRange() {
+		return dayRange;
+	}
+
+	/**
+	 * returns the dayRangePane
+	 * 
+	 * @return dayRangePane the day range scroll panel
+	 */
+	public JScrollPane getDayRangePane() {
+		return dayRangePane;
+	}
+
+	/**
+	 * Returns the day range button number
+	 * 
+	 * @return dayRangeButton the int of the button clicked
+	 */
+	public int getDayRangeButton() {
+		return dayRangeButton;
+	}
+
+	/**
+	 * Returns the offset of the button pressed
+	 * 
+	 * @param day the day of the event
+	 * @param month the month of the event
+	 * @return count the int of the button
+	 */
+	public int getButtonConversion(int day, int month) {
 		int count = 0;
 		for (int i = 0; i < month; i++) {
 			if (i == 1 && daysInCalendar == 365) {
@@ -465,13 +503,26 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			count += daysPerMonth[i];
 		}
 		count += day - 1;
+		return count;
+	}
+
+	/**
+	 * Sets the dayRange
+	 * 
+	 * @param day the day of the event
+	 * @param month the month of the event
+	 */
+	public void setDayRange(int day, int month) {
+		dayRange = new JPanel();
+		dayRange.setPreferredSize(new Dimension(300, 1450));
+		int count = getButtonConversion(day, month);
 		System.out.println("Count: " + count);
-		
+
 		dayRange.setBackground(oddMonthColor);
-		
+
 		SpringLayout dayRangeSpring = new SpringLayout();
 		dayRange.setLayout(dayRangeSpring);
-		
+
 		for (int i = 0; i < 24; i++) {
 			JLabel jeb = new JLabel();
 			JSeparator sep = new JSeparator(SwingConstants.HORIZONTAL);
@@ -496,16 +547,18 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			dayRangeSpring.putConstraint(SpringLayout.WEST, sep, 10, SpringLayout.EAST, jeb);
 			dayRangeSpring.putConstraint(SpringLayout.NORTH, sep, (60 * i) + 10, SpringLayout.NORTH, dayRange);
 		}
+		dayRangeButton = count;
 		int length = datePanel[count].size();
 		DateButton head = datePanel[count].getHead().next();
+		System.out.println("Again: " + count);
 		for (int i = 0; i < length; i++) {
 			int startHour = (head.getStartTime() / 100);
 			int startMin = (head.getStartTime() - (startHour * 100)) / 15;
 			int endHour = (head.getEndTime() / 100);
 			int endMin = (head.getEndTime() - (endHour * 100)) / 15;
-			
+
 			System.out.println("Event Start: " + startHour + " " + startMin + " End: " + endHour + " " + endMin);
-			
+
 			JButton event = new JButton();
 			event.setText("<html>" + head.getEvent() + "</html>");
 			event.setFont(DAYRANGEFONT);
@@ -513,10 +566,13 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			event.setPreferredSize(new Dimension(165, ((endHour - startHour) * 60) - (startMin * 15) + (endMin * 15)));
 			dayRange.add(event);
 			dayRangeSpring.putConstraint(SpringLayout.WEST, event, 80, SpringLayout.WEST, dayRange);
-			dayRangeSpring.putConstraint(SpringLayout.NORTH, event, (startHour * 60) + 10 + (startMin * 15), SpringLayout.NORTH, dayRange);
+			dayRangeSpring.putConstraint(SpringLayout.NORTH, event, (startHour * 60) + 10 + (startMin * 15),
+					SpringLayout.NORTH, dayRange);
 			dayRange.setComponentZOrder(event, 0);
 			head = head.next();
+			System.out.println("Another i = " + i);
 		}
+		
 	}
 
 	/**
@@ -541,8 +597,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		colorsBut.addActionListener(this);
 		colorsBut.setFont(new Font("Comic Sans", Font.BOLD, 25));
 		colorsBut.setMaximumSize(new Dimension(220, 40));
-		
-		// Set up day range 
+
+		// Set up day range
 		setDayRange(Calendar.getInstance().get(Calendar.DAY_OF_MONTH), monthOfCalendar);
 
 		createSmallCalendar(monthOfCalendar);
@@ -568,6 +624,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 50), new Dimension(0, 100)));
 		westPanel.add(colorsBut);
 		westPanel.add(new Box.Filler(new Dimension(0, 1), new Dimension(0, 20), new Dimension(0, 20)));
+		dayRangePane.getVerticalScrollBar().setValue(0);
 	}
 
 	/**
@@ -775,9 +832,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				while (currentData != null && currentData.getDay() == j + 1 && currentData.getMonth() == i + 1
 						&& currentData.getYear() == yearOfCalendar) {
 					datePanel[currentDay].addButton(currentData.getStartTime(), currentData.getStartInt(),
-							currentData.getEndTime(), currentData.getEndInt(), currentData.getDay(), currentData.getMonth(),
-							currentData.getYear(), currentData.getName(), currentData.getColor().getRed(),
-							currentData.getColor().getGreen(), currentData.getColor().getBlue());
+							currentData.getEndTime(), currentData.getEndInt(), currentData.getDay(),
+							currentData.getMonth(), currentData.getYear(), currentData.getName(),
+							currentData.getColor().getRed(), currentData.getColor().getGreen(),
+							currentData.getColor().getBlue());
 
 					if (it.hasNext()) {
 						currentData = it.next();
@@ -2230,9 +2288,15 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 										((Color) jcb.getSelectedItem()).getGreen(),
 										((Color) jcb.getSelectedItem()).getBlue());
 								datePanel[i].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
-										newEvent.getEndTime(), newEvent.getEndInt(), datePanel[i].getDay(), datePanel[i].getMonth(),
-										datePanel[i].getYear(), newEvent.getName(), newEvent.getColor().getRed(),
-										newEvent.getColor().getGreen(), newEvent.getColor().getBlue());
+										newEvent.getEndTime(), newEvent.getEndInt(), datePanel[i].getDay(),
+										datePanel[i].getMonth(), datePanel[i].getYear(), newEvent.getName(),
+										newEvent.getColor().getRed(), newEvent.getColor().getGreen(),
+										newEvent.getColor().getBlue());
+								System.out.println("Soemthing: " + dayRangeButton + i);
+								if (dayRangeButton == i) {
+									setDayRange(newEvent.getDay(), newEvent.getMonth() - 1);
+									dayRangePane.setViewportView(dayRange);
+								}
 								screen.setVisible(true);
 								screen.repaint();
 								screen.validate();
