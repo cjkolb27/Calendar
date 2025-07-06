@@ -12,6 +12,7 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.MouseInfo;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -131,6 +132,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private JButton[] smallMonthButtons;
 	/** Buttons for every calendar day */
 	private JButton[] buttons;
+	/** Day Range buttons */
+	private JButton[] dayRangeButtons;
 	/** Add button for west panel */
 	private JButton addColorBut;
 	/** Delete button for west panel */
@@ -490,7 +493,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	/**
 	 * Returns the offset of the button pressed
 	 * 
-	 * @param day the day of the event
+	 * @param day   the day of the event
 	 * @param month the month of the event
 	 * @return count the int of the button
 	 */
@@ -509,7 +512,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	/**
 	 * Sets the dayRange
 	 * 
-	 * @param day the day of the event
+	 * @param day   the day of the event
 	 * @param month the month of the event
 	 */
 	public void setDayRange(int day, int month) {
@@ -549,6 +552,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		}
 		dayRangeButton = count;
 		int length = datePanel[count].size();
+		dayRangeButtons = new JButton[length];
+		System.out.println("Button Count: " + dayRangeButtons.length);
 		DateButton head = datePanel[count].getHead().next();
 		System.out.println("Again: " + count);
 		for (int i = 0; i < length; i++) {
@@ -559,20 +564,22 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 
 			System.out.println("Event Start: " + startHour + " " + startMin + " End: " + endHour + " " + endMin);
 
-			JButton event = new JButton();
-			event.setText("<html>" + head.getEvent() + "</html>");
-			event.setFont(DAYRANGEFONT);
-			event.setBackground(head.getColor());
-			event.setPreferredSize(new Dimension(165, ((endHour - startHour) * 60) - (startMin * 15) + (endMin * 15)));
-			dayRange.add(event);
-			dayRangeSpring.putConstraint(SpringLayout.WEST, event, 80, SpringLayout.WEST, dayRange);
-			dayRangeSpring.putConstraint(SpringLayout.NORTH, event, (startHour * 60) + 10 + (startMin * 15),
-					SpringLayout.NORTH, dayRange);
-			dayRange.setComponentZOrder(event, 0);
+			dayRangeButtons[i] = new JButton();
+			dayRangeButtons[i].addActionListener(this);
+			dayRangeButtons[i].setText("<html>" + head.getEvent() + "</html>");
+			dayRangeButtons[i].setFont(DAYRANGEFONT);
+			dayRangeButtons[i].setBackground(head.getColor());
+			dayRangeButtons[i].setPreferredSize(
+					new Dimension(165, ((endHour - startHour) * 60) - (startMin * 15) + (endMin * 15)));
+			dayRange.add(dayRangeButtons[i]);
+			dayRangeSpring.putConstraint(SpringLayout.WEST, dayRangeButtons[i], 80, SpringLayout.WEST, dayRange);
+			dayRangeSpring.putConstraint(SpringLayout.NORTH, dayRangeButtons[i],
+					(startHour * 60) + 10 + (startMin * 15), SpringLayout.NORTH, dayRange);
+			dayRange.setComponentZOrder(dayRangeButtons[i], 0);
 			head = head.next();
 			System.out.println("Another i = " + i);
 		}
-		
+
 	}
 
 	/**
@@ -2305,6 +2312,176 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 								JOptionPane.showMessageDialog(screen, e1.getMessage());
 								tryEvent = true;
 							}
+						}
+					}
+				}
+			}
+			if (dayRangeButtons != null) {
+				for (int i = 0; i < dayRangeButtons.length; i++) {
+					if (e.getSource() == dayRangeButtons[i]) {
+						DateButton but = datePanel[dayRangeButton].getHead().next();
+						for (int j = 0; j < i; j++) {
+							but = but.next();
+						}
+						Dimension textFieldSize = new Dimension(151, 20);
+						Dimension labelSize = new Dimension(75, 20);
+
+						JLabel col = new JLabel("Event Color");
+						col.setPreferredSize(labelSize);
+						col.setForeground(getTextColor());
+						JLabel pre = new JLabel("Preset Event");
+						pre.setPreferredSize(labelSize);
+						pre.setForeground(getTextColor());
+						JLabel lab1 = new JLabel("Event Name");
+						lab1.setPreferredSize(labelSize);
+						lab1.setForeground(getTextColor());
+						eventTextField = new JTextField(but.getEvent());
+						eventTextField.setPreferredSize(textFieldSize);
+						JLabel lab2 = new JLabel("Start Time");
+						lab2.setPreferredSize(labelSize);
+						lab2.setForeground(getTextColor());
+						startTextField = new JTextField(but.getStart());
+						startTextField.setPreferredSize(textFieldSize);
+						JLabel lab3 = new JLabel("End Time");
+						lab3.setPreferredSize(labelSize);
+						lab3.setForeground(getTextColor());
+						endTextField = new JTextField(but.getEnd());
+						endTextField.setPreferredSize(textFieldSize);
+						JPanel pan = new JPanel();
+						pan.setPreferredSize(new Dimension(100, 135));
+						SpringLayout layout = new SpringLayout();
+						pan.setLayout(layout);
+
+						jcb = getJCB();
+						jcb.setSelectedItem(but.getColor());
+						// jcb.setBounds(100, 20, 140, 30);
+						jcb.setPreferredSize(new Dimension(30, 20));
+						jcb.setFocusable(false);
+						jcb.setBorder(BorderFactory.createLineBorder(but.getColor(), 200));
+						jcb.setForeground(null);
+
+						Component[] c = jcb.getComponents();
+						for (Component res : c) {
+							if (res instanceof AbstractButton) {
+								if (res.isVisible()) {
+									res.setVisible(false);
+								}
+							}
+						}
+
+						preset = new JComboBox<>(getPresetOptions().getStringPresets());
+						preset.setPreferredSize(textFieldSize);
+						preset.setSelectedIndex(-1);
+						preset.setFocusable(false);
+						preset.addActionListener(this);
+
+						pan.add(col);
+						pan.add(jcb);
+						layout.putConstraint(SpringLayout.WEST, col, 5, SpringLayout.WEST, pan);
+						layout.putConstraint(SpringLayout.NORTH, col, 5, SpringLayout.NORTH, pan);
+						layout.putConstraint(SpringLayout.WEST, jcb, 5, SpringLayout.EAST, col);
+						layout.putConstraint(SpringLayout.NORTH, jcb, 5, SpringLayout.NORTH, pan);
+
+						pan.add(pre);
+						pan.add(preset);
+						layout.putConstraint(SpringLayout.WEST, pre, 5, SpringLayout.WEST, pan);
+						layout.putConstraint(SpringLayout.NORTH, pre, 30, SpringLayout.NORTH, col);
+						layout.putConstraint(SpringLayout.WEST, preset, 5, SpringLayout.EAST, pre);
+						layout.putConstraint(SpringLayout.NORTH, preset, 30, SpringLayout.NORTH, jcb);
+
+						pan.add(lab1);
+						pan.add(eventTextField);
+						layout.putConstraint(SpringLayout.WEST, lab1, 5, SpringLayout.WEST, pan);
+						layout.putConstraint(SpringLayout.NORTH, lab1, 30, SpringLayout.NORTH, pre);
+						layout.putConstraint(SpringLayout.WEST, eventTextField, 5, SpringLayout.EAST, lab1);
+						layout.putConstraint(SpringLayout.NORTH, eventTextField, 30, SpringLayout.NORTH, preset);
+
+						pan.add(lab2);
+						pan.add(startTextField);
+						layout.putConstraint(SpringLayout.WEST, lab2, 5, SpringLayout.WEST, pan);
+						layout.putConstraint(SpringLayout.NORTH, lab2, 24, SpringLayout.NORTH, lab1);
+						layout.putConstraint(SpringLayout.WEST, startTextField, 5, SpringLayout.EAST, lab2);
+						layout.putConstraint(SpringLayout.NORTH, startTextField, 24, SpringLayout.NORTH, eventTextField);
+
+						pan.add(lab3);
+						pan.add(endTextField);
+						layout.putConstraint(SpringLayout.WEST, lab3, 5, SpringLayout.WEST, pan);
+						layout.putConstraint(SpringLayout.NORTH, lab3, 24, SpringLayout.NORTH, lab2);
+						layout.putConstraint(SpringLayout.WEST, endTextField, 5, SpringLayout.EAST, lab3);
+						layout.putConstraint(SpringLayout.NORTH, endTextField, 24, SpringLayout.NORTH, startTextField);
+
+						boolean tryEvent = true;
+						while (tryEvent) {
+							tryEvent = false;
+							String[] choices = { "Update", "Delete", "Cancel" };
+							Color selectedColor = new Color(255, 153, 161);
+							JFrame frame = new JFrame("Parent Frame");
+							frame.setLocation(MouseInfo.getPointerInfo().getLocation());
+							frame.setUndecorated(true);    
+							frame.setSize(1, 1);       
+							frame.setOpacity(0f); 
+							frame.setVisible(true);  
+							int optionSelected = JOptionPane.showOptionDialog(frame, pan,
+									"Edit Event (" + datePanel[dayRangeButton].getDateString() + ")",
+									JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices,
+									choices[0]);
+							frame.dispose();
+							try {
+								// selectedColor =
+								// currentUI.getColorOptions().getColors()[jcb.getSelectedIndex()];
+								selectedColor = (Color) jcb.getSelectedItem();
+							} catch (Exception e2) {
+								selectedColor = new Color(255, 153, 161);
+							}
+							if (optionSelected == 0) {
+								try {
+									EventData newEvent = getManager().editEvent(
+											(double) (but.getYear()
+													+ (((but.getMonth() * 31) + (but.getDay())) * .001)),
+											but.getStartTime(), eventTextField.getText(), startTextField.getText(), endTextField.getText(),
+											but.getDay(), but.getMonth(), but.getYear(), selectedColor.getRed(),
+											selectedColor.getGreen(), selectedColor.getBlue());
+									datePanel[dayRangeButton].editButton(newEvent.getStartTime(), but.getStartTime(),
+											newEvent.getStartInt(), newEvent.getEndTime(), newEvent.getEndInt(),
+											but.getDay(), but.getMonth(), but.getYear(), newEvent.getName(),
+											newEvent.getColor().getRed(), newEvent.getColor().getGreen(),
+											newEvent.getColor().getBlue());
+									if (getDayRangeButton() == getButtonConversion(newEvent.getDay(),
+											newEvent.getMonth() - 1)) {
+										setDayRange(newEvent.getDay(), newEvent.getMonth() - 1);
+										getDayRangePane().setViewportView(getDayRange());
+									}
+									getScreen().setVisible(true);
+									getScreen().repaint();
+									getScreen().validate();
+									return;
+								} catch (Exception e1) {
+									startTextField.setText(but.getStart());
+									endTextField.setText(but.getEnd());
+									JOptionPane.showMessageDialog(getScreen(), e1.getMessage());
+									tryEvent = true;
+								}
+							} else if (optionSelected == 1) {
+								try {
+									getManager().removeEvent(
+											(double) (but.getYear()
+													+ (((but.getMonth() * 31) + (but.getDay())) * .001)),
+											but.getStartTime());
+									datePanel[dayRangeButton].removeButton(but.getStartTime());
+									if (getDayRangeButton() == getButtonConversion(but.getDay(), but.getMonth() - 1)) {
+										setDayRange(but.getDay(), but.getMonth() - 1);
+										getDayRangePane().setViewportView(getDayRange());
+									}
+									getScreen().setVisible(true);
+									getScreen().repaint();
+									getScreen().validate();
+									return;
+								} catch (Exception e2) {
+									JOptionPane.showMessageDialog(getScreen(), e2.getMessage());
+									tryEvent = true;
+								}
+							}
+							i = dayRangeButtons.length;
 						}
 					}
 				}
