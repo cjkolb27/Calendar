@@ -21,6 +21,10 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -55,6 +59,7 @@ import javax.swing.plaf.ColorUIResource;
 import javax.swing.text.NumberFormatter;
 
 import events.EventData;
+import io.NetworkIO;
 import manager.CalendarManager;
 import util.ColorData;
 import util.DatePanel;
@@ -104,6 +109,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private static CalendarManager manager;
 	/** Title GUI */
 	private static final String PROGRAM_TITLE = "Calendar";
+	/** Connection version */
+	private static final String CONNECTION_VERSION = "Ver1.0";
 	/** All month names */
 	private static final String[] ALLMONTHNAMES = { "January", "Febuary", "March", "April", "May", "June", "July",
 			"August", "September", "October", "November", "December" };
@@ -258,6 +265,14 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private boolean presetEventMenu;
 	/** Has set up dayRange */
 	private boolean dayRangeSet;
+	/** Connect to online */
+	private boolean connectOnline;
+	/** Socket */
+	private Socket socket;
+	/** Hostname of the server */
+	private String hostname;
+	/** Port number of the server */
+	private int port;
 
 	/**
 	 * Creates the GUI for the user to interact with the CalendarManager
@@ -313,6 +328,48 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 
 		screen.repaint();
 		screen.validate();
+		String[] hostport = NetworkIO.readNetworkIO(new File(System.getProperty("user.home") + File.separator + "Documents"
+				+ File.separator + "CalendarData" + File.separator + "NetworkIO.txt"));
+		if (hostport != null) {
+			connectOnline = true;
+			try {
+				hostname = hostport[0];
+				port = Integer.parseInt(hostport[1]);
+				System.out.println("Hostname: " + hostname + " Port: " + port);
+			} catch(Exception e) {
+				connectOnline = false;
+			}
+		} else {
+			connectOnline = false;
+		}
+		
+		Thread t = new Thread(() -> {
+			System.out.println("Thread Starting");
+			while(connectOnline) {
+				try {
+					System.out.println("Creating Socket");
+					socket = new Socket(hostname, port);
+					System.out.println("Socket Created");
+					OutputStream output = socket.getOutputStream();
+					PrintWriter writer = new PrintWriter(output, true);
+					String host = InetAddress.getLocalHost().getHostName();
+					writer.print("Post " + CONNECTION_VERSION + "\r\nHost: " + host + "\r\n");
+					writer.close();
+					
+					socket.close();
+					while(true) {
+						break;
+					}
+					connectOnline = false;
+				} catch (Exception e) {
+					connectOnline = false;
+					e.printStackTrace();
+				}
+			}
+			System.out.println("Thread Closing");
+		});
+		t.setDaemon(true);
+		t.start();
 	}
 
 	/**
