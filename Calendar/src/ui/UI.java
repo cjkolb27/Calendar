@@ -20,14 +20,20 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.Scanner;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -267,12 +273,18 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private boolean dayRangeSet;
 	/** Connect to online */
 	private boolean connectOnline;
-	/** Socket */
-	private Socket socket;
+	/** Server Socket */
+	private static Socket serverSocket;
+	/** Client Socket */
+	private static ServerSocket clientSocket;
 	/** Hostname of the server */
 	private String hostname;
 	/** Port number of the server */
-	private int port;
+	private int serverPort;
+	/** Port number of the client */
+	private int clientPort;
+	/** PrintWriter for writing to the server */
+	private static PrintWriter writeToServer;
 
 	/**
 	 * Creates the GUI for the user to interact with the CalendarManager
@@ -328,45 +340,62 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 
 		screen.repaint();
 		screen.validate();
-		String[] hostport = NetworkIO.readNetworkIO(new File(System.getProperty("user.home") + File.separator + "Documents"
-				+ File.separator + "CalendarData" + File.separator + "NetworkIO.txt"));
+		String[] hostport = NetworkIO.readNetworkIO(new File(System.getProperty("user.home") + File.separator
+				+ "Documents" + File.separator + "CalendarData" + File.separator + "NetworkIO.txt"));
 		if (hostport != null) {
 			connectOnline = true;
 			try {
 				hostname = hostport[0];
-				port = Integer.parseInt(hostport[1]);
-				System.out.println("Hostname: " + hostname + " Port: " + port);
-			} catch(Exception e) {
+				serverPort = Integer.parseInt(hostport[1]);
+				System.out.println("Hostname: " + hostname + " Port: " + serverPort);
+			} catch (Exception e) {
 				connectOnline = false;
 			}
 		} else {
 			connectOnline = false;
 		}
-		
+
 		Thread t = new Thread(() -> {
 			System.out.println("Thread Starting");
-			while(connectOnline) {
+			if (connectOnline) {
 				try {
-					System.out.println("Creating Socket");
-					socket = new Socket(hostname, port);
-					System.out.println("Socket Created");
-					OutputStream output = socket.getOutputStream();
-					PrintWriter writer = new PrintWriter(output, true);
+					System.out.println("Creating Sockets");
+					serverSocket = new Socket(hostname, serverPort);
+					clientSocket = new ServerSocket(0);
+					clientPort = clientSocket.getLocalPort();
+
+					Thread t2 = new Thread(() -> {
+						try {
+							System.out.println("Client Listening");
+							Socket serverConnection = clientSocket.accept();
+							System.out.println("Listening complete");
+							InputStream input = serverConnection.getInputStream();
+							Scanner scanner = new Scanner(input);
+							String message;
+							while((message = scanner.nextLine()) != null) {
+								System.out.println(message);
+							}
+							System.out.println("Client connection closed.");
+						} catch (Exception e) {
+							connectOnline = false;
+							e.printStackTrace();
+						}
+					});
+					t2.setDaemon(true);
+					t2.start();
+
+					System.out.println("Sockets Created");
+					OutputStream output = serverSocket.getOutputStream();
+					writeToServer = new PrintWriter(output, true);
 					String host = InetAddress.getLocalHost().getHostName();
-					writer.print("Post " + CONNECTION_VERSION + "\r\nHost: " + host + "\r\n");
-					writer.close();
-					
-					socket.close();
-					while(true) {
-						break;
-					}
-					connectOnline = false;
+					writeToServer.print("Post " + CONNECTION_VERSION + "\r\nHost: " + host + "\r\nPort: " + clientPort + "\r\n\r\n");
+					writeToServer.flush();
+					System.out.println("Write complete");
 				} catch (Exception e) {
 					connectOnline = false;
 					e.printStackTrace();
 				}
 			}
-			System.out.println("Thread Closing");
 		});
 		t.setDaemon(true);
 		t.start();
@@ -379,6 +408,22 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	 */
 	public static void main(String[] args) {
 		new UI();
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			try {
+				if (serverSocket != null && !serverSocket.isClosed()) {
+					serverSocket.close();
+				}
+				if (clientSocket != null && !clientSocket.isClosed()) {
+					clientSocket.close();
+				}
+				if (writeToServer != null) {
+					writeToServer.close();
+				}
+				System.out.println("Program is closed.");
+			} catch (Exception e) {
+				// Nothing
+			}
+		}));
 	}
 
 	/**
@@ -2458,7 +2503,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 						layout.putConstraint(SpringLayout.WEST, lab2, 5, SpringLayout.WEST, pan);
 						layout.putConstraint(SpringLayout.NORTH, lab2, 24, SpringLayout.NORTH, lab1);
 						layout.putConstraint(SpringLayout.WEST, startTextField, 5, SpringLayout.EAST, lab2);
-						layout.putConstraint(SpringLayout.NORTH, startTextField, 24, SpringLayout.NORTH, eventTextField);
+						layout.putConstraint(SpringLayout.NORTH, startTextField, 24, SpringLayout.NORTH,
+								eventTextField);
 
 						pan.add(lab3);
 						pan.add(endTextField);
@@ -2474,10 +2520,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 							Color selectedColor = new Color(255, 153, 161);
 							JFrame frame = new JFrame("Parent Frame");
 							frame.setLocation(MouseInfo.getPointerInfo().getLocation());
-							frame.setUndecorated(true);    
-							frame.setSize(1, 1);       
-							frame.setOpacity(0f); 
-							frame.setVisible(true);  
+							frame.setUndecorated(true);
+							frame.setSize(1, 1);
+							frame.setOpacity(0f);
+							frame.setVisible(true);
 							int optionSelected = JOptionPane.showOptionDialog(frame, pan,
 									"Edit Event (" + datePanel[dayRangeButton].getDateString() + ")",
 									JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, choices,
@@ -2495,9 +2541,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 									EventData newEvent = getManager().editEvent(
 											(double) (but.getYear()
 													+ (((but.getMonth() * 31) + (but.getDay())) * .001)),
-											but.getStartTime(), eventTextField.getText(), startTextField.getText(), endTextField.getText(),
-											but.getDay(), but.getMonth(), but.getYear(), selectedColor.getRed(),
-											selectedColor.getGreen(), selectedColor.getBlue());
+											but.getStartTime(), eventTextField.getText(), startTextField.getText(),
+											endTextField.getText(), but.getDay(), but.getMonth(), but.getYear(),
+											selectedColor.getRed(), selectedColor.getGreen(), selectedColor.getBlue());
 									datePanel[dayRangeButton].editButton(newEvent.getStartTime(), but.getStartTime(),
 											newEvent.getStartInt(), newEvent.getEndTime(), newEvent.getEndInt(),
 											but.getDay(), but.getMonth(), but.getYear(), newEvent.getName(),
