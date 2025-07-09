@@ -7,7 +7,6 @@ import java.util.Iterator;
 import org.junit.jupiter.api.Test;
 
 import events.EventData;
-import manager.CalendarManager;
 
 /**
  * Test class for testing SortedDateList
@@ -21,9 +20,9 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testSortedDateList() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>();
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
 		assertEquals(0, s.size());
-		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100);
+		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, true);
 		s.add(e, e.getDate(), e.getStartInt());
 		assertEquals(1, s.size());
 		assertEquals(e, s.get(2024.384, 15));
@@ -34,17 +33,17 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testAdd() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>();
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
 		assertThrows(NullPointerException.class, () -> s.add(null, 2.2, 0));
-		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100);
-		EventData e2 = new EventData("Job", "1220a", "415p", 12, 12, 2024, 100, 100, 100);
+		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, true);
+		EventData e2 = new EventData("Job", "1220a", "415p", 12, 12, 2024, 100, 100, 100, true);
 		s.add(e, e.getDate(), e.getStartInt());
 		s.add(e2, e2.getDate(), e2.getStartInt());
 		assertEquals(2, s.size());
 
-		SortedDateList<EventData> s2 = new SortedDateList<EventData>();
-		EventData e3 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100);
-		EventData e4 = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100);
+		SortedDateList<EventData> s2 = new SortedDateList<EventData>(0);
+		EventData e3 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100, true);
+		EventData e4 = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, true);
 		s2.add(e3, e3.getDate(), e3.getStartInt());
 		s2.add(e4, e4.getDate(), e4.getStartInt());
 		assertEquals(2, s2.size());
@@ -55,10 +54,10 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testGet() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>();
-		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100);
-		EventData e2 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100);
-		EventData e3 = new EventData("Job", "1215a", "415p", 14, 12, 2024, 100, 100, 100);
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
+		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, true);
+		EventData e2 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100, true);
+		EventData e3 = new EventData("Job", "1215a", "415p", 14, 12, 2024, 100, 100, 100, true);
 		s.add(e, e.getDate(), e.getStartInt());
 		assertEquals(e, s.get(e.getDate(), e.getStartInt()));
 
@@ -79,10 +78,10 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testGetAtIndex() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>();
-		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100);
-		EventData e2 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100);
-		EventData e3 = new EventData("Job", "1215a", "415p", 14, 12, 2024, 100, 100, 100);
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
+		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, true);
+		EventData e2 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100, true);
+		EventData e3 = new EventData("Job", "1215a", "415p", 14, 12, 2024, 100, 100, 100, true);
 		s.add(e, e.getDate(), e.getStartInt());
 		assertEquals(e, s.getAtIndex(0));
 
@@ -101,10 +100,10 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testRemoveE() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>();
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
 		assertThrows(NullPointerException.class, () -> s.removeE(null, 0));
 
-		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100);
+		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, true);
 		assertThrows(IllegalArgumentException.class, () -> s.removeE(e, e.getStartInt()));
 		assertEquals(0, s.size());
 
@@ -112,22 +111,22 @@ class SortedDateListTest {
 		s.removeE(e, e.getStartInt());
 		assertEquals(0, s.size());
 
-		EventData e2 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100);
+		EventData e2 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100, true);
 		s.add(e, e.getDate(), e.getStartInt());
 		s.add(e2, e2.getDate(), e2.getStartInt());
 		s.removeE(e, e.getStartInt());
 		assertEquals(1, s.size());
 
-		SortedDateList<EventData> s2 = new SortedDateList<EventData>();
-		EventData e3 = new EventData("Job", "1215a", "415p", 14, 12, 2024, 100, 100, 100);
+		SortedDateList<EventData> s2 = new SortedDateList<EventData>(0);
+		EventData e3 = new EventData("Job", "1215a", "415p", 14, 12, 2024, 100, 100, 100, true);
 		s2.add(e, e.getDate(), e.getStartInt());
 		s2.add(e2, e2.getDate(), e2.getStartInt());
 		s2.add(e3, e3.getDate(), e3.getStartInt());
 		s2.removeE(e, e.getStartInt());
 		assertEquals(2, s2.size());
 
-		SortedDateList<EventData> s3 = new SortedDateList<EventData>();
-		EventData e4 = new EventData("Job", "1215a", "415p", 9, 12, 2024, 100, 100, 100);
+		SortedDateList<EventData> s3 = new SortedDateList<EventData>(0);
+		EventData e4 = new EventData("Job", "1215a", "415p", 9, 12, 2024, 100, 100, 100, true);
 		s3.add(e, e.getDate(), e.getStartInt());
 		s3.add(e2, e2.getDate(), e2.getStartInt());
 		s3.add(e3, e3.getDate(), e3.getStartInt());
@@ -138,9 +137,9 @@ class SortedDateListTest {
 
 		assertThrows(IllegalArgumentException.class, () -> s.removeE(e4, e4.getStartInt()));
 
-		EventData e5 = new EventData("Job", "1215a", "415p", 8, 12, 2024, 100, 100, 100);
-		EventData e6 = new EventData("Job", "1215a", "415p", 15, 12, 2024, 100, 100, 100);
-		EventData e7 = new EventData("Job", "1215a", "415p", 19, 12, 2024, 100, 100, 100);
+		EventData e5 = new EventData("Job", "1215a", "415p", 8, 12, 2024, 100, 100, 100, true);
+		EventData e6 = new EventData("Job", "1215a", "415p", 15, 12, 2024, 100, 100, 100, true);
+		EventData e7 = new EventData("Job", "1215a", "415p", 19, 12, 2024, 100, 100, 100, true);
 		s3.add(e7, e7.getDate(), e7.getStartInt());
 		s3.add(e5, e5.getDate(), e5.getStartInt());
 		s3.add(e6, e6.getDate(), e6.getStartInt());
@@ -160,8 +159,8 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testRemoveD() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>();
-		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100);
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
+		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, true);
 		assertThrows(IllegalArgumentException.class, () -> s.removeD(2024.384, e.getStartInt()));
 		assertEquals(0, s.size());
 
@@ -169,22 +168,22 @@ class SortedDateListTest {
 		s.removeD(e.getDate(), e.getStartInt());
 		assertEquals(0, s.size());
 
-		EventData e2 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100);
+		EventData e2 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100, true);
 		s.add(e, e.getDate(), e.getStartInt());
 		s.add(e2, e2.getDate(), e2.getStartInt());
 		s.removeD(e.getDate(), e.getStartInt());
 		assertEquals(1, s.size());
 
-		SortedDateList<EventData> s2 = new SortedDateList<EventData>();
-		EventData e3 = new EventData("Job", "1215a", "415p", 14, 12, 2024, 100, 100, 100);
+		SortedDateList<EventData> s2 = new SortedDateList<EventData>(0);
+		EventData e3 = new EventData("Job", "1215a", "415p", 14, 12, 2024, 100, 100, 100, true);
 		s2.add(e, e.getDate(), e.getStartInt());
 		s2.add(e2, e2.getDate(), e2.getStartInt());
 		s2.add(e3, e3.getDate(), e3.getStartInt());
 		s2.removeD(e.getDate(), e.getStartInt());
 		assertEquals(2, s2.size());
 
-		SortedDateList<EventData> s3 = new SortedDateList<EventData>();
-		EventData e4 = new EventData("Job", "1215a", "415p", 9, 12, 2024, 100, 100, 100);
+		SortedDateList<EventData> s3 = new SortedDateList<EventData>(0);
+		EventData e4 = new EventData("Job", "1215a", "415p", 9, 12, 2024, 100, 100, 100, true);
 		s3.add(e, e.getDate(), e.getStartInt());
 		s3.add(e2, e2.getDate(), e2.getStartInt());
 		s3.add(e3, e3.getDate(), e3.getStartInt());
@@ -195,9 +194,9 @@ class SortedDateListTest {
 
 		assertThrows(IllegalArgumentException.class, () -> s.removeD(e4.getDate(), e4.getStartInt()));
 
-		EventData e5 = new EventData("Job", "1215a", "415p", 8, 12, 2024, 100, 100, 100);
-		EventData e6 = new EventData("Job", "1215a", "415p", 15, 12, 2024, 100, 100, 100);
-		EventData e7 = new EventData("Job", "1215a", "415p", 19, 12, 2024, 100, 100, 100);
+		EventData e5 = new EventData("Job", "1215a", "415p", 8, 12, 2024, 100, 100, 100, true);
+		EventData e6 = new EventData("Job", "1215a", "415p", 15, 12, 2024, 100, 100, 100, true);
+		EventData e7 = new EventData("Job", "1215a", "415p", 19, 12, 2024, 100, 100, 100, true);
 		s3.add(e7, e7.getDate(), e7.getStartInt());
 		s3.add(e5, e5.getDate(), e5.getStartInt());
 		s3.add(e6, e6.getDate(), e6.getStartInt());
@@ -217,7 +216,7 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testSize() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>();
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
 		assertEquals(0, s.size());
 	}
 
@@ -226,8 +225,8 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testIterator() {
-		SortedDateList<EventData> sdl = new SortedDateList<EventData>();
-		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100);
+		SortedDateList<EventData> sdl = new SortedDateList<EventData>(0);
+		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, true);
 		sdl.add(e, e.getDate(), e.getStartInt());
 		Iterator<EventData> it = sdl.iterator();
 		assertTrue(sdl.iterator().hasNext());

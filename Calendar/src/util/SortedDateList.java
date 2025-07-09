@@ -15,11 +15,14 @@ public class SortedDateList<E> {
 	ListNode back;
 	/** Size of list */
 	private int size;
+	/** Version history of list */
+	private int version;
 
 	/**
 	 * Sets the size of the list to 0, and sets front/back to null
 	 */
-	public SortedDateList() {
+	public SortedDateList(int version) {
+		this.version = version;
 		size = 0;
 		front = null;
 		back = null;
@@ -260,6 +263,24 @@ public class SortedDateList<E> {
 	 */
 	public int size() {
 		return size;
+	}
+	
+	/**
+	 * Returns the version history of the calendar
+	 * 
+	 * @return version the version of the calendar
+	 */
+	public int getVersion() {
+		return version;
+	}
+	
+	/**
+	 * Sets the version history
+	 * 
+	 * @param version the version of the calendar
+	 */
+	public void setVersion(int version) {
+		this.version = version;
 	}
 
 	/**

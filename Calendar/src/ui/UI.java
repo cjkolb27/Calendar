@@ -30,6 +30,8 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -372,7 +374,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 							InputStream input = serverConnection.getInputStream();
 							Scanner scanner = new Scanner(input);
 							String message;
-							while((message = scanner.nextLine()) != null) {
+							while((message = scanner.nextLine()) != null && connectOnline) {
 								System.out.println(message);
 							}
 							System.out.println("Client connection closed.");
@@ -388,7 +390,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 					OutputStream output = serverSocket.getOutputStream();
 					writeToServer = new PrintWriter(output, true);
 					String host = InetAddress.getLocalHost().getHostName();
-					writeToServer.print("Post " + CONNECTION_VERSION + "\r\nHost: " + host + "\r\nPort: " + clientPort + "\r\n\r\n");
+					writeToServer.print("Post " + CONNECTION_VERSION + "\r\nHost: " + host + "\r\nPort: " + clientPort + "\r\n*]*START*[*\r\n" + manager.getYear() + ".txt\r\n" + Files.readString(Path.of(manager.getPath())) + "*]*END*[*\r\n\r\n");
 					writeToServer.flush();
 					System.out.println("Write complete");
 				} catch (Exception e) {
@@ -412,12 +414,15 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			try {
 				if (serverSocket != null && !serverSocket.isClosed()) {
 					serverSocket.close();
+					System.out.println("ServerSocket is closed.");
 				}
 				if (clientSocket != null && !clientSocket.isClosed()) {
 					clientSocket.close();
+					System.out.println("ClientSocket is closed.");
 				}
 				if (writeToServer != null) {
 					writeToServer.close();
+					System.out.println("WriteToServer is closed.");
 				}
 				System.out.println("Program is closed.");
 			} catch (Exception e) {
@@ -1960,7 +1965,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 					try {
 						System.out.println("Current State: " + current);
 						EventData newEvent = new EventData(eventTextField.getText(), startTextField.getText(),
-								endTextField.getText(), 1, 1, 1, 2, 2, 2);
+								endTextField.getText(), 1, 1, 1, 2, 2, 2, false);
 						if (!presetOptions.duplicatePreset(newEvent.getName(), newEvent.getStartTime(),
 								newEvent.getEndTime(), (Color) jcb.getSelectedItem())) {
 							System.out.println(":[");
@@ -2006,7 +2011,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 						System.out.println("Current State5: " + presetState.getState());
 						int presetIndex = preset.getSelectedIndex();
 						EventData newEvent = new EventData(eventTextField.getText(), startTextField.getText(),
-								endTextField.getText(), 1, 1, 1, 2, 2, 2);
+								endTextField.getText(), 1, 1, 1, 2, 2, 2, false);
 						if (presetOptions.duplicatePreset(newEvent.getName(), newEvent.getStartTime(),
 								newEvent.getEndTime(), (Color) jcb.getSelectedItem())) {
 							presetOptions.removePreset(presetOptions.getPresets()[presetIndex].getName(),
@@ -2543,7 +2548,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 													+ (((but.getMonth() * 31) + (but.getDay())) * .001)),
 											but.getStartTime(), eventTextField.getText(), startTextField.getText(),
 											endTextField.getText(), but.getDay(), but.getMonth(), but.getYear(),
-											selectedColor.getRed(), selectedColor.getGreen(), selectedColor.getBlue());
+											selectedColor.getRed(), selectedColor.getGreen(), selectedColor.getBlue(), false);
 									datePanel[dayRangeButton].editButton(newEvent.getStartTime(), but.getStartTime(),
 											newEvent.getStartInt(), newEvent.getEndTime(), newEvent.getEndInt(),
 											but.getDay(), but.getMonth(), but.getYear(), newEvent.getName(),

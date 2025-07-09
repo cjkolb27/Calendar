@@ -408,7 +408,7 @@ public class DatePanel implements ActionListener {
 								EventData newEvent = currentUI.getManager().editEvent(
 										(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime(),
 										jtf1.getText(), jtf2.getText(), jtf3.getText(), getDay(), getMonth(), getYear(),
-										selectedColor.getRed(), selectedColor.getGreen(), selectedColor.getBlue());
+										selectedColor.getRed(), selectedColor.getGreen(), selectedColor.getBlue(), false);
 								editButton(newEvent.getStartTime(), current.getStartTime(), newEvent.getStartInt(),
 										newEvent.getEndTime(), newEvent.getEndInt(), getDay(), getMonth(), getYear(),
 										newEvent.getName(), newEvent.getColor().getRed(),

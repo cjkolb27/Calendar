@@ -17,7 +17,7 @@ class EventDataTest {
 	 */
 	@Test
 	void testEventData() {
-		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 30, 100, 100, 100);
+		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 30, 100, 100, 100, true);
 		assertEquals("Job", e.getName());
 		assertEquals("12:15am", e.getStartTime());
 		assertEquals("4:15pm", e.getEndTime());
@@ -31,12 +31,12 @@ class EventDataTest {
 	 */
 	@Test
 	void testGetName() {
-		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 30, 100, 100, 100);
+		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 30, 100, 100, 100, true);
 		assertEquals("Job", e.getName());
 		assertThrows(IllegalArgumentException.class,
-				() -> new EventData("", "1215am", "415pm", 12, 12, 30, 100, 100, 100));
+				() -> new EventData("", "1215am", "415pm", 12, 12, 30, 100, 100, 100, true));
 		assertThrows(IllegalArgumentException.class,
-				() -> new EventData(null, "1215a", "415p", 12, 12, 30, 100, 100, 100));
+				() -> new EventData(null, "1215a", "415p", 12, 12, 30, 100, 100, 100, true));
 	}
 
 	/**
@@ -44,11 +44,11 @@ class EventDataTest {
 	 */
 	@Test
 	void testGetStartTime() {
-		EventData e = new EventData("Job", "1215a", "415pm", 12, 12, 30, 100, 100, 100);
+		EventData e = new EventData("Job", "1215a", "415pm", 12, 12, 30, 100, 100, 100, true);
 		assertEquals("12:15am", e.getStartTime());
-		assertThrows(IllegalArgumentException.class, () -> new EventData("Job", "", "415p", 12, 12, 30, 100, 100, 100));
+		assertThrows(IllegalArgumentException.class, () -> new EventData("Job", "", "415p", 12, 12, 30, 100, 100, 100, true));
 		assertThrows(IllegalArgumentException.class,
-				() -> new EventData("Job", null, "415p", 12, 12, 30, 100, 100, 100));
+				() -> new EventData("Job", null, "415p", 12, 12, 30, 100, 100, 100, true));
 		assertEquals(15, e.getStartInt());
 	}
 
@@ -57,11 +57,11 @@ class EventDataTest {
 	 */
 	@Test
 	void testGetEndTime() {
-		EventData e = new EventData("Job", "1215am", "415pm", 12, 12, 30, 100, 100, 100);
+		EventData e = new EventData("Job", "1215am", "415pm", 12, 12, 30, 100, 100, 100, true);
 		assertEquals("4:15pm", e.getEndTime());
-		assertThrows(IllegalArgumentException.class, () -> new EventData("Job", "415p", "", 12, 12, 30, 100, 100, 100));
+		assertThrows(IllegalArgumentException.class, () -> new EventData("Job", "415p", "", 12, 12, 30, 100, 100, 100, true));
 		assertThrows(IllegalArgumentException.class,
-				() -> new EventData("Job", "415p", null, 12, 12, 30, 100, 100, 100));
+				() -> new EventData("Job", "415p", null, 12, 12, 30, 100, 100, 100, true));
 		assertEquals(1615, e.getEndInt());
 	}
 
@@ -70,48 +70,48 @@ class EventDataTest {
 	 */
 	@Test
 	void testGetDay() {
-		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 30, 100, 100, 100);
+		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 30, 100, 100, 100, true);
 		assertEquals(12, e.getDay());
 		assertThrows(IllegalArgumentException.class,
-				() -> new EventData("Job", "415p", "415p", 32, 12, 30, 100, 100, 100));
+				() -> new EventData("Job", "415p", "415p", 32, 12, 30, 100, 100, 100, true));
 		assertThrows(IllegalArgumentException.class,
-				() -> new EventData("Job", "415p", "415p", 0, 12, 30, 100, 100, 100));
+				() -> new EventData("Job", "415p", "415p", 0, 12, 30, 100, 100, 100, true));
 
-		EventData e2 = new EventData("Job", "1215a", "415p", 12, 11, 30, 100, 100, 100);
+		EventData e2 = new EventData("Job", "1215a", "415p", 12, 11, 30, 100, 100, 100, true);
 		assertEquals(12, e2.getDay());
 
-		EventData e3 = new EventData("Job", "1215a", "415p", 12, 10, 30, 100, 100, 100);
+		EventData e3 = new EventData("Job", "1215a", "415p", 12, 10, 30, 100, 100, 100, true);
 		assertEquals(12, e3.getDay());
 
-		EventData e4 = new EventData("Job", "1215a", "415p", 12, 9, 30, 100, 100, 100);
+		EventData e4 = new EventData("Job", "1215a", "415p", 12, 9, 30, 100, 100, 100, true);
 		assertEquals(12, e4.getDay());
 
-		EventData e5 = new EventData("Job", "1215a", "415p", 12, 8, 30, 100, 100, 100);
+		EventData e5 = new EventData("Job", "1215a", "415p", 12, 8, 30, 100, 100, 100, true);
 		assertEquals(12, e5.getDay());
 
-		EventData e6 = new EventData("Job", "1215a", "415p", 12, 7, 30, 100, 100, 100);
+		EventData e6 = new EventData("Job", "1215a", "415p", 12, 7, 30, 100, 100, 100, true);
 		assertEquals(12, e6.getDay());
 
-		EventData e7 = new EventData("Job", "1215a", "415p", 12, 6, 30, 100, 100, 100);
+		EventData e7 = new EventData("Job", "1215a", "415p", 12, 6, 30, 100, 100, 100, true);
 		assertEquals(12, e7.getDay());
 
-		EventData e8 = new EventData("Job", "1215a", "415p", 12, 5, 30, 100, 100, 100);
+		EventData e8 = new EventData("Job", "1215a", "415p", 12, 5, 30, 100, 100, 100, true);
 		assertEquals(12, e8.getDay());
 
-		EventData e9 = new EventData("Job", "1215a", "415p", 12, 4, 30, 100, 100, 100);
+		EventData e9 = new EventData("Job", "1215a", "415p", 12, 4, 30, 100, 100, 100, true);
 		assertEquals(12, e9.getDay());
 		assertThrows(IllegalArgumentException.class,
-				() -> new EventData("Job", "415p", "415p", 32, 4, 30, 100, 100, 100));
+				() -> new EventData("Job", "415p", "415p", 32, 4, 30, 100, 100, 100, true));
 
-		EventData e10 = new EventData("Job", "1215a", "415p", 12, 3, 30, 100, 100, 100);
+		EventData e10 = new EventData("Job", "1215a", "415p", 12, 3, 30, 100, 100, 100, true);
 		assertEquals(12, e10.getDay());
 
-		EventData e11 = new EventData("Job", "1215a", "415p", 12, 2, 30, 100, 100, 100);
+		EventData e11 = new EventData("Job", "1215a", "415p", 12, 2, 30, 100, 100, 100, true);
 		assertEquals(12, e11.getDay());
 		assertThrows(IllegalArgumentException.class,
-				() -> new EventData("Job", "415p", "415p", 32, 2, 30, 100, 100, 100));
+				() -> new EventData("Job", "415p", "415p", 32, 2, 30, 100, 100, 100, true));
 
-		EventData e12 = new EventData("Job", "1215a", "415p", 12, 1, 30, 100, 100, 100);
+		EventData e12 = new EventData("Job", "1215a", "415p", 12, 1, 30, 100, 100, 100, true);
 		assertEquals(12, e12.getDay());
 	}
 
@@ -120,12 +120,12 @@ class EventDataTest {
 	 */
 	@Test
 	void testGetMonth() {
-		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 30, 100, 100, 100);
+		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 30, 100, 100, 100, true);
 		assertEquals(12, e.getMonth());
 		assertThrows(IllegalArgumentException.class,
-				() -> new EventData("Job", "415p", "415p", 12, 13, 30, 100, 100, 100));
+				() -> new EventData("Job", "415p", "415p", 12, 13, 30, 100, 100, 100, true));
 		assertThrows(IllegalArgumentException.class,
-				() -> new EventData("Job", "415p", "415p", 12, 0, 30, 100, 100, 100));
+				() -> new EventData("Job", "415p", "415p", 12, 0, 30, 100, 100, 100, true));
 	}
 
 	/**
@@ -133,7 +133,7 @@ class EventDataTest {
 	 */
 	@Test
 	void testGetYear() {
-		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 30, 100, 100, 100);
+		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 30, 100, 100, 100, true);
 		assertEquals(30, e.getYear());
 	}
 
@@ -142,10 +142,10 @@ class EventDataTest {
 	 */
 	@Test
 	void testGetDate() {
-		EventData e1 = new EventData("Job", "1215a", "415p", 12, 12, 2023, 100, 100, 100);
-		EventData e2 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100);
-		EventData e3 = new EventData("Job", "1215a", "415p", 12, 11, 2023, 100, 100, 100);
-		EventData e4 = new EventData("Job", "1215a", "415p", 11, 12, 2023, 100, 100, 100);
+		EventData e1 = new EventData("Job", "1215a", "415p", 12, 12, 2023, 100, 100, 100, true);
+		EventData e2 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100, true);
+		EventData e3 = new EventData("Job", "1215a", "415p", 12, 11, 2023, 100, 100, 100, true);
+		EventData e4 = new EventData("Job", "1215a", "415p", 11, 12, 2023, 100, 100, 100, true);
 		assertEquals(2023.384, e1.getDate());
 		assertTrue(e1.getDate() < e2.getDate());
 		assertTrue(e1.getDate() > e3.getDate());
@@ -158,8 +158,8 @@ class EventDataTest {
 	 */
 	@Test
 	void testEditData() {
-		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 30, 100, 100, 100);
-		EventData e1 = new EventData("Job", "1215a", "415p", 12, 12, 2023, 100, 100, 100);
+		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 30, 100, 100, 100, true);
+		EventData e1 = new EventData("Job", "1215a", "415p", 12, 12, 2023, 100, 100, 100, true);
 		assertTrue(e.getDate() < e1.getDate());
 		e.editData("Job", "12:15a", "4:15p", 12, 12, 30, 100, 100, 100);
 		assertEquals("Job", e.getName());

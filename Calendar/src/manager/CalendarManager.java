@@ -22,8 +22,10 @@ public class CalendarManager {
 
 	/** Current year */
 	private int year = 0;
-	/** null path */
+	/** Path to calendar data */
 	private String path = null;
+	/** Path change log */
+	private String pathChangeLog = null;
 	/** Sorted list for holding events */
 	private SortedDateList<EventData> eventYearList;
 	/** Array of all settings */
@@ -37,18 +39,31 @@ public class CalendarManager {
 	 */
 	public CalendarManager() {
 		allSettings = new String[2];
-		eventYearList = new SortedDateList<EventData>();
+		eventYearList = new SortedDateList<EventData>(0);
 		year = Year.now().getValue();
 		loadSettings();
 		path = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "CalendarData"
 				+ File.separator + year + ".txt";
+		pathChangeLog = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "CalendarData"
+				+ File.separator + year + "_changes.txt";
 		System.out.println(path);
 		try {
-			new File(path).createNewFile();
+			if (!new File(path).exists()) {
+				new File(path).createNewFile();
+				PrintStream fileWriter = new PrintStream(new File(path));
+				fileWriter.print("1\n");
+				fileWriter.close();
+			}
+			if (!new File(pathChangeLog).exists()) {
+				new File(pathChangeLog).createNewFile();
+				PrintStream fileWriter = new PrintStream(new File(pathChangeLog));
+				fileWriter.print("0\n");
+				fileWriter.close();
+			}
 		} catch (IOException e) {
 			throw new IllegalArgumentException("No Calendar Files Exist\n");
 		}
-		eventYearList = CalendarReader.readCalendar(new File(path));
+		eventYearList = CalendarReader.readCalendar(new File(path), new File(pathChangeLog));
 	}
 
 	/**
@@ -57,13 +72,15 @@ public class CalendarManager {
 	 * @param debugYear the year set for debugging
 	 */
 	public CalendarManager(int debugYear) {
-		eventYearList = new SortedDateList<EventData>();
+		eventYearList = new SortedDateList<EventData>(0);
 		year = debugYear;
 		path = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "CalendarData"
 				+ File.separator + year + ".txt";
+		pathChangeLog = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "CalendarData"
+				+ File.separator + year + "_changes.txt";
 		try {
 			new File(path).createNewFile();
-			eventYearList = CalendarReader.readCalendar(new File(path));
+			eventYearList = CalendarReader.readCalendar(new File(path), new File(pathChangeLog));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -131,17 +148,30 @@ public class CalendarManager {
 	 * @param yearAdd the year to load calendar
 	 */
 	public void loadCalendar(int yearAdd) {
-		eventYearList = new SortedDateList<EventData>();
+		eventYearList = new SortedDateList<EventData>(0);
 		year += yearAdd;
 		System.out.println("Something" + year);
 		path = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "CalendarData"
 				+ File.separator + year + ".txt";
+		pathChangeLog = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "CalendarData"
+				+ File.separator + year + "_changes.txt";
 		try {
-			new File(path).createNewFile();
+			if (!new File(path).exists()) {
+				new File(path).createNewFile();
+				PrintStream fileWriter = new PrintStream(new File(path));
+				fileWriter.print("1\n");
+				fileWriter.close();
+			}
+			if (!new File(pathChangeLog).exists()) {
+				new File(pathChangeLog).createNewFile();
+				PrintStream fileWriter = new PrintStream(new File(pathChangeLog));
+				fileWriter.print("0\n");
+				fileWriter.close();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		eventYearList = CalendarReader.readCalendar(new File(path));
+		eventYearList = CalendarReader.readCalendar(new File(path), new File(pathChangeLog));
 	}
 
 	/**
@@ -150,14 +180,14 @@ public class CalendarManager {
 	 * @param name the name of the file
 	 */
 	public void loadCalendarByName(String name) {
-		eventYearList = new SortedDateList<EventData>();
+		eventYearList = new SortedDateList<EventData>(0);
 		path = name;
 		try {
 			new File(path).createNewFile();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		eventYearList = CalendarReader.readCalendar(new File(path));
+		eventYearList = CalendarReader.readCalendar(new File(path), new File(pathChangeLog));
 	}
 
 	/**
@@ -165,7 +195,7 @@ public class CalendarManager {
 	 */
 	public void saveCalendar() {
 		try {
-			CalendarWriter.writeCalendar(new File(path), eventYearList);
+			CalendarWriter.writeCalendar(new File(path), eventYearList, new File(pathChangeLog));
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e.getMessage());
 		}
@@ -196,7 +226,7 @@ public class CalendarManager {
 	 */
 	public EventData createEvent(String name, String startTime, String endTime, int day, int month, int year, int red,
 			int green, int blue) {
-		EventData newEvent = new EventData(name, startTime, endTime, day, month, year, red, green, blue);
+		EventData newEvent = new EventData(name, startTime, endTime, day, month, year, red, green, blue, false);
 		if (year != this.year) {
 			throw new IllegalArgumentException("Year does not match current year");
 		}
@@ -224,13 +254,15 @@ public class CalendarManager {
 	 * @param red           the red color
 	 * @param blue          the blue color
 	 * @param green         the green color
+	 * @param synced        the synced boolean
 	 * @return EventData the event edited
 	 */
 	public EventData editEvent(double originalDate, int originalStart, String name, String startTime, String endTime,
-			int day, int month, int year, int red, int green, int blue) {
+			int day, int month, int year, int red, int green, int blue, boolean synced) {
 		try {
-			EventData newEvent = new EventData(name, startTime, endTime, day, month, year, red, green, blue);
-			if (!eventYearList.checkValue(originalDate, newEvent.getStartInt()) && newEvent.getStartInt() != originalStart) {
+			EventData newEvent = new EventData(name, startTime, endTime, day, month, year, red, green, blue, synced);
+			if (!eventYearList.checkValue(originalDate, newEvent.getStartInt())
+					&& newEvent.getStartInt() != originalStart) {
 				throw new IllegalArgumentException("Duplicate Dates when Editing");
 			}
 			eventYearList.removeD(originalDate, originalStart);
@@ -265,7 +297,7 @@ public class CalendarManager {
 	 */
 	public void clearCalendar() {
 		saveCalendar();
-		eventYearList = new SortedDateList<EventData>();
+		eventYearList = new SortedDateList<EventData>(0);
 	}
 
 	/**
@@ -283,7 +315,7 @@ public class CalendarManager {
 	public void deleteCalendar() {
 		try {
 			PrintStream fileWriter = new PrintStream(new File(path));
-			fileWriter.print("\n");
+			fileWriter.print("1\n");
 			fileWriter.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -299,5 +331,14 @@ public class CalendarManager {
 	 */
 	public String[] defaultSettings() {
 		return allSettings;
+	}
+
+	/**
+	 * Returns the path to the current year
+	 * 
+	 * @return path the path to the calendar data
+	 */
+	public String getPath() {
+		return path;
 	}
 }

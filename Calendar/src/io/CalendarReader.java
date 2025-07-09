@@ -20,12 +20,15 @@ public class CalendarReader {
 	 * Reads a given file and outputs data into a Sorted list
 	 * 
 	 * @param file the file to read
+	 * @param changeFile the change log file to read
 	 * @return list the list of sorted dates
 	 */
-	public static SortedDateList<EventData> readCalendar(File file) {
-		SortedDateList<EventData> list = new SortedDateList<EventData>();
+	public static SortedDateList<EventData> readCalendar(File file, File changeFile) {
+		SortedDateList<EventData> list = new SortedDateList<EventData>(0);
 		try {
 			Scanner scanner = new Scanner(file);
+			list.setVersion(scanner.nextInt());
+			scanner.nextLine();
 			while (scanner.hasNextLine() && scanner.hasNext()) {
 				scanner.useDelimiter("@@");
 				try {
@@ -41,13 +44,37 @@ public class CalendarReader {
 					if (scanner.hasNextLine()) {
 						scanner.nextLine();
 					}
-					EventData eventData = new EventData(name, startTime, endTime, day, month, year, red, green, blue);
+					EventData eventData = new EventData(name, startTime, endTime, day, month, year, red, green, blue, true);
 					list.add(eventData, eventData.getDate(), eventData.getStartInt());
 				} catch (Exception e) {
 					// Nothing
 				}
 			}
 			scanner.close();
+			Scanner scanner2 = new Scanner(changeFile);
+			scanner2.nextLine();
+			while (scanner2.hasNextLine() && scanner2.hasNext()) {
+				scanner2.useDelimiter("@@");
+				try {
+					String name = scanner2.next();
+					String startTime = scanner2.next();
+					String endTime = scanner2.next();
+					int day = scanner2.nextInt();
+					int month = scanner2.nextInt();
+					int year = scanner2.nextInt();
+					int red = scanner2.nextInt();
+					int green = scanner2.nextInt();
+					int blue = scanner2.nextInt();
+					if (scanner2.hasNextLine()) {
+						scanner2.nextLine();
+					}
+					EventData eventData = new EventData(name, startTime, endTime, day, month, year, red, green, blue, false);
+					list.add(eventData, eventData.getDate(), eventData.getStartInt());
+				} catch (Exception e) {
+					// Nothing
+				}
+			}
+			scanner2.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

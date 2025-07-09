@@ -24,6 +24,8 @@ public class EventData {
 	private int month;
 	/** Event year */
 	private int year;
+	/** Is synced */
+	private boolean synced;
 	/** Date factor */
 	private double date;
 	/** Color of an event */
@@ -41,9 +43,10 @@ public class EventData {
 	 * @param red       the red color
 	 * @param blue      the blue color
 	 * @param green     the green color
+	 * @param synced    the synced boolean if synced to the server
 	 */
 	public EventData(String name, String startTime, String endTime, int day, int month, int year, int red, int green,
-			int blue) {
+			int blue, boolean synced) {
 		setColor(red, green, blue);
 		setName(name);
 		setStartTime(startTime);
@@ -53,6 +56,7 @@ public class EventData {
 		setYear(year);
 		setMonth(month);
 		setDay(day);
+		setSynced(synced);
 		setDate();
 	}
 
@@ -251,6 +255,10 @@ public class EventData {
 	private void setDate() {
 		this.date = year + (month * 31 + (double) day) * .001;
 	}
+	
+	public void setSynced(boolean synced) {
+		this.synced = synced;
+	}
 
 	/**
 	 * Returns the name
@@ -340,6 +348,10 @@ public class EventData {
 	 */
 	public Color getColor() {
 		return eventColor;
+	}
+	
+	public boolean getSynced() {
+		return synced;
 	}
 
 	/**

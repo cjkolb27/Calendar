@@ -7,10 +7,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import events.EventData;
-
 /**
- * 
+ * CalendarManager test class
  */
 class CalendarManagerTest {
 
@@ -36,7 +34,7 @@ class CalendarManagerTest {
 		assertEquals(3, c.getEvents().getAtIndex(3).getDay());
 
 		c.editEvent(c.getEvents().getAtIndex(3).getDate(), c.getEvents().getAtIndex(3).getStartInt(), "Job", "12:20p",
-				"1:25p", 4, 6, 1800, 100, 100, 100);
+				"1:25p", 4, 6, 1800, 100, 100, 100, true);
 		assertEquals(4, c.getEvents().getAtIndex(3).getDay());
 
 		c.createEvent("Job", "12:20p", "1:20p", 5, 5, 1800, 100, 100, 100);
