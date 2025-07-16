@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 import events.EventData;
+import events.EventData.SyncState;
 import util.SortedDateList;
 
 /**
@@ -41,13 +42,15 @@ public class CalendarReader {
 					int red = scanner.nextInt();
 					int green = scanner.nextInt();
 					int blue = scanner.nextInt();
+					String timestamp = scanner.next();
 					if (scanner.hasNextLine()) {
 						scanner.nextLine();
 					}
-					EventData eventData = new EventData(name, startTime, endTime, day, month, year, red, green, blue, true);
+					EventData eventData = new EventData(name, startTime, endTime, day, month, year, red, green, blue, SyncState.Synced, " ", timestamp);
 					list.add(eventData, eventData.getDate(), eventData.getStartInt());
 				} catch (Exception e) {
 					// Nothing
+					System.out.println(e.getMessage());
 				}
 			}
 			scanner.close();
@@ -56,6 +59,8 @@ public class CalendarReader {
 			while (scanner2.hasNextLine() && scanner2.hasNext()) {
 				scanner2.useDelimiter("@@");
 				try {
+					SyncState syncState = SyncState.valueOf(scanner2.next());
+					String previous = scanner2.next();
 					String name = scanner2.next();
 					String startTime = scanner2.next();
 					String endTime = scanner2.next();
@@ -65,19 +70,41 @@ public class CalendarReader {
 					int red = scanner2.nextInt();
 					int green = scanner2.nextInt();
 					int blue = scanner2.nextInt();
+					String timestamp = scanner2.next();
 					if (scanner2.hasNextLine()) {
 						scanner2.nextLine();
 					}
-					EventData eventData = new EventData(name, startTime, endTime, day, month, year, red, green, blue, false);
+					EventData eventData = new EventData(name, startTime, endTime, day, month, year, red, green, blue, syncState, previous, timestamp);
+					if (syncState == SyncState.Deleted || syncState == SyncState.Edited) {
+						Scanner scanner3 = new Scanner(previous);
+						scanner3.useDelimiter("/");
+						SyncState syncState2 = SyncState.valueOf(scanner3.next());
+						String previous2 = scanner3.next();
+						String name2 = scanner3.next();
+						String startTime2 = scanner3.next();
+						String endTime2 = scanner3.next();
+						int theDay2 = scanner3.nextInt();
+						int theMonth2 = scanner3.nextInt();
+						int theYear2 = scanner3.nextInt();
+						int red2 = scanner3.nextInt();
+						int green2 = scanner3.nextInt();
+						int blue2 = scanner3.nextInt();
+						String timestamp2 = scanner3.next();
+						scanner3.close();
+						EventData eventData2 = new EventData(name2, startTime2, endTime2, theDay2, theMonth2, theYear2, red2, green2, blue2, syncState2, previous2, timestamp2);
+						list.removeD(eventData2.getDate(), eventData2.getStartInt());
+					}
 					list.add(eventData, eventData.getDate(), eventData.getStartInt());
 				} catch (Exception e) {
 					// Nothing
+					System.out.println(e.getMessage());
 				}
 			}
 			scanner2.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		list.printToCMD();
 		return list;
 	}
 }

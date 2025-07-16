@@ -1,6 +1,9 @@
 package events;
 
 import java.awt.Color;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Abstract Class for setting all event data
@@ -14,6 +17,12 @@ public class EventData {
 	private String startTime;
 	/** Event end time */
 	private String endTime;
+	/** Previous event details */
+	private String previous;
+	/** Timestamp of when event was created */
+	private String timestamp;
+	/** Synce state of the event */
+	private SyncState syncState;
 	/** Start time int */
 	private int startInt;
 	/** End time int */
@@ -24,8 +33,6 @@ public class EventData {
 	private int month;
 	/** Event year */
 	private int year;
-	/** Is synced */
-	private boolean synced;
 	/** Date factor */
 	private double date;
 	/** Color of an event */
@@ -44,9 +51,10 @@ public class EventData {
 	 * @param blue      the blue color
 	 * @param green     the green color
 	 * @param synced    the synced boolean if synced to the server
+	 * @param timestamp the timestamp of when the event was created
 	 */
 	public EventData(String name, String startTime, String endTime, int day, int month, int year, int red, int green,
-			int blue, boolean synced) {
+			int blue, SyncState syncState, String previous, String timestamp) {
 		setColor(red, green, blue);
 		setName(name);
 		setStartTime(startTime);
@@ -56,8 +64,19 @@ public class EventData {
 		setYear(year);
 		setMonth(month);
 		setDay(day);
-		setSynced(synced);
+		setSyncState(syncState);
+		setPrevious(previous);
+		if (previous == null) {
+			setPrevious(" ");
+		}
 		setDate();
+		if (" ".equals(timestamp)) {
+			String formatted = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
+					.format(Instant.now());
+			setTimestamp(formatted);
+		} else {
+			setTimestamp(timestamp);
+		}
 	}
 
 	private void setColor(int red, int green, int blue) {
@@ -74,6 +93,14 @@ public class EventData {
 			throw new IllegalArgumentException("Invalid Event");
 		}
 		this.name = name;
+	}
+
+	private void setTimestamp(String timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	public String getTimestamp() {
+		return timestamp;
 	}
 
 	private void setStartTime(String startTime) {
@@ -255,9 +282,21 @@ public class EventData {
 	private void setDate() {
 		this.date = year + (month * 31 + (double) day) * .001;
 	}
-	
-	public void setSynced(boolean synced) {
-		this.synced = synced;
+
+	public void setSyncState(SyncState state) {
+		syncState = state;
+	}
+
+	public SyncState getSyncState() {
+		return syncState;
+	}
+
+	public void setPrevious(String previous) {
+		this.previous = previous;
+	}
+
+	public String getPrevious() {
+		return previous;
 	}
 
 	/**
@@ -349,9 +388,32 @@ public class EventData {
 	public Color getColor() {
 		return eventColor;
 	}
-	
-	public boolean getSynced() {
-		return synced;
+
+	public enum SyncState {
+		/** Synced state */
+		Synced,
+		/** Not Synced state */
+		NotSynced,
+		/** Deleted state */
+		Deleted,
+		/** Edited state */
+		Edited
+	}
+
+	@Override
+	public String toString() {
+		return getSyncState().toString() + "@@" + getPrevious() + "@@" + getName() + "@@"
+				+ getStartTime().substring(0, getStartTime().length() - 1) + "@@"
+				+ getEndTime().substring(0, getEndTime().length() - 1) + "@@" + getDay() + "@@" + getMonth() + "@@"
+				+ getYear() + "@@" + getColor().getRed() + "@@" + getColor().getGreen() + "@@" + getColor().getBlue()
+				+ "@@" + getTimestamp() + "@@";
+	}
+
+	public String toStringSynced() {
+		return getName() + "@@" + getStartTime().substring(0, getStartTime().length() - 1) + "@@"
+				+ getEndTime().substring(0, getEndTime().length() - 1) + "@@" + getDay() + "@@" + getMonth() + "@@"
+				+ getYear() + "@@" + getColor().getRed() + "@@" + getColor().getGreen() + "@@" + getColor().getBlue()
+				+ "@@" + getTimestamp() + "@@";
 	}
 
 	/**
@@ -368,7 +430,7 @@ public class EventData {
 	 * @param blue      the blue color
 	 */
 	public void editData(String name, String startTime, String endTime, int day, int month, int year, int red,
-			int green, int blue) {
+			int green, int blue, SyncState syncState, String previous) {
 		setColor(red, green, blue);
 		setName(name);
 		setStartTime(startTime);
@@ -376,6 +438,8 @@ public class EventData {
 		setYear(year);
 		setMonth(month);
 		setDay(day);
+		setSyncState(syncState);
+		setPrevious(previous);
 		setDate();
 	}
 }

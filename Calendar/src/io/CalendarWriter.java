@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
 import events.EventData;
+import events.EventData.SyncState;
 import util.SortedDateList;
 
 /**
@@ -30,7 +31,7 @@ public class CalendarWriter {
 			PrintStream fileWriter = new PrintStream(file);
 			fileWriter.println(list.getVersion());
 			for (int i = 0; i < list.size(); i++) {
-				if (list.getAtIndex(i).getSynced()) {
+				if (list.getAtIndex(i).getSyncState() == SyncState.Synced) {
 					fileWriter.print(list.getAtIndex(i).getName() + "@@"
 							+ list.getAtIndex(i).getStartTime().substring(0,
 									list.getAtIndex(i).getStartTime().length() - 1)
@@ -70,15 +71,45 @@ public class CalendarWriter {
 			PrintStream fileWriter = new PrintStream(file);
 			fileWriter.println(list.getVersion());
 			for (int i = 0; i < list.size(); i++) {
-				fileWriter.print(list.getAtIndex(i).getName() + "@@"
-						+ list.getAtIndex(i).getStartTime().substring(0, list.getAtIndex(i).getStartTime().length() - 1)
-						+ "@@"
-						+ list.getAtIndex(i).getEndTime().substring(0, list.getAtIndex(i).getEndTime().length() - 1)
-						+ "@@" + list.getAtIndex(i).getDay() + "@@" + list.getAtIndex(i).getMonth() + "@@"
-						+ list.getAtIndex(i).getYear() + "@@" + list.getAtIndex(i).getColor().getRed() + "@@"
-						+ list.getAtIndex(i).getColor().getGreen() + "@@" + list.getAtIndex(i).getColor().getBlue()
-						+ "@@\n");
+				if (list.getAtIndex(i).getSyncState() == SyncState.Synced) {
+					fileWriter.print(list.getAtIndex(i).getName() + "@@"
+							+ list.getAtIndex(i).getStartTime().substring(0,
+									list.getAtIndex(i).getStartTime().length() - 1)
+							+ "@@"
+							+ list.getAtIndex(i).getEndTime().substring(0, list.getAtIndex(i).getEndTime().length() - 1)
+							+ "@@" + list.getAtIndex(i).getDay() + "@@" + list.getAtIndex(i).getMonth() + "@@"
+							+ list.getAtIndex(i).getYear() + "@@" + list.getAtIndex(i).getColor().getRed() + "@@"
+							+ list.getAtIndex(i).getColor().getGreen() + "@@" + list.getAtIndex(i).getColor().getBlue()
+							+ "@@" + list.getAtIndex(i).getTimestamp() + "@@\n");
+				} else if (list.getAtIndex(i).getSyncState() == SyncState.NotSynced) {
+					list.getAtIndex(i).setSyncState(SyncState.Synced);
+					fileWriter.print(list.getAtIndex(i).getName() + "@@"
+							+ list.getAtIndex(i).getStartTime().substring(0,
+									list.getAtIndex(i).getStartTime().length() - 1)
+							+ "@@"
+							+ list.getAtIndex(i).getEndTime().substring(0, list.getAtIndex(i).getEndTime().length() - 1)
+							+ "@@" + list.getAtIndex(i).getDay() + "@@" + list.getAtIndex(i).getMonth() + "@@"
+							+ list.getAtIndex(i).getYear() + "@@" + list.getAtIndex(i).getColor().getRed() + "@@"
+							+ list.getAtIndex(i).getColor().getGreen() + "@@" + list.getAtIndex(i).getColor().getBlue()
+							+ "@@" + list.getAtIndex(i).getTimestamp() + "@@\n");
+				} else if (list.getAtIndex(i).getSyncState() == SyncState.Edited) {
+					list.getAtIndex(i).setSyncState(SyncState.Synced);
+					list.getAtIndex(i).setPrevious(" ");
+					fileWriter.print(list.getAtIndex(i).getName() + "@@"
+							+ list.getAtIndex(i).getStartTime().substring(0,
+									list.getAtIndex(i).getStartTime().length() - 1)
+							+ "@@"
+							+ list.getAtIndex(i).getEndTime().substring(0, list.getAtIndex(i).getEndTime().length() - 1)
+							+ "@@" + list.getAtIndex(i).getDay() + "@@" + list.getAtIndex(i).getMonth() + "@@"
+							+ list.getAtIndex(i).getYear() + "@@" + list.getAtIndex(i).getColor().getRed() + "@@"
+							+ list.getAtIndex(i).getColor().getGreen() + "@@" + list.getAtIndex(i).getColor().getBlue()
+							+ "@@" + list.getAtIndex(i).getTimestamp() + "@@\n");
+				} else if (list.getAtIndex(i).getSyncState() == SyncState.Deleted) {
+					list.removeD(list.getAtIndex(i).getDate(), list.getAtIndex(i).getStartInt());
+					i--;
+				}
 			}
+			list.printToCMD();
 			fileWriter.close();
 			PrintStream fileWrite = new PrintStream(changedFile);
 			fileWrite.println("0");
@@ -93,19 +124,10 @@ public class CalendarWriter {
 			int changeCount = 0;
 			StringBuffer buff = new StringBuffer();
 			PrintStream fileWriter = new PrintStream(changedFile);
-			fileWriter.println(changeCount);
 			for (int i = 0; i < list.size(); i++) {
-				if (!list.getAtIndex(i).getSynced()) {
+				if (list.getAtIndex(i).getSyncState() != SyncState.Synced) {
 					changeCount++;
-					buff.append(list.getAtIndex(i).getName() + "@@"
-							+ list.getAtIndex(i).getStartTime().substring(0,
-									list.getAtIndex(i).getStartTime().length() - 1)
-							+ "@@"
-							+ list.getAtIndex(i).getEndTime().substring(0, list.getAtIndex(i).getEndTime().length() - 1)
-							+ "@@" + list.getAtIndex(i).getDay() + "@@" + list.getAtIndex(i).getMonth() + "@@"
-							+ list.getAtIndex(i).getYear() + "@@" + list.getAtIndex(i).getColor().getRed() + "@@"
-							+ list.getAtIndex(i).getColor().getGreen() + "@@" + list.getAtIndex(i).getColor().getBlue()
-							+ "@@\n");
+					buff.append(list.getAtIndex(i).toString() + "\n");
 				}
 			}
 			fileWriter.println(changeCount);

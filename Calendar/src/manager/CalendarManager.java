@@ -8,6 +8,7 @@ import java.time.Year;
 import java.util.Scanner;
 
 import events.EventData;
+import events.EventData.SyncState;
 import util.SortedDateList;
 import io.CalendarReader;
 import io.CalendarWriter;
@@ -195,7 +196,16 @@ public class CalendarManager {
 	 */
 	public void saveCalendar() {
 		try {
-			CalendarWriter.writeCalendar(new File(path), eventYearList, new File(pathChangeLog));
+			//CalendarWriter.writeCalendar(new File(path), eventYearList, new File(pathChangeLog));
+			CalendarWriter.writeNonSyncedCalendar(new File(pathChangeLog), eventYearList);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e.getMessage());
+		}
+	}
+	
+	public void approveChanges() {
+		try {
+			CalendarWriter.writeSyncedCalendar(new File(path), eventYearList, new File(pathChangeLog));
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e.getMessage());
 		}
@@ -225,8 +235,8 @@ public class CalendarManager {
 	 * @return newEvent the newly created event
 	 */
 	public EventData createEvent(String name, String startTime, String endTime, int day, int month, int year, int red,
-			int green, int blue) {
-		EventData newEvent = new EventData(name, startTime, endTime, day, month, year, red, green, blue, false);
+			int green, int blue, SyncState syncState, String previous) {
+		EventData newEvent = new EventData(name, startTime, endTime, day, month, year, red, green, blue, syncState, previous, " ");
 		if (year != this.year) {
 			throw new IllegalArgumentException("Year does not match current year");
 		}
@@ -258,9 +268,9 @@ public class CalendarManager {
 	 * @return EventData the event edited
 	 */
 	public EventData editEvent(double originalDate, int originalStart, String name, String startTime, String endTime,
-			int day, int month, int year, int red, int green, int blue, boolean synced) {
+			int day, int month, int year, int red, int green, int blue, SyncState syncState, String previous) {
 		try {
-			EventData newEvent = new EventData(name, startTime, endTime, day, month, year, red, green, blue, synced);
+			EventData newEvent = new EventData(name, startTime, endTime, day, month, year, red, green, blue, syncState, previous.replaceAll("@@", "/"), " ");
 			if (!eventYearList.checkValue(originalDate, newEvent.getStartInt())
 					&& newEvent.getStartInt() != originalStart) {
 				throw new IllegalArgumentException("Duplicate Dates when Editing");

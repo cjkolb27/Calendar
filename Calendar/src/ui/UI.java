@@ -20,11 +20,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -67,6 +64,7 @@ import javax.swing.plaf.ColorUIResource;
 import javax.swing.text.NumberFormatter;
 
 import events.EventData;
+import events.EventData.SyncState;
 import io.NetworkIO;
 import manager.CalendarManager;
 import util.ColorData;
@@ -219,6 +217,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private JMenuItem editSettings;
 	/** Item for quitting the program */
 	private JMenuItem quit;
+	/** Sync Test */
+	private JMenuItem sync;
 	/** True when settings have changed */
 	private Boolean settingsChanged;
 	/** Scroll Frame for holding all map days */
@@ -374,7 +374,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 							InputStream input = serverConnection.getInputStream();
 							Scanner scanner = new Scanner(input);
 							String message;
-							while((message = scanner.nextLine()) != null && connectOnline) {
+							while ((message = scanner.nextLine()) != null && connectOnline) {
 								System.out.println(message);
 							}
 							System.out.println("Client connection closed.");
@@ -390,7 +390,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 					OutputStream output = serverSocket.getOutputStream();
 					writeToServer = new PrintWriter(output, true);
 					String host = InetAddress.getLocalHost().getHostName();
-					writeToServer.print("Post " + CONNECTION_VERSION + "\r\nHost: " + host + "\r\nPort: " + clientPort + "\r\n*]*START*[*\r\n" + manager.getYear() + ".txt\r\n" + Files.readString(Path.of(manager.getPath())) + "*]*END*[*\r\n\r\n");
+					writeToServer.print("Post " + CONNECTION_VERSION + "\r\nHost: " + host + "\r\nPort: " + clientPort
+							+ "\r\n*]*START*[*\r\n" + manager.getYear() + ".txt\r\n"
+							+ Files.readString(Path.of(manager.getPath())) + "*]*END*[*\r\n\r\n");
 					writeToServer.flush();
 					System.out.println("Write complete");
 				} catch (Exception e) {
@@ -860,6 +862,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 
 		SortedDateList<EventData> sdl = manager.getEvents();
 
+		// System.out.println("The size of the sdl: " + sdl.size());
+
 		Iterator<EventData> it = sdl.iterator();
 		EventData currentData;
 		if (it.hasNext()) {
@@ -945,12 +949,14 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				datePanel[currentDay] = new DatePanel((j + 1), (i + 1), yearOfCalendar, this);
 				while (currentData != null && currentData.getDay() == j + 1 && currentData.getMonth() == i + 1
 						&& currentData.getYear() == yearOfCalendar) {
-					datePanel[currentDay].addButton(currentData.getStartTime(), currentData.getStartInt(),
-							currentData.getEndTime(), currentData.getEndInt(), currentData.getDay(),
-							currentData.getMonth(), currentData.getYear(), currentData.getName(),
-							currentData.getColor().getRed(), currentData.getColor().getGreen(),
-							currentData.getColor().getBlue());
-
+					if (currentData.getSyncState() != SyncState.Deleted) {
+						System.out.println("Found: " + currentData.getSyncState().toString());
+						datePanel[currentDay].addButton(currentData.getStartTime(), currentData.getStartInt(),
+								currentData.getEndTime(), currentData.getEndInt(), currentData.getDay(),
+								currentData.getMonth(), currentData.getYear(), currentData.getName(),
+								currentData.getColor().getRed(), currentData.getColor().getGreen(),
+								currentData.getColor().getBlue());
+					}
 					if (it.hasNext()) {
 						currentData = it.next();
 					} else {
@@ -961,6 +967,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 
 				buttons[currentDay].add(datePanel[currentDay].getPanel(), BorderLayout.CENTER);
 				panel.add(buttons[currentDay]);
+				// System.out.println("Printed A Button
+				// LKJFSL:FKJSL:FKJSDFL:KSDJFSLKDFJSDL:FKJSDFL:KJFL:KDS");
 				currentDay++;
 			}
 			daysInCalendar = currentDay;
@@ -1000,6 +1008,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				offset++;
 			}
 		}
+
 	}
 
 	private void setScreenWindow() {
@@ -1056,6 +1065,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		loadCalendar = new JMenuItem(LOADCAL);
 		editSettings = new JMenuItem(EDITSET);
 		quit = new JMenuItem("Quit");
+		sync = new JMenuItem("Synce");
 
 		loadCalendar.addActionListener(this);
 		loadCalendar.setBackground(panelColor);
@@ -1066,10 +1076,14 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		quit.addActionListener(this);
 		quit.setBackground(panelColor);
 		quit.setForeground(textColor);
+		sync.addActionListener(this);
+		sync.setBackground(panelColor);
+		sync.setForeground(textColor);
 
 		menu.add(loadCalendar);
 		menu.add(editSettings);
 		menu.add(quit);
+		menu.add(sync);
 		menuBar.add(menu);
 		menuBar.setBackground(panelColor);
 		menuBar.setForeground(textColor);
@@ -1457,6 +1471,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			System.gc();
 		} else if (e.getSource() == quit) {
 			System.exit(0);
+		} else if (e.getSource() == sync) {
+			manager.approveChanges();
 		} else if (e.getSource() == newEventBut) {
 			System.out.println("New Event Button");
 			Dimension textFieldSize = new Dimension(151, 30);
@@ -1679,7 +1695,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 									datePanel[buttonIndex].getDay(), datePanel[buttonIndex].getMonth(),
 									datePanel[buttonIndex].getYear(), ((Color) jcb.getSelectedItem()).getRed(),
 									((Color) jcb.getSelectedItem()).getGreen(),
-									((Color) jcb.getSelectedItem()).getBlue());
+									((Color) jcb.getSelectedItem()).getBlue(), SyncState.NotSynced, " ");
 							datePanel[buttonIndex].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
 									newEvent.getEndTime(), newEvent.getEndInt(), datePanel[buttonIndex].getDay(),
 									datePanel[buttonIndex].getMonth(), datePanel[buttonIndex].getYear(),
@@ -1762,7 +1778,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 													datePanel[i].getDay(), datePanel[i].getMonth(),
 													datePanel[i].getYear(), ((Color) jcb.getSelectedItem()).getRed(),
 													((Color) jcb.getSelectedItem()).getGreen(),
-													((Color) jcb.getSelectedItem()).getBlue());
+													((Color) jcb.getSelectedItem()).getBlue(), SyncState.NotSynced,
+													" ");
 											datePanel[i].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
 													newEvent.getEndTime(), newEvent.getEndInt(), datePanel[i].getDay(),
 													datePanel[i].getMonth(), datePanel[i].getYear(), newEvent.getName(),
@@ -1965,7 +1982,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 					try {
 						System.out.println("Current State: " + current);
 						EventData newEvent = new EventData(eventTextField.getText(), startTextField.getText(),
-								endTextField.getText(), 1, 1, 1, 2, 2, 2, false);
+								endTextField.getText(), 1, 1, 1, 2, 2, 2, SyncState.NotSynced, " ", " ");
 						if (!presetOptions.duplicatePreset(newEvent.getName(), newEvent.getStartTime(),
 								newEvent.getEndTime(), (Color) jcb.getSelectedItem())) {
 							System.out.println(":[");
@@ -2011,7 +2028,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 						System.out.println("Current State5: " + presetState.getState());
 						int presetIndex = preset.getSelectedIndex();
 						EventData newEvent = new EventData(eventTextField.getText(), startTextField.getText(),
-								endTextField.getText(), 1, 1, 1, 2, 2, 2, false);
+								endTextField.getText(), 1, 1, 1, 2, 2, 2, SyncState.NotSynced, " ", " ");
 						if (presetOptions.duplicatePreset(newEvent.getName(), newEvent.getStartTime(),
 								newEvent.getEndTime(), (Color) jcb.getSelectedItem())) {
 							presetOptions.removePreset(presetOptions.getPresets()[presetIndex].getName(),
@@ -2400,7 +2417,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 										datePanel[i].getDay(), datePanel[i].getMonth(), datePanel[i].getYear(),
 										((Color) jcb.getSelectedItem()).getRed(),
 										((Color) jcb.getSelectedItem()).getGreen(),
-										((Color) jcb.getSelectedItem()).getBlue());
+										((Color) jcb.getSelectedItem()).getBlue(), SyncState.NotSynced, " ");
 								datePanel[i].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
 										newEvent.getEndTime(), newEvent.getEndInt(), datePanel[i].getDay(),
 										datePanel[i].getMonth(), datePanel[i].getYear(), newEvent.getName(),
@@ -2548,7 +2565,13 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 													+ (((but.getMonth() * 31) + (but.getDay())) * .001)),
 											but.getStartTime(), eventTextField.getText(), startTextField.getText(),
 											endTextField.getText(), but.getDay(), but.getMonth(), but.getYear(),
-											selectedColor.getRed(), selectedColor.getGreen(), selectedColor.getBlue(), false);
+											selectedColor.getRed(), selectedColor.getGreen(), selectedColor.getBlue(),
+											SyncState.Edited,
+											getManager().getEvents()
+													.get((double) (but.getYear()
+															+ (((but.getMonth() * 31) + (but.getDay())) * .001)),
+															but.getStartTime())
+													.toStringSynced());
 									datePanel[dayRangeButton].editButton(newEvent.getStartTime(), but.getStartTime(),
 											newEvent.getStartInt(), newEvent.getEndTime(), newEvent.getEndInt(),
 											but.getDay(), but.getMonth(), but.getYear(), newEvent.getName(),
@@ -2721,7 +2744,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 										datePanel[buttonIndex].getDay(), datePanel[buttonIndex].getMonth(),
 										datePanel[buttonIndex].getYear(), ((Color) jcb.getSelectedItem()).getRed(),
 										((Color) jcb.getSelectedItem()).getGreen(),
-										((Color) jcb.getSelectedItem()).getBlue());
+										((Color) jcb.getSelectedItem()).getBlue(), SyncState.NotSynced, " ");
 								datePanel[buttonIndex].addButton(newEvent.getStartTime(), newEvent.getStartInt(),
 										newEvent.getEndTime(), newEvent.getEndInt(), datePanel[buttonIndex].getDay(),
 										datePanel[buttonIndex].getMonth(), datePanel[buttonIndex].getYear(),

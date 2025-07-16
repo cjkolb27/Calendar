@@ -7,6 +7,7 @@ import java.io.File;
 import org.junit.jupiter.api.Test;
 
 import events.EventData;
+import events.EventData.SyncState;
 import util.SortedDateList;
 
 /**
@@ -23,12 +24,12 @@ class CalendarWriterTest {
 	@Test
 	void testWriteCalendar() {
 		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
-		EventData e1 = new EventData("Job", "12:30a", "12:35a", 12, 11, 2024, 100, 100, 100, true);
-		EventData e2 = new EventData("Job", "12:35a", "12:36a", 12, 11, 2024, 100, 100, 100, true);
-		EventData e3 = new EventData("Job", "12:29a", "12:30a", 12, 11, 2024, 100, 100, 100, true);
-		EventData e4 = new EventData("Job", "12:30a", "12:35a", 17, 11, 2024, 100, 100, 100, true);
-		EventData e5 = new EventData("Job", "1:00a", "12:35a", 18, 11, 2024, 100, 100, 100, false);
-		EventData e6 = new EventData("Job", "12:40a", "12:35a", 21, 11, 2024, 100, 100, 100, true);
+		EventData e1 = new EventData("Job", "12:30a", "12:35a", 12, 11, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
+		EventData e2 = new EventData("Job", "12:35a", "12:36a", 12, 11, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
+		EventData e3 = new EventData("Job", "12:29a", "12:30a", 12, 11, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
+		EventData e4 = new EventData("Job", "12:30a", "12:35a", 17, 11, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
+		EventData e5 = new EventData("Job", "1:00a", "12:35a", 18, 11, 2024, 100, 100, 100, SyncState.NotSynced, " ", " ");
+		EventData e6 = new EventData("Job", "12:40a", "12:35a", 21, 11, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		s.add(e1, e1.getDate(), e1.getStartInt());
 		s.add(e2, e2.getDate(), e2.getStartInt());
 		s.add(e3, e3.getDate(), e3.getStartInt());
@@ -60,6 +61,14 @@ class CalendarWriterTest {
 		assertEquals(e4.getDate(), s2.getAtIndex(3).getDate());
 		assertEquals(e5.getDate(), s2.getAtIndex(4).getDate());
 		assertEquals(e6.getDate(), s2.getAtIndex(5).getDate());
+	}
+	
+	@Test
+	void testWriteSyncedCalendar() {
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
+		s = CalendarReader.readCalendar(new File("testFiles/year1.txt"), new File("testFiles/year1_changes.txt"));
+		CalendarWriter.writeSyncedCalendar(new File("testFiles/year2.txt"), s, new File("testFiles/year2_changes.txt"));
+		assertEquals(151, s.size());
 	}
 
 }

@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Scanner;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
@@ -21,6 +22,7 @@ import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 
 import events.EventData;
+import events.EventData.SyncState;
 import ui.UI;
 
 /**
@@ -405,15 +407,34 @@ public class DatePanel implements ActionListener {
 						}
 						if (optionSelected == 0) {
 							try {
-								EventData newEvent = currentUI.getManager().editEvent(
-										(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime(),
-										jtf1.getText(), jtf2.getText(), jtf3.getText(), getDay(), getMonth(), getYear(),
-										selectedColor.getRed(), selectedColor.getGreen(), selectedColor.getBlue(), false);
+								EventData eventPrevious = currentUI.getManager().getEvents()
+										.get((double) (year + (((month * 31) + (day)) * .001)), current.getStartTime());
+								EventData newEvent = null;
+								if (eventPrevious.getSyncState() == SyncState.NotSynced) {
+									newEvent = currentUI.getManager().editEvent(
+											(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime(),
+											jtf1.getText(), jtf2.getText(), jtf3.getText(), getDay(), getMonth(),
+											getYear(), selectedColor.getRed(), selectedColor.getGreen(),
+											selectedColor.getBlue(), SyncState.NotSynced, " ");
+								} else if (eventPrevious.getSyncState() == SyncState.Synced) {
+									newEvent = currentUI.getManager().editEvent(
+											(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime(),
+											jtf1.getText(), jtf2.getText(), jtf3.getText(), getDay(), getMonth(),
+											getYear(), selectedColor.getRed(), selectedColor.getGreen(),
+											selectedColor.getBlue(), SyncState.Edited, eventPrevious.toString().replaceAll("@@", "/"));
+								} else if (eventPrevious.getSyncState() == SyncState.Edited) {
+									newEvent = currentUI.getManager().editEvent(
+											(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime(),
+											jtf1.getText(), jtf2.getText(), jtf3.getText(), getDay(), getMonth(),
+											getYear(), selectedColor.getRed(), selectedColor.getGreen(),
+											selectedColor.getBlue(), SyncState.Edited, eventPrevious.getPrevious());
+								}
 								editButton(newEvent.getStartTime(), current.getStartTime(), newEvent.getStartInt(),
 										newEvent.getEndTime(), newEvent.getEndInt(), getDay(), getMonth(), getYear(),
 										newEvent.getName(), newEvent.getColor().getRed(),
 										newEvent.getColor().getGreen(), newEvent.getColor().getBlue());
-								if (currentUI.getDayRangeButton() == currentUI.getButtonConversion(newEvent.getDay(), newEvent.getMonth() - 1)) {
+								if (currentUI.getDayRangeButton() == currentUI.getButtonConversion(newEvent.getDay(),
+										newEvent.getMonth() - 1)) {
 									currentUI.setDayRange(newEvent.getDay(), newEvent.getMonth() - 1);
 									currentUI.getDayRangePane().setViewportView(currentUI.getDayRange());
 								}
@@ -429,10 +450,40 @@ public class DatePanel implements ActionListener {
 							}
 						} else if (optionSelected == 1) {
 							try {
-								currentUI.getManager().removeEvent((double) (year + (((month * 31) + (day)) * .001)),
-										current.getStartTime());
+								EventData eventPrevious = currentUI.getManager().getEvents()
+										.get((double) (year + (((month * 31) + (day)) * .001)), current.getStartTime());
+								if (eventPrevious.getSyncState() == SyncState.NotSynced) {
+									currentUI.getManager().removeEvent(
+											(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime());
+								} else if (eventPrevious.getSyncState() == SyncState.Synced) {
+									currentUI.getManager().removeEvent(
+											(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime());
+									currentUI.getManager().createEvent(eventPrevious.getName(),
+											eventPrevious.getStartTime(), eventPrevious.getEndTime(),
+											eventPrevious.getDay(), eventPrevious.getMonth(), eventPrevious.getYear(),
+											eventPrevious.getColor().getRed(), eventPrevious.getColor().getGreen(),
+											eventPrevious.getColor().getBlue(), SyncState.Deleted, eventPrevious.toString().replaceAll("@@", "/"));
+								} else if (eventPrevious.getSyncState() == SyncState.Edited) {
+									Scanner scanner = new Scanner(eventPrevious.getPrevious());
+									scanner.useDelimiter("@@");
+									String name = scanner.next();
+									String startTime = scanner.next();
+									String endTime = scanner.next();
+									int theDay = scanner.nextInt();
+									int theMonth = scanner.nextInt();
+									int theYear = scanner.nextInt();
+									int red = scanner.nextInt();
+									int green = scanner.nextInt();
+									int blue = scanner.nextInt();
+									scanner.close();
+									currentUI.getManager().removeEvent(
+											(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime());
+									currentUI.getManager().createEvent(name, startTime, endTime, theDay, theMonth,
+											theYear, red, green, blue, SyncState.Deleted, " ");
+								}
 								removeButton(current.getStartTime());
-								if (currentUI.getDayRangeButton() == currentUI.getButtonConversion(current.getDay(), current.getMonth() - 1)) {
+								if (currentUI.getDayRangeButton() == currentUI.getButtonConversion(current.getDay(),
+										current.getMonth() - 1)) {
 									currentUI.setDayRange(current.getDay(), current.getMonth() - 1);
 									currentUI.getDayRangePane().setViewportView(currentUI.getDayRange());
 								}
@@ -620,7 +671,7 @@ public class DatePanel implements ActionListener {
 		public int getStartTime() {
 			return startTime;
 		}
-		
+
 		/**
 		 * Gets the end time
 		 * 
@@ -629,7 +680,7 @@ public class DatePanel implements ActionListener {
 		public int getEndTime() {
 			return endTime;
 		}
-		
+
 		/**
 		 * Gets the start time string
 		 * 
@@ -638,7 +689,7 @@ public class DatePanel implements ActionListener {
 		public String getStart() {
 			return start;
 		}
-		
+
 		/**
 		 * Gets the end time string
 		 * 
@@ -674,7 +725,7 @@ public class DatePanel implements ActionListener {
 		public Color getColor() {
 			return dateColor;
 		}
-		
+
 		/**
 		 * Gets the next event
 		 * 

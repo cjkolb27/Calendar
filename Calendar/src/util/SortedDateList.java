@@ -2,6 +2,8 @@ package util;
 
 import java.util.Iterator;
 
+import events.EventData;
+
 /**
  * List for sorting events by their dates
  * 
@@ -53,7 +55,7 @@ public class SortedDateList<E> {
 	 * @param date      the date of the event
 	 * @param startTime the start time of an event
 	 */
-	public void add(E data, double date, int startTime) {
+	public void add(EventData data, double date, int startTime) {
 		if (data == null) {
 			throw new NullPointerException();
 		}
@@ -93,7 +95,7 @@ public class SortedDateList<E> {
 				current = current.next;
 			}
 		} else if (size == 1 && (front.date > date || (front.date == date && front.startTime >= startTime))) {
-			back = new ListNode((E) null, 0, 0, null, null);
+			back = new ListNode((EventData) null, 0, 0, null, null);
 			back = front;
 			front = new ListNode(data, date, startTime, back, null);
 			back.prev = front;
@@ -120,7 +122,7 @@ public class SortedDateList<E> {
 	 * @param startTime the start time of an event
 	 * @return current the current event
 	 */
-	public E get(double date, int startTime) {
+	public EventData get(double date, int startTime) {
 		ListNode current = front;
 		if (size == 0) {
 			return null;
@@ -143,7 +145,7 @@ public class SortedDateList<E> {
 	 * @param index the index in the list
 	 * @return E the E at index
 	 */
-	public E getAtIndex(int index) {
+	public EventData getAtIndex(int index) {
 		ListNode current = front;
 		int in = index;
 		if (in < 0 || in > size - 1) {
@@ -163,7 +165,7 @@ public class SortedDateList<E> {
 	 * @param data      the event
 	 * @param startTime as an integer
 	 */
-	public void removeE(E data, int startTime) {
+	public void removeE(EventData data, int startTime) {
 		if (data == null) {
 			throw new NullPointerException();
 		}
@@ -171,7 +173,7 @@ public class SortedDateList<E> {
 			throw new IllegalArgumentException("Cannot remove from an empty list");
 		}
 		ListNode current = front;
-		if (current.data == data && current.startTime == startTime) {
+		if ((current.data == data || current.next.data.getTimestamp().equals(data.getTimestamp())) && current.startTime == startTime) {
 			if (size == 1) {
 				front = null;
 				size--;
@@ -190,7 +192,7 @@ public class SortedDateList<E> {
 			return;
 		}
 		while (current.next != null) {
-			if (current.next.data == data && current.next.startTime == startTime) {
+			if ((current.next.data == data || current.next.data.getTimestamp().equals(data.getTimestamp())) && current.next.startTime == startTime) {
 				if (current.next.next == null) {
 					current.next = current.next.next;
 					back = current.next;
@@ -282,13 +284,21 @@ public class SortedDateList<E> {
 	public void setVersion(int version) {
 		this.version = version;
 	}
+	
+	public void printToCMD() {
+		Iterator<EventData> it = iterator();
+		while(it.hasNext()) {
+			EventData event = it.next();
+			System.out.println(event.toString());
+		}
+	}
 
 	/**
 	 * Creates an iterable list of of events in order
 	 * 
 	 * @return DateIterator the iterator of all events
 	 */
-	public Iterator<E> iterator() {
+	public Iterator<EventData> iterator() {
 		return new DateIterator();
 	}
 
@@ -297,7 +307,7 @@ public class SortedDateList<E> {
 	 * 
 	 * @author Caleb Kolb
 	 */
-	private class DateIterator implements Iterator<E> {
+	private class DateIterator implements Iterator<EventData> {
 		/** current ListNode */
 		private ListNode current;
 
@@ -312,7 +322,7 @@ public class SortedDateList<E> {
 		}
 
 		@Override
-		public E next() {
+		public EventData next() {
 			if (hasNext()) {
 				current = current.next;
 				return current.data;
@@ -330,7 +340,7 @@ public class SortedDateList<E> {
 	 */
 	private class ListNode {
 		/** Data of the list node */
-		private E data;
+		private EventData data;
 		/** Date of event */
 		private double date;
 		/** Start Time of event */
@@ -350,7 +360,7 @@ public class SortedDateList<E> {
 		 * @param next      the next event
 		 * @param prev      the previous event
 		 */
-		public ListNode(E data, double date, int startTime, ListNode next, ListNode prev) {
+		public ListNode(EventData data, double date, int startTime, ListNode next, ListNode prev) {
 			setData(data);
 			setDate(date);
 			setStartTime(startTime);
@@ -358,7 +368,7 @@ public class SortedDateList<E> {
 			setPrev(prev);
 		}
 
-		private void setData(E data) {
+		private void setData(EventData data) {
 			this.data = data;
 		}
 
@@ -378,7 +388,7 @@ public class SortedDateList<E> {
 			this.prev = prev;
 		}
 
-		public E getData() {
+		public EventData getData() {
 			return data;
 		}
 	}
