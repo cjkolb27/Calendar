@@ -104,7 +104,7 @@ public class CalendarReader {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		list.printToCMD();
+		//list.printToCMD();
 		return list;
 	}
 }

@@ -69,7 +69,7 @@ public class CalendarWriter {
 	public static void writeSyncedCalendar(File file, SortedDateList<EventData> list, File changedFile) {
 		try {
 			PrintStream fileWriter = new PrintStream(file);
-			fileWriter.println(list.getVersion());
+			fileWriter.print(list.getVersion() + "\r\n");
 			for (int i = 0; i < list.size(); i++) {
 				if (list.getAtIndex(i).getSyncState() == SyncState.Synced) {
 					fileWriter.print(list.getAtIndex(i).getName() + "@@"
@@ -80,7 +80,7 @@ public class CalendarWriter {
 							+ "@@" + list.getAtIndex(i).getDay() + "@@" + list.getAtIndex(i).getMonth() + "@@"
 							+ list.getAtIndex(i).getYear() + "@@" + list.getAtIndex(i).getColor().getRed() + "@@"
 							+ list.getAtIndex(i).getColor().getGreen() + "@@" + list.getAtIndex(i).getColor().getBlue()
-							+ "@@" + list.getAtIndex(i).getTimestamp() + "@@\n");
+							+ "@@" + list.getAtIndex(i).getTimestamp() + "@@\r\n");
 				} else if (list.getAtIndex(i).getSyncState() == SyncState.NotSynced) {
 					list.getAtIndex(i).setSyncState(SyncState.Synced);
 					fileWriter.print(list.getAtIndex(i).getName() + "@@"
@@ -91,7 +91,7 @@ public class CalendarWriter {
 							+ "@@" + list.getAtIndex(i).getDay() + "@@" + list.getAtIndex(i).getMonth() + "@@"
 							+ list.getAtIndex(i).getYear() + "@@" + list.getAtIndex(i).getColor().getRed() + "@@"
 							+ list.getAtIndex(i).getColor().getGreen() + "@@" + list.getAtIndex(i).getColor().getBlue()
-							+ "@@" + list.getAtIndex(i).getTimestamp() + "@@\n");
+							+ "@@" + list.getAtIndex(i).getTimestamp() + "@@\r\n");
 				} else if (list.getAtIndex(i).getSyncState() == SyncState.Edited) {
 					list.getAtIndex(i).setSyncState(SyncState.Synced);
 					list.getAtIndex(i).setPrevious(" ");
@@ -103,7 +103,7 @@ public class CalendarWriter {
 							+ "@@" + list.getAtIndex(i).getDay() + "@@" + list.getAtIndex(i).getMonth() + "@@"
 							+ list.getAtIndex(i).getYear() + "@@" + list.getAtIndex(i).getColor().getRed() + "@@"
 							+ list.getAtIndex(i).getColor().getGreen() + "@@" + list.getAtIndex(i).getColor().getBlue()
-							+ "@@" + list.getAtIndex(i).getTimestamp() + "@@\n");
+							+ "@@" + list.getAtIndex(i).getTimestamp() + "@@\r\n");
 				} else if (list.getAtIndex(i).getSyncState() == SyncState.Deleted) {
 					list.removeD(list.getAtIndex(i).getDate(), list.getAtIndex(i).getStartInt());
 					i--;
@@ -127,7 +127,7 @@ public class CalendarWriter {
 			for (int i = 0; i < list.size(); i++) {
 				if (list.getAtIndex(i).getSyncState() != SyncState.Synced) {
 					changeCount++;
-					buff.append(list.getAtIndex(i).toString() + "\n");
+					buff.append(list.getAtIndex(i).toString() + "\r\n");
 				}
 			}
 			fileWriter.println(changeCount);

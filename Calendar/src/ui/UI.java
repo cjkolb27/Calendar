@@ -38,6 +38,7 @@ import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -211,6 +212,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private JMenuBar menuBar;
 	/** Menu */
 	private JMenu menu;
+	/** Connected indicator */
+	private JMenu connectedMenu;
 	/** Item for loading calendar date */
 	private JMenuItem loadCalendar;
 	/** Item for editing settings */
@@ -368,18 +371,42 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 
 					Thread t2 = new Thread(() -> {
 						try {
+							Icon green = new ImageIcon(getClass().getClassLoader().getResource("green.png"));
+							connectedMenu.setIcon(green);
 							System.out.println("Client Listening");
 							Socket serverConnection = clientSocket.accept();
 							System.out.println("Listening complete");
 							InputStream input = serverConnection.getInputStream();
 							Scanner scanner = new Scanner(input);
-							String message;
-							while ((message = scanner.nextLine()) != null && connectOnline) {
-								System.out.println(message);
+							String message = "";
+							String line;
+							while ((line = scanner.nextLine()) != null && connectOnline) {
+								message += line + "\r\n";
+								if (message.contains("\r\n\r\n")) {
+									System.out.print(message);
+									Scanner scanner2 = new Scanner(message);
+									String request = scanner2.next();
+									if ("Get".equals(request)) {
+										String file = scanner2.next();
+										writeToServer.print("Post " + CONNECTION_VERSION + "\r\nHost: " + InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
+												+ "\r\n*]*START*[*\r\n" + manager.getYear() + ".txt\r\n" + Files.readString(Path.of(manager.getPath())) + "*]*END*[*\r\n\r\n");
+										writeToServer.flush();
+									} else if ("Post".equals(request)) {
+										int version = Integer.parseInt(scanner2.next());
+										if (version == manager.getEvents().getVersion()) {
+											System.out.println("Version Up To Date!");
+										}
+									}
+									scanner2.close();
+									message = "";
+								}
 							}
+							scanner.close();
 							System.out.println("Client connection closed.");
 						} catch (Exception e) {
 							connectOnline = false;
+							Icon red = new ImageIcon(getClass().getClassLoader().getResource("red.png"));
+							connectedMenu.setIcon(red);
 							e.printStackTrace();
 						}
 					});
@@ -387,16 +414,17 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 					t2.start();
 
 					System.out.println("Sockets Created");
-					OutputStream output = serverSocket.getOutputStream();
-					writeToServer = new PrintWriter(output, true);
-					String host = InetAddress.getLocalHost().getHostName();
-					writeToServer.print("Post " + CONNECTION_VERSION + "\r\nHost: " + host + "\r\nPort: " + clientPort
-							+ "\r\n*]*START*[*\r\n" + manager.getYear() + ".txt\r\n"
-							+ Files.readString(Path.of(manager.getPath())) + "*]*END*[*\r\n\r\n");
+					writeToServer = new PrintWriter(serverSocket.getOutputStream(), true);
+					writeToServer.print("Get " + CONNECTION_VERSION + "\r\nHost: " + InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
+							+ "\r\n*]*START*[*\r\n" + manager.getYear() + ".txt\r\n" + "*]*END*[*\r\n\r\n");
+
+					// Files.readString(Path.of(manager.getPath()))
 					writeToServer.flush();
 					System.out.println("Write complete");
 				} catch (Exception e) {
 					connectOnline = false;
+					Icon red = new ImageIcon(getClass().getClassLoader().getResource("red.png"));
+					connectedMenu.setIcon(red);
 					e.printStackTrace();
 				}
 			}
@@ -950,7 +978,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				while (currentData != null && currentData.getDay() == j + 1 && currentData.getMonth() == i + 1
 						&& currentData.getYear() == yearOfCalendar) {
 					if (currentData.getSyncState() != SyncState.Deleted) {
-						System.out.println("Found: " + currentData.getSyncState().toString());
+						// System.out.println("Found: " + currentData.getSyncState().toString());
 						datePanel[currentDay].addButton(currentData.getStartTime(), currentData.getStartInt(),
 								currentData.getEndTime(), currentData.getEndInt(), currentData.getDay(),
 								currentData.getMonth(), currentData.getYear(), currentData.getName(),
@@ -1084,7 +1112,13 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		menu.add(editSettings);
 		menu.add(quit);
 		menu.add(sync);
+
+		connectedMenu = new JMenu("");
+		Icon red = new ImageIcon(getClass().getClassLoader().getResource("red.png"));
+		connectedMenu.setIcon(red);
 		menuBar.add(menu);
+		menuBar.add(Box.createHorizontalGlue());
+		menuBar.add(connectedMenu);
 		menuBar.setBackground(panelColor);
 		menuBar.setForeground(textColor);
 		menuBar.setBorder(BorderFactory.createBevelBorder(0));
