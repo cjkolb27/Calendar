@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.InetAddress;
 import java.util.Scanner;
 
 import javax.swing.AbstractButton;
@@ -410,24 +411,68 @@ public class DatePanel implements ActionListener {
 								EventData eventPrevious = currentUI.getManager().getEvents()
 										.get((double) (year + (((month * 31) + (day)) * .001)), current.getStartTime());
 								EventData newEvent = null;
-								if (eventPrevious.getSyncState() == SyncState.NotSynced) {
-									newEvent = currentUI.getManager().editEvent(
-											(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime(),
-											jtf1.getText(), jtf2.getText(), jtf3.getText(), getDay(), getMonth(),
-											getYear(), selectedColor.getRed(), selectedColor.getGreen(),
-											selectedColor.getBlue(), SyncState.NotSynced, " ");
-								} else if (eventPrevious.getSyncState() == SyncState.Synced) {
-									newEvent = currentUI.getManager().editEvent(
-											(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime(),
-											jtf1.getText(), jtf2.getText(), jtf3.getText(), getDay(), getMonth(),
-											getYear(), selectedColor.getRed(), selectedColor.getGreen(),
-											selectedColor.getBlue(), SyncState.Edited, eventPrevious.toString().replaceAll("@@", "/"));
-								} else if (eventPrevious.getSyncState() == SyncState.Edited) {
-									newEvent = currentUI.getManager().editEvent(
-											(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime(),
-											jtf1.getText(), jtf2.getText(), jtf3.getText(), getDay(), getMonth(),
-											getYear(), selectedColor.getRed(), selectedColor.getGreen(),
-											selectedColor.getBlue(), SyncState.Edited, eventPrevious.getPrevious());
+								try {
+									currentUI.LOCK.lock();
+									if (eventPrevious.getSyncState() == SyncState.NotSynced) {
+										newEvent = currentUI.getManager().editEvent(
+												(double) (year + (((month * 31) + (day)) * .001)),
+												current.getStartTime(), jtf1.getText(), jtf2.getText(), jtf3.getText(),
+												getDay(), getMonth(), getYear(), selectedColor.getRed(),
+												selectedColor.getGreen(), selectedColor.getBlue(), SyncState.NotSynced,
+												" ");
+										if (currentUI.connectOnline) {
+											currentUI.writeToServer.print("Put " + currentUI.CONNECTION_VERSION
+													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
+													+ "\r\nPort: " + currentUI.clientPort + "\r\n"
+													+ newEvent.toString() + "\r\n\r\n");
+											currentUI.writeToServer.flush();
+											currentUI.TASKS.add(() -> System.out.println("Task sent to the server."));
+										} else {
+											currentUI.TASKS
+													.add(() -> System.out.println("Task not sent to the server."));
+										}
+									} else if (eventPrevious.getSyncState() == SyncState.Synced) {
+										newEvent = currentUI.getManager().editEvent(
+												(double) (year + (((month * 31) + (day)) * .001)),
+												current.getStartTime(), jtf1.getText(), jtf2.getText(), jtf3.getText(),
+												getDay(), getMonth(), getYear(), selectedColor.getRed(),
+												selectedColor.getGreen(), selectedColor.getBlue(), SyncState.Edited,
+												eventPrevious.toString().replaceAll("@@", "/"));
+										if (currentUI.connectOnline) {
+											currentUI.writeToServer.print("Put " + currentUI.CONNECTION_VERSION
+													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
+													+ "\r\nPort: " + currentUI.clientPort + "\r\n"
+													+ newEvent.toString() + "\r\n\r\n");
+											currentUI.writeToServer.flush();
+											currentUI.TASKS.add(() -> System.out.println("Task sent to the server."));
+										} else {
+											currentUI.TASKS
+													.add(() -> System.out.println("Task not sent to the server."));
+										}
+									} else if (eventPrevious.getSyncState() == SyncState.Edited) {
+										newEvent = currentUI.getManager().editEvent(
+												(double) (year + (((month * 31) + (day)) * .001)),
+												current.getStartTime(), jtf1.getText(), jtf2.getText(), jtf3.getText(),
+												getDay(), getMonth(), getYear(), selectedColor.getRed(),
+												selectedColor.getGreen(), selectedColor.getBlue(), SyncState.Edited,
+												eventPrevious.getPrevious());
+										if (currentUI.connectOnline) {
+											currentUI.writeToServer.print("Put " + currentUI.CONNECTION_VERSION
+													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
+													+ "\r\nPort: " + currentUI.clientPort + "\r\n"
+													+ newEvent.toStringSynced() + "\r\n\r\n");
+											currentUI.writeToServer.flush();
+											currentUI.TASKS.add(() -> System.out.println("Task sent to the server."));
+										} else {
+											currentUI.TASKS
+													.add(() -> System.out.println("Task not sent to the server."));
+										}
+									}
+								} finally {
+									currentUI.LOCK.unlock();
+								}
+								if (newEvent == null) {
+									throw new NullPointerException();
 								}
 								editButton(newEvent.getStartTime(), current.getStartTime(), newEvent.getStartInt(),
 										newEvent.getEndTime(), newEvent.getEndInt(), getDay(), getMonth(), getYear(),
@@ -452,40 +497,60 @@ public class DatePanel implements ActionListener {
 							try {
 								EventData eventPrevious = currentUI.getManager().getEvents()
 										.get((double) (year + (((month * 31) + (day)) * .001)), current.getStartTime());
-								if (eventPrevious.getSyncState() == SyncState.NotSynced) {
-									currentUI.getManager().removeEvent(
-											(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime());
-								} else if (eventPrevious.getSyncState() == SyncState.Synced) {
-									currentUI.getManager().removeEvent(
-											(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime());
-									currentUI.getManager().createEvent(eventPrevious.getName(),
-											eventPrevious.getStartTime(), eventPrevious.getEndTime(),
-											eventPrevious.getDay(), eventPrevious.getMonth(), eventPrevious.getYear(),
-											eventPrevious.getColor().getRed(), eventPrevious.getColor().getGreen(),
-											eventPrevious.getColor().getBlue(), SyncState.Deleted, eventPrevious.toString().replaceAll("@@", "/"));
-								} else if (eventPrevious.getSyncState() == SyncState.Edited) {
-									Scanner scanner = new Scanner(eventPrevious.getPrevious());
-									scanner.useDelimiter("@@");
-									String name = scanner.next();
-									String startTime = scanner.next();
-									String endTime = scanner.next();
-									int theDay = scanner.nextInt();
-									int theMonth = scanner.nextInt();
-									int theYear = scanner.nextInt();
-									int red = scanner.nextInt();
-									int green = scanner.nextInt();
-									int blue = scanner.nextInt();
-									scanner.close();
-									currentUI.getManager().removeEvent(
-											(double) (year + (((month * 31) + (day)) * .001)), current.getStartTime());
-									currentUI.getManager().createEvent(name, startTime, endTime, theDay, theMonth,
-											theYear, red, green, blue, SyncState.Deleted, " ");
-								}
-								removeButton(current.getStartTime());
-								if (currentUI.getDayRangeButton() == currentUI.getButtonConversion(current.getDay(),
-										current.getMonth() - 1)) {
-									currentUI.setDayRange(current.getDay(), current.getMonth() - 1);
-									currentUI.getDayRangePane().setViewportView(currentUI.getDayRange());
+								try {
+									currentUI.LOCK.lock();
+									if (eventPrevious.getSyncState() == SyncState.NotSynced) {
+										currentUI.getManager().removeEvent(
+												(double) (year + (((month * 31) + (day)) * .001)),
+												current.getStartTime());
+									} else if (eventPrevious.getSyncState() == SyncState.Synced) {
+										currentUI.getManager().removeEvent(
+												(double) (year + (((month * 31) + (day)) * .001)),
+												current.getStartTime());
+										currentUI.getManager().createEvent(eventPrevious.getName(),
+												eventPrevious.getStartTime(), eventPrevious.getEndTime(),
+												eventPrevious.getDay(), eventPrevious.getMonth(),
+												eventPrevious.getYear(), eventPrevious.getColor().getRed(),
+												eventPrevious.getColor().getGreen(), eventPrevious.getColor().getBlue(),
+												SyncState.Deleted, eventPrevious.toString().replaceAll("@@", "/"));
+//										if (currentUI.connectOnline) {
+//											currentUI.writeToServer.print("Delete" + currentUI.CONNECTION_VERSION
+//													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
+//													+ "\r\nPort: " + currentUI.clientPort + "\r\n*]*START*[*\r\n"
+//													+ eventPrevious.toStringSynced() + "*]*END*[*\r\n\r\n");
+//											currentUI.writeToServer.flush();
+//											currentUI.TASKS.add(() -> System.out.println("Task sent to the server."));
+//										} else {
+//											currentUI.TASKS
+//													.add(() -> System.out.println("Task not sent to the server."));
+//										}
+									} else if (eventPrevious.getSyncState() == SyncState.Edited) {
+										Scanner scanner = new Scanner(eventPrevious.getPrevious());
+										scanner.useDelimiter("@@");
+										String name = scanner.next();
+										String startTime = scanner.next();
+										String endTime = scanner.next();
+										int theDay = scanner.nextInt();
+										int theMonth = scanner.nextInt();
+										int theYear = scanner.nextInt();
+										int red = scanner.nextInt();
+										int green = scanner.nextInt();
+										int blue = scanner.nextInt();
+										scanner.close();
+										currentUI.getManager().removeEvent(
+												(double) (year + (((month * 31) + (day)) * .001)),
+												current.getStartTime());
+										currentUI.getManager().createEvent(name, startTime, endTime, theDay, theMonth,
+												theYear, red, green, blue, SyncState.Deleted, " ");
+									}
+									removeButton(current.getStartTime());
+									if (currentUI.getDayRangeButton() == currentUI.getButtonConversion(current.getDay(),
+											current.getMonth() - 1)) {
+										currentUI.setDayRange(current.getDay(), current.getMonth() - 1);
+										currentUI.getDayRangePane().setViewportView(currentUI.getDayRange());
+									}
+								} finally {
+									currentUI.LOCK.unlock();
 								}
 								currentUI.getScreen().setVisible(true);
 								currentUI.getScreen().repaint();

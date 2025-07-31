@@ -26,7 +26,7 @@ public class CalendarWriter {
 	 */
 	public static void writeCalendar(File file, SortedDateList<EventData> list, File changedFile) {
 		int changeCount = 0;
-		SortedDateList<EventData> changeList = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> changeList = new SortedDateList<EventData>(0, 0);
 		try {
 			PrintStream fileWriter = new PrintStream(file);
 			fileWriter.println(list.getVersion());

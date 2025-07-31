@@ -40,7 +40,7 @@ public class CalendarManager {
 	 */
 	public CalendarManager() {
 		allSettings = new String[2];
-		eventYearList = new SortedDateList<EventData>(0);
+		eventYearList = new SortedDateList<EventData>(0, 0);
 		year = Year.now().getValue();
 		loadSettings();
 		path = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "CalendarData"
@@ -73,7 +73,7 @@ public class CalendarManager {
 	 * @param debugYear the year set for debugging
 	 */
 	public CalendarManager(int debugYear) {
-		eventYearList = new SortedDateList<EventData>(0);
+		eventYearList = new SortedDateList<EventData>(0, 0);
 		year = debugYear;
 		path = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "CalendarData"
 				+ File.separator + year + ".txt";
@@ -149,7 +149,7 @@ public class CalendarManager {
 	 * @param yearAdd the year to load calendar
 	 */
 	public void loadCalendar(int yearAdd) {
-		eventYearList = new SortedDateList<EventData>(0);
+		eventYearList = new SortedDateList<EventData>(0, 0);
 		year += yearAdd;
 		System.out.println("Something" + year);
 		path = System.getProperty("user.home") + File.separator + "Documents" + File.separator + "CalendarData"
@@ -181,7 +181,7 @@ public class CalendarManager {
 	 * @param name the name of the file
 	 */
 	public void loadCalendarByName(String name) {
-		eventYearList = new SortedDateList<EventData>(0);
+		eventYearList = new SortedDateList<EventData>(0, 0);
 		path = name;
 		try {
 			new File(path).createNewFile();
@@ -307,7 +307,7 @@ public class CalendarManager {
 	 */
 	public void clearCalendar() {
 		saveCalendar();
-		eventYearList = new SortedDateList<EventData>(0);
+		eventYearList = new SortedDateList<EventData>(0, 0);
 	}
 
 	/**

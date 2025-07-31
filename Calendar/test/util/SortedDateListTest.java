@@ -21,7 +21,7 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testSortedDateList() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0, 0);
 		assertEquals(0, s.size());
 		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		s.add(e, e.getDate(), e.getStartInt());
@@ -34,7 +34,7 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testAdd() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0, 0);
 		assertThrows(NullPointerException.class, () -> s.add(null, 2.2, 0));
 		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		EventData e2 = new EventData("Job", "1220a", "415p", 12, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
@@ -42,7 +42,7 @@ class SortedDateListTest {
 		s.add(e2, e2.getDate(), e2.getStartInt());
 		assertEquals(2, s.size());
 
-		SortedDateList<EventData> s2 = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s2 = new SortedDateList<EventData>(0, 0);
 		EventData e3 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		EventData e4 = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		s2.add(e3, e3.getDate(), e3.getStartInt());
@@ -55,7 +55,7 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testGet() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0, 0);
 		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		EventData e2 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		EventData e3 = new EventData("Job", "1215a", "415p", 14, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
@@ -79,7 +79,7 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testGetAtIndex() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0, 0);
 		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		EventData e2 = new EventData("Job", "1215a", "415p", 13, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		EventData e3 = new EventData("Job", "1215a", "415p", 14, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
@@ -101,7 +101,7 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testRemoveE() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0, 0);
 		assertThrows(NullPointerException.class, () -> s.removeE(null, 0));
 
 		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
@@ -118,7 +118,7 @@ class SortedDateListTest {
 		s.removeE(e, e.getStartInt());
 		assertEquals(1, s.size());
 
-		SortedDateList<EventData> s2 = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s2 = new SortedDateList<EventData>(0, 0);
 		EventData e3 = new EventData("Job", "1215a", "415p", 14, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		s2.add(e, e.getDate(), e.getStartInt());
 		s2.add(e2, e2.getDate(), e2.getStartInt());
@@ -126,7 +126,7 @@ class SortedDateListTest {
 		s2.removeE(e, e.getStartInt());
 		assertEquals(2, s2.size());
 
-		SortedDateList<EventData> s3 = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s3 = new SortedDateList<EventData>(0, 0);
 		EventData e4 = new EventData("Job", "1215a", "415p", 9, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		s3.add(e, e.getDate(), e.getStartInt());
 		s3.add(e2, e2.getDate(), e2.getStartInt());
@@ -160,7 +160,7 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testRemoveD() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0, 0);
 		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		assertThrows(IllegalArgumentException.class, () -> s.removeD(2024.384, e.getStartInt()));
 		assertEquals(0, s.size());
@@ -175,7 +175,7 @@ class SortedDateListTest {
 		s.removeD(e.getDate(), e.getStartInt());
 		assertEquals(1, s.size());
 
-		SortedDateList<EventData> s2 = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s2 = new SortedDateList<EventData>(0, 0);
 		EventData e3 = new EventData("Job", "1215a", "415p", 14, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		s2.add(e, e.getDate(), e.getStartInt());
 		s2.add(e2, e2.getDate(), e2.getStartInt());
@@ -183,7 +183,7 @@ class SortedDateListTest {
 		s2.removeD(e.getDate(), e.getStartInt());
 		assertEquals(2, s2.size());
 
-		SortedDateList<EventData> s3 = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s3 = new SortedDateList<EventData>(0, 0);
 		EventData e4 = new EventData("Job", "1215a", "415p", 9, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		s3.add(e, e.getDate(), e.getStartInt());
 		s3.add(e2, e2.getDate(), e2.getStartInt());
@@ -217,7 +217,7 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testSize() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0, 0);
 		assertEquals(0, s.size());
 	}
 
@@ -226,7 +226,7 @@ class SortedDateListTest {
 	 */
 	@Test
 	void testIterator() {
-		SortedDateList<EventData> sdl = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> sdl = new SortedDateList<EventData>(0, 0);
 		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		sdl.add(e, e.getDate(), e.getStartInt());
 		Iterator<EventData> it = sdl.iterator();

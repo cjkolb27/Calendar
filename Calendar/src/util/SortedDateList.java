@@ -19,15 +19,26 @@ public class SortedDateList<E> {
 	private int size;
 	/** Version history of list */
 	private int version;
+	/** Count of non synced events */
+	private int notSynced;
 
 	/**
 	 * Sets the size of the list to 0, and sets front/back to null
 	 */
-	public SortedDateList(int version) {
+	public SortedDateList(int version, int notSynced) {
 		this.version = version;
+		setNotSynced(notSynced);
 		size = 0;
 		front = null;
 		back = null;
+	}
+	
+	public int getNotSynced() {
+		return notSynced;
+	}
+	
+	public void setNotSynced(int notSynced) {
+		this.notSynced = notSynced;
 	}
 
 	/**

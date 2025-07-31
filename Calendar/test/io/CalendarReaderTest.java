@@ -22,7 +22,7 @@ class CalendarReaderTest {
 	 */
 	@Test
 	void testReadCalendar() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0, 0);
 		s = CalendarReader.readCalendar(new File("testFiles/calendar1.txt"), new File("testFiles/calendar1_changes.txt"));
 		assertEquals(1, s.getVersion());
 		assertEquals(12, s.size());
@@ -42,7 +42,7 @@ class CalendarReaderTest {
 //		assertEquals(23, s.getAtIndex(12).getDay());
 //		assertEquals(30, s.getAtIndex(13).getDay());
 		
-		SortedDateList<EventData> s2 = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s2 = new SortedDateList<EventData>(0, 0);
 		s2 = CalendarReader.readCalendar(new File("testFiles/year1.txt"), new File("testFiles/year1_changes.txt"));
 		assertEquals(14, s2.size());
 	}

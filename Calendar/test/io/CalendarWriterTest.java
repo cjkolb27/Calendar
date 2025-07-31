@@ -23,7 +23,7 @@ class CalendarWriterTest {
 	 */
 	@Test
 	void testWriteCalendar() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0, 0);
 		EventData e1 = new EventData("Job", "12:30a", "12:35a", 12, 11, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		EventData e2 = new EventData("Job", "12:35a", "12:36a", 12, 11, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
 		EventData e3 = new EventData("Job", "12:29a", "12:30a", 12, 11, 2024, 100, 100, 100, SyncState.Synced, " ", " ");
@@ -65,7 +65,7 @@ class CalendarWriterTest {
 	
 	@Test
 	void testWriteSyncedCalendar() {
-		SortedDateList<EventData> s = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> s = new SortedDateList<EventData>(0, 0);
 		s = CalendarReader.readCalendar(new File("testFiles/year1.txt"), new File("testFiles/year1_changes.txt"));
 		CalendarWriter.writeSyncedCalendar(new File("testFiles/year2.txt"), s, new File("testFiles/year2_changes.txt"));
 		assertEquals(151, s.size());

@@ -25,7 +25,7 @@ public class CalendarReader {
 	 * @return list the list of sorted dates
 	 */
 	public static SortedDateList<EventData> readCalendar(File file, File changeFile) {
-		SortedDateList<EventData> list = new SortedDateList<EventData>(0);
+		SortedDateList<EventData> list = new SortedDateList<EventData>(0, 0);
 		try {
 			Scanner scanner = new Scanner(file);
 			list.setVersion(scanner.nextInt());
@@ -56,6 +56,7 @@ public class CalendarReader {
 			scanner.close();
 			Scanner scanner2 = new Scanner(changeFile);
 			scanner2.nextLine();
+			int count = 0;
 			while (scanner2.hasNextLine() && scanner2.hasNext()) {
 				scanner2.useDelimiter("@@");
 				try {
@@ -75,6 +76,7 @@ public class CalendarReader {
 						scanner2.nextLine();
 					}
 					EventData eventData = new EventData(name, startTime, endTime, day, month, year, red, green, blue, syncState, previous, timestamp);
+					count++;
 					if (syncState == SyncState.Deleted || syncState == SyncState.Edited) {
 						Scanner scanner3 = new Scanner(previous);
 						scanner3.useDelimiter("/");
@@ -101,6 +103,7 @@ public class CalendarReader {
 				}
 			}
 			scanner2.close();
+			list.setNotSynced(count);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
