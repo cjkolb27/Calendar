@@ -34,6 +34,9 @@ public class CalendarReader {
 				scanner.useDelimiter("@@");
 				try {
 					String name = scanner.next();
+					if ("\n".equals(name) || "\r\n".equals(name)) {
+						break;
+					}
 					String startTime = scanner.next();
 					String endTime = scanner.next();
 					int day = scanner.nextInt();

@@ -423,13 +423,11 @@ public class DatePanel implements ActionListener {
 										if (currentUI.connectOnline) {
 											currentUI.writeToServer.print("Put " + currentUI.CONNECTION_VERSION
 													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
-													+ "\r\nPort: " + currentUI.clientPort + "\r\n"
+													+ "\r\nPort: " + currentUI.clientPort + "\r\nVersion: "
+													+ currentUI.getManager().getEvents().getVersion() + "\r\n"
+													+ currentUI.getManager().getYear() + ".txt\r\n"
 													+ newEvent.toString() + "\r\n\r\n");
 											currentUI.writeToServer.flush();
-											currentUI.TASKS.add(() -> System.out.println("Task sent to the server."));
-										} else {
-											currentUI.TASKS
-													.add(() -> System.out.println("Task not sent to the server."));
 										}
 									} else if (eventPrevious.getSyncState() == SyncState.Synced) {
 										newEvent = currentUI.getManager().editEvent(
@@ -441,13 +439,11 @@ public class DatePanel implements ActionListener {
 										if (currentUI.connectOnline) {
 											currentUI.writeToServer.print("Put " + currentUI.CONNECTION_VERSION
 													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
-													+ "\r\nPort: " + currentUI.clientPort + "\r\n"
+													+ "\r\nPort: " + currentUI.clientPort + "\r\nVersion: "
+													+ currentUI.getManager().getEvents().getVersion() + "\r\n"
+													+ currentUI.getManager().getYear() + ".txt\r\n"
 													+ newEvent.toString() + "\r\n\r\n");
 											currentUI.writeToServer.flush();
-											currentUI.TASKS.add(() -> System.out.println("Task sent to the server."));
-										} else {
-											currentUI.TASKS
-													.add(() -> System.out.println("Task not sent to the server."));
 										}
 									} else if (eventPrevious.getSyncState() == SyncState.Edited) {
 										newEvent = currentUI.getManager().editEvent(
@@ -459,13 +455,11 @@ public class DatePanel implements ActionListener {
 										if (currentUI.connectOnline) {
 											currentUI.writeToServer.print("Put " + currentUI.CONNECTION_VERSION
 													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
-													+ "\r\nPort: " + currentUI.clientPort + "\r\n"
-													+ newEvent.toStringSynced() + "\r\n\r\n");
+													+ "\r\nPort: " + currentUI.clientPort + "\r\nVersion: "
+													+ currentUI.getManager().getEvents().getVersion() + "\r\n"
+													+ currentUI.getManager().getYear() + ".txt\r\n"
+													+ newEvent.toString() + "\r\n\r\n");
 											currentUI.writeToServer.flush();
-											currentUI.TASKS.add(() -> System.out.println("Task sent to the server."));
-										} else {
-											currentUI.TASKS
-													.add(() -> System.out.println("Task not sent to the server."));
 										}
 									}
 								} finally {

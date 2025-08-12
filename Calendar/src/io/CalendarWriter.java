@@ -40,27 +40,14 @@ public class CalendarWriter {
 							+ "@@" + list.getAtIndex(i).getDay() + "@@" + list.getAtIndex(i).getMonth() + "@@"
 							+ list.getAtIndex(i).getYear() + "@@" + list.getAtIndex(i).getColor().getRed() + "@@"
 							+ list.getAtIndex(i).getColor().getGreen() + "@@" + list.getAtIndex(i).getColor().getBlue()
-							+ "@@\n");
+							+ "@@" + list.getAtIndex(i).getTimestamp() + "@@\n");
 				} else {
 					changeCount++;
 					changeList.add(list.getAtIndex(i), list.getAtIndex(i).getDate(), list.getAtIndex(i).getStartInt());
 				}
 			}
+			writeNonSyncedCalendar(changedFile, list);
 			fileWriter.close();
-			PrintStream fileWrite = new PrintStream(changedFile);
-			fileWrite.println(changeCount);
-			for (int i = 0; i < changeList.size(); i++) {
-				fileWrite.print(changeList.getAtIndex(i).getName() + "@@" + changeList
-						.getAtIndex(i).getStartTime().substring(0, changeList.getAtIndex(i).getStartTime().length() - 1)
-						+ "@@"
-						+ changeList.getAtIndex(i).getEndTime().substring(0,
-								changeList.getAtIndex(i).getEndTime().length() - 1)
-						+ "@@" + changeList.getAtIndex(i).getDay() + "@@" + changeList.getAtIndex(i).getMonth() + "@@"
-						+ changeList.getAtIndex(i).getYear() + "@@" + changeList.getAtIndex(i).getColor().getRed()
-						+ "@@" + changeList.getAtIndex(i).getColor().getGreen() + "@@"
-						+ changeList.getAtIndex(i).getColor().getBlue() + "@@\n");
-			}
-			fileWrite.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

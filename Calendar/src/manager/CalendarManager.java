@@ -64,7 +64,7 @@ public class CalendarManager {
 		} catch (IOException e) {
 			throw new IllegalArgumentException("No Calendar Files Exist\n");
 		}
-		eventYearList = CalendarReader.readCalendar(new File(path), new File(pathChangeLog));
+		loadEvents();
 	}
 
 	/**
@@ -190,6 +190,10 @@ public class CalendarManager {
 		}
 		eventYearList = CalendarReader.readCalendar(new File(path), new File(pathChangeLog));
 	}
+	
+	public void loadEvents() {
+		eventYearList = CalendarReader.readCalendar(new File(path), new File(pathChangeLog));
+	}
 
 	/**
 	 * Saves the contents of the calendar
@@ -206,6 +210,47 @@ public class CalendarManager {
 	public void approveChanges() {
 		try {
 			CalendarWriter.writeSyncedCalendar(new File(path), eventYearList, new File(pathChangeLog));
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e.getMessage());
+		}
+	}
+	
+	public void patch(String patches, int version) {
+		try {
+			Scanner scanner = new Scanner(patches);
+			scanner.useDelimiter("@@");
+			while (scanner.hasNextLine() && scanner.hasNext()) {
+				try {
+					SyncState syncState = SyncState.valueOf(scanner.next());
+					System.out.println("ALKJSFLKJIWJWMNWMWMWKMWIXIXIXIIXX" + syncState);
+					if (syncState == null) {
+						break;
+					}
+					String previous = scanner.next();
+					String name = scanner.next();
+					String startTime = scanner.next();
+					String endTime = scanner.next();
+					int day = scanner.nextInt();
+					int month = scanner.nextInt();
+					int years = scanner.nextInt();
+					int red = scanner.nextInt();
+					int green = scanner.nextInt();
+					int blue = scanner.nextInt();
+					String timestamp = scanner.next();
+					if (scanner.hasNextLine()) {
+						scanner.nextLine();
+					}
+					EventData eventData = new EventData(name, startTime, endTime, day, month, years, red, green, blue, syncState, previous, timestamp);
+					System.out.println("SKLJDFLKSJDFLKSJDFLKSDJFSLKDLAPAPPAPAPPAS");
+					eventYearList.updateChanges(eventData);
+				} catch (Exception e) {
+					// Nothing
+					System.out.println(e.getMessage());
+				}
+			}
+			scanner.close();
+			CalendarWriter.writeCalendar(new File(path), eventYearList, new File(pathChangeLog));
+			loadCalendar(0);
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e.getMessage());
 		}

@@ -21,6 +21,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -60,10 +61,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.MenuSelectionManager;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.LineBorder;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.text.NumberFormatter;
 
@@ -149,6 +153,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	private JButton[] smallMonthButtons;
 	/** Buttons for every calendar day */
 	private JButton[] buttons;
+	/** Buttons for every space */
+	private JButton[] fakeButtons;
 	/** Day Range buttons */
 	private JButton[] dayRangeButtons;
 	/** Add button for west panel */
@@ -295,8 +301,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	public static PrintWriter writeToServer;
 	/** Lock for controlling network resources */
 	public final Lock LOCK;
-	/** Queue for executing tasks in order */
-	public final BlockingQueue<Runnable> TASKS;
+	///** Queue for executing tasks in order */
+	//public final BlockingQueue<Runnable> TASKS;
 
 	/**
 	 * Creates the GUI for the user to interact with the CalendarManager
@@ -304,7 +310,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	public UI() {
 		super();
 		LOCK = new ReentrantLock();
-		TASKS = new LinkedBlockingQueue<>();
 		// UIManager UI = new UIManager();
 		UIManager.put("OptionPane.background", new ColorUIResource(optionPaneColor));
 		UIManager.put("Panel.background", optionPaneColor);
@@ -319,6 +324,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		settingsChanged = false;
 		manager = new CalendarManager();
 		screen = new JFrame();
+		createMenuBar();
 		ImageIcon image = new ImageIcon(getClass().getClassLoader().getResource("CalendarPNG.png"));
 		screen.setIconImage(image.getImage());
 		screen.setSize(Toolkit.getDefaultToolkit().getScreenSize().width,
@@ -334,8 +340,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		setAllDates();
 
 		buildButtonDays();
-
-		createMenuBar();
 		settings = manager.defaultSettings();
 		ScreenState state = ScreenState.Windowed;
 		if ("Borderless".equals(settings[1])) {
@@ -354,6 +358,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 
 		screen.repaint();
 		screen.validate();
+		runThreads();
+	}
+
+	private void runThreads() {
 		String[] hostport = NetworkIO.readNetworkIO(new File(System.getProperty("user.home") + File.separator
 				+ "Documents" + File.separator + "CalendarData" + File.separator + "NetworkIO.txt"));
 		if (hostport != null) {
@@ -369,102 +377,163 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			connectOnline = false;
 		}
 
-		Thread tasks = new Thread(() -> {
-			while (true) {
-				try {
-					Runnable task = TASKS.take();
-					task.run();
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					break;
-				}
-			}
-		});
-		tasks.setDaemon(true);
-		tasks.start();
+//		Thread tasks = new Thread(() -> {
+//			while (true) {
+//				try {
+//					Runnable task = TASKS.take();
+//					LOCK.lock();
+//					try {
+//						task.run();
+//					} finally {
+//						LOCK.unlock();
+//					}
+//				} catch (InterruptedException e) {
+//					Thread.currentThread().interrupt();
+//					break;
+//				}
+//			}
+//		});
+//		tasks.setDaemon(true);
+//		tasks.start();
 
-		Thread t = new Thread(() -> {
-			System.out.println("Thread Starting");
-			if (connectOnline) {
-				try {
-					System.out.println("Creating Sockets");
-					serverSocket = new Socket(hostname, serverPort);
-					clientSocket = new ServerSocket(0);
-					clientPort = clientSocket.getLocalPort();
+		if (connectOnline) {
+			try {
+				System.out.println("Creating Sockets");
+				serverSocket = new Socket(hostname, serverPort);
+				clientSocket = new ServerSocket(0);
+				clientPort = clientSocket.getLocalPort();
+				
+				System.out.println("Sockets Created");
+				writeToServer = new PrintWriter(serverSocket.getOutputStream(), true);
+				LOCK.lock();
+				writeToServer.print("Get " + CONNECTION_VERSION + "\r\nHost: "
+						+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort + "\r\nVersion: "
+						+ manager.getEvents().getVersion() + "\r\n" + manager.getYear() + ".txt\r\n\r\n");
 
-					Thread t2 = new Thread(() -> {
+				// Files.readString(Path.of(manager.getPath()))
+				writeToServer.flush();
+				LOCK.unlock();
+				System.out.println("Write complete");
+				
+				System.out.println("Client Listening");
+				Socket serverConnection = clientSocket.accept();
+				System.out.println("Listening complete");
+				Icon green = new ImageIcon(getClass().getClassLoader().getResource("green.png"));
+				connectedMenu.setIcon(green);
+				InputStream input = serverConnection.getInputStream();
+				Scanner scanner = new Scanner(input);
+				String messages = "";
+				String lines;
+				while ((lines = scanner.nextLine()) != null && connectOnline) {
+					messages += lines + "\r\n";
+					if (messages.contains("\r\n\r\n")) {
+						LOCK.lock();
 						try {
-							Icon green = new ImageIcon(getClass().getClassLoader().getResource("green.png"));
-							connectedMenu.setIcon(green);
-							System.out.println("Client Listening");
-							Socket serverConnection = clientSocket.accept();
-							System.out.println("Listening complete");
-							InputStream input = serverConnection.getInputStream();
-							Scanner scanner = new Scanner(input);
-							String message = "";
-							String line;
-							while ((line = scanner.nextLine()) != null && connectOnline) {
-								message += line + "\r\n";
-								if (message.contains("\r\n\r\n")) {
-									LOCK.lock();
-									try {
-										System.out.print(message);
-										Scanner scanner2 = new Scanner(message);
-										String request = scanner2.next();
-										if ("Get".equals(request)) {
-											String file = scanner2.next();
-											writeToServer.print("Post " + CONNECTION_VERSION + "\r\nHost: "
-													+ InetAddress.getLocalHost().getHostName() + "\r\nPort: "
-													+ clientPort + "\r\n*]*START*[*\r\n" + manager.getYear()
-													+ ".txt\r\n" + Files.readString(Path.of(manager.getPath()))
-													+ "*]*END*[*\r\n\r\n");
-											writeToServer.flush();
-										} else if ("Post".equals(request)) {
-											int version = Integer.parseInt(scanner2.next());
-											if (version == manager.getEvents().getVersion()) {
-												System.out.println("Version Up To Date!");
-											}
-										}
-										scanner2.close();
-										message = "";
-									} finally {
-										LOCK.unlock();
-									}
+							System.out.print(messages);
+							Scanner scanner2 = new Scanner(messages);
+							String request = scanner2.next();
+							if ("Post".equals(request)) {
+								int version = Integer.parseInt(scanner2.next());
+								if (version == manager.getEvents().getVersion()) {
+									System.out.println("Version Up To Date!");
+								} else {
+									System.out.println("Version Not Up To Date!\r\n");
+									Files.writeString(Path.of(manager.getPath()), messages.substring(messages.indexOf("\r\n") + 2));
+									manager.loadEvents();
+									manager.saveCalendar();
+									updateDatepanel();
+									screen.setVisible(true);
+									screen.repaint();
+									screen.validate();
 								}
 							}
-							scanner.close();
-							System.out.println("Client connection closed.");
-						} catch (Exception e) {
-							connectOnline = false;
-							Icon red = new ImageIcon(getClass().getClassLoader().getResource("red.png"));
-							connectedMenu.setIcon(red);
-							e.printStackTrace();
+							scanner2.close();
+							messages = "";
+						} finally {
+							LOCK.unlock();
 						}
-					});
-					t2.setDaemon(true);
-					t2.start();
-
-					System.out.println("Sockets Created");
-					writeToServer = new PrintWriter(serverSocket.getOutputStream(), true);
-					LOCK.lock();
-					writeToServer.print("Get " + CONNECTION_VERSION + "\r\nHost: "
-							+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort + "\r\nVersion: "
-							+ manager.getEvents().getVersion() + "\r\n" + manager.getYear() + ".txt\r\n\r\n");
-
-					// Files.readString(Path.of(manager.getPath()))
-					writeToServer.flush();
-					LOCK.unlock();
-					System.out.println("Write complete");
-				} catch (Exception e) {
-					connectOnline = false;
-					Icon red = new ImageIcon(getClass().getClassLoader().getResource("red.png"));
-					connectedMenu.setIcon(red);
-					e.printStackTrace();
+						break;
+					}
 				}
+
+				Thread t2 = new Thread(() -> {
+					try {
+						String message = "";
+						String line;
+						while ((line = scanner.nextLine()) != null && connectOnline) {
+							message += line + "\r\n";
+							if (message.contains("\r\n\r\n")) {
+								LOCK.lock();
+								try {
+									if (message.indexOf("\r\n") == 0) {
+										message = message.replaceFirst("\\r\\n", "");
+									}
+									System.out.print(message);
+									Scanner scanner2 = new Scanner(message);
+									String request = scanner2.next();
+									if ("Get".equals(request)) {
+										String file = scanner2.next();
+										writeToServer.print("Post " + CONNECTION_VERSION + "\r\nHost: "
+												+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
+												+ "\r\n" + manager.getYear() + ".txt\r\n"
+												+ Files.readString(Path.of(manager.getPath())) + "\r\n\r\n");
+										writeToServer.flush();
+									} else if ("Post".equals(request)) {
+										int version = Integer.parseInt(scanner2.next());
+										if (version == manager.getEvents().getVersion()) {
+											System.out.println("Version Up To Date!");
+										} else {
+											System.out.println("Version Not Up To Date!\r\n");
+											Files.writeString(Path.of(manager.getPath()), message.substring(message.indexOf("\r\n") + 2));
+											manager.loadEvents();
+											manager.saveCalendar();
+											updateDatepanel();
+											screen.setVisible(true);
+											screen.repaint();
+											screen.validate();
+										}
+									} else if ("Put".equals(request)) {
+										System.out.println(request);
+										int index = 0;
+										int version = 0;
+										for (int i = 0; i < 3; i++) {
+											index = message.indexOf("\r\n", index) + 2;
+										}
+										manager.patch(message.substring(index), 0);
+										updateDatepanel();
+										screen.setVisible(true);
+										screen.repaint();
+										screen.validate();
+									}
+									scanner2.close();
+									message = "";
+								} finally {
+									LOCK.unlock();
+								}
+							}
+						}
+						scanner.close();
+						System.out.println("Client connection closed.");
+					} catch (Exception e) {
+						connectOnline = false;
+						Icon red = new ImageIcon(getClass().getClassLoader().getResource("red.png"));
+						connectedMenu.setIcon(red);
+						e.printStackTrace();
+						System.out.println("Client connection closed2.");
+					}
+				});
+				t2.setDaemon(true);
+				t2.start();
+				
+				
+				
+			} catch (Exception e) {
+				connectOnline = false;
+				Icon red = new ImageIcon(getClass().getClassLoader().getResource("red.png"));
+				connectedMenu.setIcon(red);
+				e.printStackTrace();
 			}
-		});
-		t.setDaemon(true);
-		t.start();
+		}
 	}
 
 	/**
@@ -546,6 +615,19 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			System.out.println("State Changed to Windowed");
 			screen.setVisible(true);
 		}
+	}
+	
+	private void updateDatepanel() {
+		int count = buttons.length;
+		for (int i = 0; i < count; i++) {
+			panel.remove(buttons[i]);
+		}
+		for (int i = 0; i < 6; i++) {
+			if (fakeButtons[i] != null) {
+				panel.remove(fakeButtons[i]);
+			}
+		}
+		buildButtonDays();
 	}
 
 	/**
@@ -919,6 +1001,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		Calendar cal = Calendar.getInstance();
 
 		buttons = new JButton[366];
+		
+		fakeButtons = new JButton[6];
 
 		datePanel = new DatePanel[366];
 
@@ -939,25 +1023,25 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		for (int i = 0; i < 12; i++) {
 			cal.set(yearOfCalendar, i, 1);
 			startDayPerMonth[i] = cal.get(Calendar.DAY_OF_WEEK);
-			System.out.println(startDayPerMonth[i]);
+			//System.out.println(startDayPerMonth[i]);
 			int days = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 			if (i == 0) {
 				for (int j = 0; j < cal.get(Calendar.DAY_OF_WEEK) - 1; j++) {
-					JButton b = new JButton();
-					b.setVisible(false);
-					b.setPreferredSize(new Dimension(75, 75));
-					panel.add(b);
+					fakeButtons[j] = new JButton();
+					fakeButtons[j].setVisible(false);
+					fakeButtons[j].setPreferredSize(new Dimension(75, 75));
+					panel.add(fakeButtons[j]);
 				}
 			}
 			if (i == 1 && days == 28) {
 				daysPerMonth[1] = 28;
-				System.out.println("Set Days in Feb to 28");
+				//System.out.println("Set Days in Feb to 28");
 				buttons[currentDay] = new JButton();
 				buttons[currentDay].addActionListener(this);
 				currentDay++;
 			} else if (i == 1) {
 				daysPerMonth[1] = 29;
-				System.out.println("Set Days in Feb to 29");
+				//System.out.println("Set Days in Feb to 29");
 			}
 			int weekCount = 0;
 			startWeekPerMonth[i] = 0;
@@ -1054,7 +1138,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		}
 		monthAndDay[0] = "<html>" + "Jan/1" + "</html>";
 		cal2.set(yearOfCalendar, 0, 1);
-		System.out.println(cal2.get(Calendar.DAY_OF_WEEK));
+		//System.out.println(cal2.get(Calendar.DAY_OF_WEEK));
 		int offset = cal2.get(Calendar.DAY_OF_WEEK);
 		int daysCounted = 0 + (offset * -1) + 9;
 		int month = 0;
@@ -1065,7 +1149,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				month++;
 			} else {
 				monthAndDay[offset] = ALLMONTHNAMES[month].substring(0, 3) + "/" + daysCounted;
-				System.out.println(monthAndDay[offset]);
+				//System.out.println(monthAndDay[offset]);
 				daysCounted += 7;
 				offset++;
 			}
@@ -1150,6 +1234,25 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		connectedMenu = new JMenu("");
 		Icon red = new ImageIcon(getClass().getClassLoader().getResource("red.png"));
 		connectedMenu.setIcon(red);
+		connectedMenu.addMenuListener(new MenuListener() {
+			@Override
+			public void menuSelected(MenuEvent e) {
+				System.out.println("Something WOW great!!!");
+				if (!connectOnline) {
+					runThreads();
+				}
+			}
+
+			@Override
+			public void menuDeselected(MenuEvent e) {
+				return;
+			}
+
+			@Override
+			public void menuCanceled(MenuEvent e) {
+				return;
+			}
+		});
 		menuBar.add(menu);
 		menuBar.add(Box.createHorizontalGlue());
 		menuBar.add(connectedMenu);
@@ -1774,11 +1877,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 								if (connectOnline) {
 									writeToServer.print("Put" + CONNECTION_VERSION + "\r\nHost: "
 											+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
-											+ "\r\n*]*START*[*\r\n" + newEvent.toStringSynced() + "*]*END*[*\r\n\r\n");
+											+ "\r\nVersion: " + manager.getEvents().getVersion() + "\r\n"
+											+ manager.getYear() + ".txt\r\n" + newEvent.toStringSynced() + "\r\n\r\n");
 									writeToServer.flush();
-									TASKS.add(() -> System.out.println("Task sent to the server."));
-								} else {
-									TASKS.add(() -> System.out.println("Task not sent to the server."));
 								}
 							} finally {
 								LOCK.unlock();
@@ -1878,9 +1979,6 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 															+ clientPort + "\r\n*]*START*[*\r\n"
 															+ newEvent.toStringSynced() + "*]*END*[*\r\n\r\n");
 													writeToServer.flush();
-													TASKS.add(() -> System.out.println("Task sent to the server."));
-												} else {
-													TASKS.add(() -> System.out.println("Task not sent to the server."));
 												}
 											} finally {
 												LOCK.unlock();
@@ -2533,12 +2631,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 									if (connectOnline) {
 										writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
 												+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
-												+ "\r\n" + newEvent.toString()
-												+ "\r\n\r\n");
+												+ "\r\nVersion: " + manager.getEvents().getVersion() + "\r\n"
+												+ manager.getYear() + ".txt\r\n" + newEvent.toString() + "\r\n\r\n");
 										writeToServer.flush();
-										TASKS.add(() -> System.out.println("Task sent to the server."));
-									} else {
-										TASKS.add(() -> System.out.println("Task not sent to the server."));
 									}
 								} finally {
 									LOCK.unlock();
@@ -2701,11 +2796,11 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 										}
 										if (connectOnline) {
 											writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
-													+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
-													+ "\r\n" + newEvent.toString()
+													+ InetAddress.getLocalHost().getHostName() + "\r\nPort: "
+													+ clientPort + "\r\nVersion: " + manager.getEvents().getVersion()
+													+ "\r\n" + manager.getYear() + ".txt\r\n" + newEvent.toString()
 													+ "\r\n\r\n");
 											writeToServer.flush();
-											TASKS.add(() -> System.out.println("Task sent to the server."));
 										}
 									} finally {
 										LOCK.unlock();
@@ -2890,12 +2985,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 									if (connectOnline) {
 										writeToServer.print("Put" + CONNECTION_VERSION + "\r\nHost: "
 												+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
-												+ "\r\n*]*START*[*\r\n" + newEvent.toStringSynced()
-												+ "*]*END*[*\r\n\r\n");
+												+ "\r\nVersion: " + manager.getEvents().getVersion() + "\r\n"
+												+ manager.getYear() + ".txt\r\n" + newEvent.toStringSynced()
+												+ "\r\n\r\n");
 										writeToServer.flush();
-										TASKS.add(() -> System.out.println("Task sent to the server."));
-									} else {
-										TASKS.add(() -> System.out.println("Task not sent to the server."));
 									}
 								} finally {
 									LOCK.unlock();

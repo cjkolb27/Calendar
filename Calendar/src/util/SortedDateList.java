@@ -1,8 +1,10 @@
 package util;
 
 import java.util.Iterator;
+import java.util.Scanner;
 
 import events.EventData;
+import events.EventData.SyncState;
 
 /**
  * List for sorting events by their dates
@@ -49,14 +51,83 @@ public class SortedDateList<E> {
 	 * @return boolean true if no duplicate and false if duplicate
 	 */
 	public boolean checkValue(double date, int startTime) {
-		ListNode temp = front;
+		ListNode temp = back;
 		while (temp != null) {
 			if (temp.date == date && temp.startTime == startTime) {
 				return false;
 			}
-			temp = temp.next;
+			temp = temp.prev;
 		}
 		return true;
+	}
+	
+	public void updateChanges(EventData event) {
+		try {
+			if (event.getSyncState() == SyncState.NotSynced) {
+				EventData theEvent = get(event.getDate(), event.getStartInt());
+				if (theEvent == null) {
+					event.setSyncState(SyncState.Synced);
+					add(event, event.getDate(), event.getStartInt());
+				} else {
+					theEvent.setSyncState(SyncState.Synced);
+				}
+				System.out.println("Synced NotSynced Data");
+			} else if (event.getSyncState() == SyncState.Edited) {
+				Scanner scanner = new Scanner(event.getPrevious());
+				scanner.useDelimiter("/");
+				scanner.next();
+				String previous = scanner.next();
+				String name = scanner.next();
+				String startTime = scanner.next();
+				String endTime = scanner.next();
+				int theDay = scanner.nextInt();
+				int theMonth = scanner.nextInt();
+				int theYear = scanner.nextInt();
+				int red = scanner.nextInt();
+				int green = scanner.nextInt();
+				int blue = scanner.nextInt();
+				String timestamp = scanner.next();
+				scanner.close();
+				EventData eventData = new EventData(name, startTime, endTime, theDay, theMonth, theYear, red, green, blue, SyncState.Synced, previous, timestamp);
+				eventData = get(eventData.getDate(), eventData.getStartInt());
+				if (eventData != null) {
+					System.out.println("NOT NULL");
+					eventData.setPrevious(" ");
+					eventData.setSyncState(SyncState.Synced);
+				} else {
+					System.out.println("THE NULL");
+					EventData theEvent = get(event.getDate(), event.getStartInt());
+					theEvent.setPrevious(" ");
+					theEvent.setSyncState(SyncState.Synced);
+				}
+				
+				System.out.println("Synced Edited Data");
+			} else if (event.getSyncState() == SyncState.Deleted) {
+				Scanner scanner = new Scanner(event.getPrevious());
+				scanner.useDelimiter("/");
+				scanner.next();
+				String previous = scanner.next();
+				String name = scanner.next();
+				String startTime = scanner.next();
+				String endTime = scanner.next();
+				int theDay = scanner.nextInt();
+				int theMonth = scanner.nextInt();
+				int theYear = scanner.nextInt();
+				int red = scanner.nextInt();
+				int green = scanner.nextInt();
+				int blue = scanner.nextInt();
+				String timestamp = scanner.next();
+				scanner.close();
+				EventData eventData = new EventData(name, startTime, endTime, theDay, theMonth, theYear, red, green, blue, SyncState.Synced, previous, timestamp);
+				EventData theEvent = get(event.getDate(), event.getStartInt());
+				if (theEvent != null) {
+					removeD(eventData.getDate(), eventData.getStartInt());
+				}
+				System.out.println("Synced Deleted Data");
+			}
+		} catch (Exception e) {
+			//Nothing
+		}
 	}
 
 	/**
