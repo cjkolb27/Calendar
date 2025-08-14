@@ -301,8 +301,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	public static PrintWriter writeToServer;
 	/** Lock for controlling network resources */
 	public final Lock LOCK;
-	///** Queue for executing tasks in order */
-	//public final BlockingQueue<Runnable> TASKS;
+	/// ** Queue for executing tasks in order */
+	// public final BlockingQueue<Runnable> TASKS;
 
 	/**
 	 * Creates the GUI for the user to interact with the CalendarManager
@@ -402,7 +402,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				serverSocket = new Socket(hostname, serverPort);
 				clientSocket = new ServerSocket(0);
 				clientPort = clientSocket.getLocalPort();
-				
+
 				System.out.println("Sockets Created");
 				writeToServer = new PrintWriter(serverSocket.getOutputStream(), true);
 				LOCK.lock();
@@ -414,7 +414,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				writeToServer.flush();
 				LOCK.unlock();
 				System.out.println("Write complete");
-				
+
 				System.out.println("Client Listening");
 				Socket serverConnection = clientSocket.accept();
 				System.out.println("Listening complete");
@@ -438,7 +438,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 									System.out.println("Version Up To Date!");
 								} else {
 									System.out.println("Version Not Up To Date!\r\n");
-									Files.writeString(Path.of(manager.getPath()), messages.substring(messages.indexOf("\r\n") + 2));
+									Files.writeString(Path.of(manager.getPath()),
+											messages.substring(messages.indexOf("\r\n") + 2));
 									manager.loadEvents();
 									manager.saveCalendar();
 									updateDatepanel();
@@ -484,7 +485,8 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 											System.out.println("Version Up To Date!");
 										} else {
 											System.out.println("Version Not Up To Date!\r\n");
-											Files.writeString(Path.of(manager.getPath()), message.substring(message.indexOf("\r\n") + 2));
+											Files.writeString(Path.of(manager.getPath()),
+													message.substring(message.indexOf("\r\n") + 2));
 											manager.loadEvents();
 											manager.saveCalendar();
 											updateDatepanel();
@@ -496,6 +498,16 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 										System.out.println(request);
 										int index = 0;
 										int version = 0;
+										Scanner scanner3 = new Scanner(message);
+										scanner3.nextLine();
+										scanner3.nextLine();
+										version = Integer.parseInt(
+												scanner3.nextLine().replaceAll("Version: ", "").replaceAll("\r\n", ""));
+										// version = Integer.parseInt(scanner.nextLine().replaceAll("Version: ",
+										// "").replaceAll("\r\n", ""));
+										System.out.println(version);
+										scanner3.close();
+										manager.getEvents().setVersion(version);
 										for (int i = 0; i < 3; i++) {
 											index = message.indexOf("\r\n", index) + 2;
 										}
@@ -524,9 +536,21 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				});
 				t2.setDaemon(true);
 				t2.start();
-				
-				
-				
+				if (manager.getEvents().getNotSynced() > 0) {
+					LOCK.lock();
+					try {
+						String line = Files.readString(Path.of(manager.getChangePath())) + "";
+						line = line.substring(line.indexOf("\r\n") + 2);
+						writeToServer.print(
+								"Put " + CONNECTION_VERSION + "\r\nHost: " + InetAddress.getLocalHost().getHostName()
+										+ "\r\nPort: " + clientPort + "\r\nVersion: " + manager.getEvents().getVersion()
+										+ "\r\n" + manager.getYear() + ".txt\r\n" + line + "\r\n\r\n");
+						writeToServer.flush();
+					} finally {
+						LOCK.unlock();
+					}
+				}
+
 			} catch (Exception e) {
 				connectOnline = false;
 				Icon red = new ImageIcon(getClass().getClassLoader().getResource("red.png"));
@@ -616,7 +640,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			screen.setVisible(true);
 		}
 	}
-	
+
 	private void updateDatepanel() {
 		int count = buttons.length;
 		for (int i = 0; i < count; i++) {
@@ -1001,7 +1025,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		Calendar cal = Calendar.getInstance();
 
 		buttons = new JButton[366];
-		
+
 		fakeButtons = new JButton[6];
 
 		datePanel = new DatePanel[366];
@@ -1023,7 +1047,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		for (int i = 0; i < 12; i++) {
 			cal.set(yearOfCalendar, i, 1);
 			startDayPerMonth[i] = cal.get(Calendar.DAY_OF_WEEK);
-			//System.out.println(startDayPerMonth[i]);
+			// System.out.println(startDayPerMonth[i]);
 			int days = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 			if (i == 0) {
 				for (int j = 0; j < cal.get(Calendar.DAY_OF_WEEK) - 1; j++) {
@@ -1035,13 +1059,13 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 			}
 			if (i == 1 && days == 28) {
 				daysPerMonth[1] = 28;
-				//System.out.println("Set Days in Feb to 28");
+				// System.out.println("Set Days in Feb to 28");
 				buttons[currentDay] = new JButton();
 				buttons[currentDay].addActionListener(this);
 				currentDay++;
 			} else if (i == 1) {
 				daysPerMonth[1] = 29;
-				//System.out.println("Set Days in Feb to 29");
+				// System.out.println("Set Days in Feb to 29");
 			}
 			int weekCount = 0;
 			startWeekPerMonth[i] = 0;
@@ -1138,7 +1162,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 		}
 		monthAndDay[0] = "<html>" + "Jan/1" + "</html>";
 		cal2.set(yearOfCalendar, 0, 1);
-		//System.out.println(cal2.get(Calendar.DAY_OF_WEEK));
+		// System.out.println(cal2.get(Calendar.DAY_OF_WEEK));
 		int offset = cal2.get(Calendar.DAY_OF_WEEK);
 		int daysCounted = 0 + (offset * -1) + 9;
 		int month = 0;
@@ -1149,7 +1173,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				month++;
 			} else {
 				monthAndDay[offset] = ALLMONTHNAMES[month].substring(0, 3) + "/" + daysCounted;
-				//System.out.println(monthAndDay[offset]);
+				// System.out.println(monthAndDay[offset]);
 				daysCounted += 7;
 				offset++;
 			}
@@ -1875,10 +1899,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 										newEvent.getName(), newEvent.getColor().getRed(),
 										newEvent.getColor().getGreen(), newEvent.getColor().getBlue());
 								if (connectOnline) {
-									writeToServer.print("Put" + CONNECTION_VERSION + "\r\nHost: "
+									writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
 											+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
 											+ "\r\nVersion: " + manager.getEvents().getVersion() + "\r\n"
-											+ manager.getYear() + ".txt\r\n" + newEvent.toStringSynced() + "\r\n\r\n");
+											+ manager.getYear() + ".txt\r\n" + newEvent.toString() + "\r\n\r\n");
 									writeToServer.flush();
 								}
 							} finally {
@@ -1947,17 +1971,17 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 							System.out.println("Dates: " + selectedDays[0] + " " + selectedDays[1] + " "
 									+ selectedDays[2] + " " + selectedDays[3] + " " + selectedDays[4] + " "
 									+ selectedDays[5] + " " + selectedDays[6]);
-
-							for (int i = buttonIndex; i < endButtonIndex; i++) {
-								try {
-									Calendar cal = Calendar.getInstance();
-									if (datePanel[i] != null) {
-										cal.set(yearOfCalendar, datePanel[i].getMonth() - 1, datePanel[i].getDay());
-										System.out.println(yearOfCalendar + " " + datePanel[i].getMonth() + " "
-												+ datePanel[i].getDay() + " " + cal.get(Calendar.DAY_OF_WEEK));
-										if (selectedDays[cal.get(Calendar.DAY_OF_WEEK) - 1]) {
-											LOCK.lock();
-											try {
+							LOCK.lock();
+							try {
+								String events = "";
+								for (int i = buttonIndex; i < endButtonIndex; i++) {
+									try {
+										Calendar cal = Calendar.getInstance();
+										if (datePanel[i] != null) {
+											cal.set(yearOfCalendar, datePanel[i].getMonth() - 1, datePanel[i].getDay());
+											System.out.println(yearOfCalendar + " " + datePanel[i].getMonth() + " "
+													+ datePanel[i].getDay() + " " + cal.get(Calendar.DAY_OF_WEEK));
+											if (selectedDays[cal.get(Calendar.DAY_OF_WEEK) - 1]) {
 												EventData newEvent = manager.createEvent(
 														(String) eventTextField.getText(),
 														(String) startTextField.getText(),
@@ -1974,24 +1998,28 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 														newEvent.getColor().getRed(), newEvent.getColor().getGreen(),
 														newEvent.getColor().getBlue());
 												if (connectOnline) {
-													writeToServer.print("Put" + CONNECTION_VERSION + "\r\nHost: "
-															+ InetAddress.getLocalHost().getHostName() + "\r\nPort: "
-															+ clientPort + "\r\n*]*START*[*\r\n"
-															+ newEvent.toStringSynced() + "*]*END*[*\r\n\r\n");
-													writeToServer.flush();
+													events += newEvent.toString() + "\r\n";
 												}
-											} finally {
-												LOCK.unlock();
 											}
 										}
+									} catch (Exception e3) {
+										// Nothing
+										System.out.println("Conflict on: " + datePanel[i].getMonth() + "/"
+												+ datePanel[i].getDay() + "/" + yearOfCalendar);
 									}
-								} catch (Exception e3) {
-									// Nothing
-									System.out.println("Conflict on: " + datePanel[i].getMonth() + "/"
-											+ datePanel[i].getDay() + "/" + yearOfCalendar);
-								}
 
+								}
+								if (connectOnline && events.length() > 0) {
+									writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
+											+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
+											+ "\r\nVersion: " + manager.getEvents().getVersion() + "\r\n"
+											+ manager.getYear() + ".txt\r\n" + events + "\r\n");
+									writeToServer.flush();
+								}
+							} finally {
+								LOCK.unlock();
 							}
+
 						} else {
 							System.out.println("Custome was selected.");
 						}
@@ -2762,82 +2790,182 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 									choices[0]);
 							frame.dispose();
 							try {
-								// selectedColor =
-								// currentUI.getColorOptions().getColors()[jcb.getSelectedIndex()];
 								selectedColor = (Color) jcb.getSelectedItem();
 							} catch (Exception e2) {
 								selectedColor = new Color(255, 153, 161);
 							}
 							if (optionSelected == 0) {
 								try {
-									LOCK.lock();
+									EventData eventPrevious = manager.getEvents()
+											.get((double) (yearOfCalendar + ((((monthOfCalendar + 1) * 31)
+													+ (Calendar.getInstance().get(Calendar.DAY_OF_MONTH))) * .001)),
+													but.getStartTime());
+									System.out.println(monthOfCalendar + " "
+											+ Calendar.getInstance().get(Calendar.DAY_OF_MONTH) + " " + yearOfCalendar);
+									EventData newEvent = null;
 									try {
-										EventData newEvent = getManager().editEvent(
-												(double) (but.getYear()
-														+ (((but.getMonth() * 31) + (but.getDay())) * .001)),
-												but.getStartTime(), eventTextField.getText(), startTextField.getText(),
-												endTextField.getText(), but.getDay(), but.getMonth(), but.getYear(),
-												selectedColor.getRed(), selectedColor.getGreen(),
-												selectedColor.getBlue(), SyncState.Edited,
-												getManager().getEvents()
-														.get((double) (but.getYear()
-																+ (((but.getMonth() * 31) + (but.getDay())) * .001)),
-																but.getStartTime())
-														.toStringSynced());
-										datePanel[dayRangeButton].editButton(newEvent.getStartTime(),
-												but.getStartTime(), newEvent.getStartInt(), newEvent.getEndTime(),
-												newEvent.getEndInt(), but.getDay(), but.getMonth(), but.getYear(),
-												newEvent.getName(), newEvent.getColor().getRed(),
-												newEvent.getColor().getGreen(), newEvent.getColor().getBlue());
-										if (getDayRangeButton() == getButtonConversion(newEvent.getDay(),
-												newEvent.getMonth() - 1)) {
-											setDayRange(newEvent.getDay(), newEvent.getMonth() - 1);
-											getDayRangePane().setViewportView(getDayRange());
-										}
-										if (connectOnline) {
-											writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
-													+ InetAddress.getLocalHost().getHostName() + "\r\nPort: "
-													+ clientPort + "\r\nVersion: " + manager.getEvents().getVersion()
-													+ "\r\n" + manager.getYear() + ".txt\r\n" + newEvent.toString()
-													+ "\r\n\r\n");
-											writeToServer.flush();
+										LOCK.lock();
+										if (eventPrevious.getSyncState() == SyncState.NotSynced) {
+											newEvent = manager.editEvent(
+													(double) (yearOfCalendar + ((((monthOfCalendar + 1) * 31)
+															+ (Calendar.getInstance().get(Calendar.DAY_OF_MONTH)))
+															* .001)),
+													but.getStartTime(), eventTextField.getText(),
+													startTextField.getText(), endTextField.getText(), but.getDay(),
+													but.getMonth(), but.getYear(), selectedColor.getRed(),
+													selectedColor.getGreen(), selectedColor.getBlue(),
+													SyncState.NotSynced, " ");
+											if (connectOnline) {
+												writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
+														+ InetAddress.getLocalHost().getHostName() + "\r\nPort: "
+														+ clientPort + "\r\nVersion: "
+														+ manager.getEvents().getVersion() + "\r\n" + manager.getYear()
+														+ ".txt\r\n" + newEvent.toString() + "\r\n\r\n");
+												writeToServer.flush();
+											}
+										} else if (eventPrevious.getSyncState() == SyncState.Synced) {
+											newEvent = manager.editEvent(
+													(double) (yearOfCalendar + ((((monthOfCalendar + 1) * 31)
+															+ (Calendar.getInstance().get(Calendar.DAY_OF_MONTH)))
+															* .001)),
+													but.getStartTime(), eventTextField.getText(),
+													startTextField.getText(), endTextField.getText(), but.getDay(),
+													but.getMonth(), but.getYear(), selectedColor.getRed(),
+													selectedColor.getGreen(), selectedColor.getBlue(), SyncState.Edited,
+													eventPrevious.toString().replaceAll("@@", "/"));
+											if (connectOnline) {
+												writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
+														+ InetAddress.getLocalHost().getHostName() + "\r\nPort: "
+														+ clientPort + "\r\nVersion: "
+														+ manager.getEvents().getVersion() + "\r\n" + manager.getYear()
+														+ ".txt\r\n" + newEvent.toString() + "\r\n\r\n");
+												writeToServer.flush();
+											}
+										} else if (eventPrevious.getSyncState() == SyncState.Edited) {
+											newEvent = manager.editEvent(
+													(double) (yearOfCalendar + ((((monthOfCalendar + 1) * 31)
+															+ (Calendar.getInstance().get(Calendar.DAY_OF_MONTH)))
+															* .001)),
+													but.getStartTime(), eventTextField.getText(),
+													startTextField.getText(), endTextField.getText(), but.getDay(),
+													but.getMonth(), but.getYear(), selectedColor.getRed(),
+													selectedColor.getGreen(), selectedColor.getBlue(), SyncState.Edited,
+													eventPrevious.getPrevious());
+											if (connectOnline) {
+												writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
+														+ InetAddress.getLocalHost().getHostName() + "\r\nPort: "
+														+ clientPort + "\r\nVersion: "
+														+ manager.getEvents().getVersion() + "\r\n" + manager.getYear()
+														+ ".txt\r\n" + newEvent.toString() + "\r\n\r\n");
+												writeToServer.flush();
+											}
 										}
 									} finally {
 										LOCK.unlock();
 									}
-									getScreen().setVisible(true);
-									getScreen().repaint();
-									getScreen().validate();
+									if (newEvent == null) {
+										throw new NullPointerException();
+									}
+									datePanel[dayRangeButton].editButton(newEvent.getStartTime(), but.getStartTime(),
+											newEvent.getStartInt(), newEvent.getEndTime(), newEvent.getEndInt(),
+											but.getDay(), but.getMonth(), but.getYear(), newEvent.getName(),
+											newEvent.getColor().getRed(), newEvent.getColor().getGreen(),
+											newEvent.getColor().getBlue());
+									if (getDayRangeButton() == getButtonConversion(newEvent.getDay(),
+											newEvent.getMonth() - 1)) {
+										setDayRange(newEvent.getDay(), newEvent.getMonth() - 1);
+										getDayRangePane().setViewportView(getDayRange());
+									}
+									screen.setVisible(true);
+									screen.repaint();
+									screen.validate();
 									return;
 								} catch (Exception e1) {
 									startTextField.setText(but.getStart());
 									endTextField.setText(but.getEnd());
-									JOptionPane.showMessageDialog(getScreen(), e1.getMessage());
+									JOptionPane.showMessageDialog(screen, e1.getMessage());
 									tryEvent = true;
 								}
 							} else if (optionSelected == 1) {
 								try {
-									LOCK.lock();
+									EventData eventPrevious = manager.getEvents()
+											.get((double) (yearOfCalendar + ((((monthOfCalendar + 1) * 31)
+													+ (Calendar.getInstance().get(Calendar.DAY_OF_MONTH))) * .001)),
+													but.getStartTime());
 									try {
-
+										LOCK.lock();
+										if (eventPrevious.getSyncState() == SyncState.NotSynced) {
+											manager.removeEvent(
+													(double) (yearOfCalendar + ((((monthOfCalendar + 1) * 31)
+															+ (Calendar.getInstance().get(Calendar.DAY_OF_MONTH)))
+															* .001)),
+													but.getStartTime());
+										} else if (eventPrevious.getSyncState() == SyncState.Synced) {
+											manager.removeEvent(
+													(double) (yearOfCalendar + ((((monthOfCalendar + 1) * 31)
+															+ (Calendar.getInstance().get(Calendar.DAY_OF_MONTH)))
+															* .001)),
+													but.getStartTime());
+											EventData deletedData = manager.createEvent(eventPrevious.getName(),
+													eventPrevious.getStartTime(), eventPrevious.getEndTime(),
+													eventPrevious.getDay(), eventPrevious.getMonth(),
+													eventPrevious.getYear(), eventPrevious.getColor().getRed(),
+													eventPrevious.getColor().getGreen(),
+													eventPrevious.getColor().getBlue(), SyncState.Deleted,
+													eventPrevious.toString().replaceAll("@@", "/"));
+											if (connectOnline) {
+												writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
+														+ InetAddress.getLocalHost().getHostName() + "\r\nPort: "
+														+ clientPort + "\r\nVersion: "
+														+ manager.getEvents().getVersion() + "\r\n" + manager.getYear()
+														+ ".txt\r\n" + deletedData.toString() + "\r\n\r\n");
+												writeToServer.flush();
+											}
+										} else if (eventPrevious.getSyncState() == SyncState.Edited) {
+											Scanner scanner = new Scanner(eventPrevious.getPrevious());
+											scanner.useDelimiter("@@");
+											String name = scanner.next();
+											String startTime = scanner.next();
+											String endTime = scanner.next();
+											int theDay = scanner.nextInt();
+											int theMonth = scanner.nextInt();
+											int theYear = scanner.nextInt();
+											int red = scanner.nextInt();
+											int green = scanner.nextInt();
+											int blue = scanner.nextInt();
+											scanner.close();
+											manager.removeEvent(
+													(double) (yearOfCalendar + ((((monthOfCalendar + 1) * 31)
+															+ (Calendar.getInstance().get(Calendar.DAY_OF_MONTH)))
+															* .001)),
+													but.getStartTime());
+											EventData deletedData = manager.createEvent(name, startTime, endTime,
+													theDay, theMonth, theYear, red, green, blue, SyncState.Deleted,
+													" ");
+											if (connectOnline) {
+												writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
+														+ InetAddress.getLocalHost().getHostName() + "\r\nPort: "
+														+ clientPort + "\r\nVersion: "
+														+ manager.getEvents().getVersion() + "\r\n" + manager.getYear()
+														+ ".txt\r\n" + deletedData.toString() + "\r\n\r\n");
+												writeToServer.flush();
+											}
+										}
+										datePanel[dayRangeButton].removeButton(but.getStartTime());
+										if (getDayRangeButton() == getButtonConversion(but.getDay(),
+												but.getMonth() - 1)) {
+											setDayRange(but.getDay(), but.getMonth() - 1);
+											getDayRangePane().setViewportView(getDayRange());
+										}
 									} finally {
 										LOCK.unlock();
 									}
-									getManager().removeEvent(
-											(double) (but.getYear()
-													+ (((but.getMonth() * 31) + (but.getDay())) * .001)),
-											but.getStartTime());
-									datePanel[dayRangeButton].removeButton(but.getStartTime());
-									if (getDayRangeButton() == getButtonConversion(but.getDay(), but.getMonth() - 1)) {
-										setDayRange(but.getDay(), but.getMonth() - 1);
-										getDayRangePane().setViewportView(getDayRange());
-									}
-									getScreen().setVisible(true);
-									getScreen().repaint();
-									getScreen().validate();
+									screen.setVisible(true);
+									screen.repaint();
+									screen.validate();
 									return;
 								} catch (Exception e2) {
-									JOptionPane.showMessageDialog(getScreen(), e2.getMessage());
+									JOptionPane.showMessageDialog(screen, e2.getMessage());
 									tryEvent = true;
 								}
 							}
@@ -2983,11 +3111,10 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 											newEvent.getColor().getRed(), newEvent.getColor().getGreen(),
 											newEvent.getColor().getBlue());
 									if (connectOnline) {
-										writeToServer.print("Put" + CONNECTION_VERSION + "\r\nHost: "
+										writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
 												+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
 												+ "\r\nVersion: " + manager.getEvents().getVersion() + "\r\n"
-												+ manager.getYear() + ".txt\r\n" + newEvent.toStringSynced()
-												+ "\r\n\r\n");
+												+ manager.getYear() + ".txt\r\n" + newEvent.toString() + "\r\n\r\n");
 										writeToServer.flush();
 									}
 								} finally {
@@ -3007,6 +3134,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				}
 			}
 		}
+
 	}
 
 	/**

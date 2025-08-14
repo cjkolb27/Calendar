@@ -396,4 +396,8 @@ public class CalendarManager {
 	public String getPath() {
 		return path;
 	}
+	
+	public String getChangePath() {
+		return pathChangeLog;
+	}
 }

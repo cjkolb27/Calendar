@@ -410,6 +410,7 @@ public class DatePanel implements ActionListener {
 							try {
 								EventData eventPrevious = currentUI.getManager().getEvents()
 										.get((double) (year + (((month * 31) + (day)) * .001)), current.getStartTime());
+								System.out.println(month + " " + day + " " + year);
 								EventData newEvent = null;
 								try {
 									currentUI.LOCK.lock();
@@ -497,27 +498,35 @@ public class DatePanel implements ActionListener {
 										currentUI.getManager().removeEvent(
 												(double) (year + (((month * 31) + (day)) * .001)),
 												current.getStartTime());
+//										EventData deletedData = currentUI.getManager().getEvents().get((double) (year + (((month * 31) + (day)) * .001)), current.getStartTime());
+//										if (currentUI.connectOnline) {
+//											currentUI.writeToServer.print("Put " + currentUI.CONNECTION_VERSION
+//													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
+//													+ "\r\nPort: " + currentUI.clientPort + "\r\nVersion: "
+//													+ currentUI.getManager().getEvents().getVersion() + "\r\n"
+//													+ currentUI.getManager().getYear() + ".txt\r\n"
+//													+ deletedData.toString() + "\r\n\r\n");
+//											currentUI.writeToServer.flush();
+//										}
 									} else if (eventPrevious.getSyncState() == SyncState.Synced) {
 										currentUI.getManager().removeEvent(
 												(double) (year + (((month * 31) + (day)) * .001)),
 												current.getStartTime());
-										currentUI.getManager().createEvent(eventPrevious.getName(),
+										EventData deletedData = currentUI.getManager().createEvent(eventPrevious.getName(),
 												eventPrevious.getStartTime(), eventPrevious.getEndTime(),
 												eventPrevious.getDay(), eventPrevious.getMonth(),
 												eventPrevious.getYear(), eventPrevious.getColor().getRed(),
 												eventPrevious.getColor().getGreen(), eventPrevious.getColor().getBlue(),
 												SyncState.Deleted, eventPrevious.toString().replaceAll("@@", "/"));
-//										if (currentUI.connectOnline) {
-//											currentUI.writeToServer.print("Delete" + currentUI.CONNECTION_VERSION
-//													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
-//													+ "\r\nPort: " + currentUI.clientPort + "\r\n*]*START*[*\r\n"
-//													+ eventPrevious.toStringSynced() + "*]*END*[*\r\n\r\n");
-//											currentUI.writeToServer.flush();
-//											currentUI.TASKS.add(() -> System.out.println("Task sent to the server."));
-//										} else {
-//											currentUI.TASKS
-//													.add(() -> System.out.println("Task not sent to the server."));
-//										}
+										if (currentUI.connectOnline) {
+											currentUI.writeToServer.print("Put " + currentUI.CONNECTION_VERSION
+													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
+													+ "\r\nPort: " + currentUI.clientPort + "\r\nVersion: "
+													+ currentUI.getManager().getEvents().getVersion() + "\r\n"
+													+ currentUI.getManager().getYear() + ".txt\r\n"
+													+ deletedData.toString() + "\r\n\r\n");
+											currentUI.writeToServer.flush();
+										}
 									} else if (eventPrevious.getSyncState() == SyncState.Edited) {
 										Scanner scanner = new Scanner(eventPrevious.getPrevious());
 										scanner.useDelimiter("@@");
@@ -534,8 +543,17 @@ public class DatePanel implements ActionListener {
 										currentUI.getManager().removeEvent(
 												(double) (year + (((month * 31) + (day)) * .001)),
 												current.getStartTime());
-										currentUI.getManager().createEvent(name, startTime, endTime, theDay, theMonth,
+										EventData deletedData = currentUI.getManager().createEvent(name, startTime, endTime, theDay, theMonth,
 												theYear, red, green, blue, SyncState.Deleted, " ");
+										if (currentUI.connectOnline) {
+											currentUI.writeToServer.print("Put " + currentUI.CONNECTION_VERSION
+													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
+													+ "\r\nPort: " + currentUI.clientPort + "\r\nVersion: "
+													+ currentUI.getManager().getEvents().getVersion() + "\r\n"
+													+ currentUI.getManager().getYear() + ".txt\r\n"
+													+ deletedData.toString() + "\r\n\r\n");
+											currentUI.writeToServer.flush();
+										}
 									}
 									removeButton(current.getStartTime());
 									if (currentUI.getDayRangeButton() == currentUI.getButtonConversion(current.getDay(),

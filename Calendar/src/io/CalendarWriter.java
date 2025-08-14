@@ -101,6 +101,7 @@ public class CalendarWriter {
 			PrintStream fileWrite = new PrintStream(changedFile);
 			fileWrite.println("0");
 			fileWrite.close();
+			list.setNotSynced(0);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -120,6 +121,7 @@ public class CalendarWriter {
 			fileWriter.println(changeCount);
 			fileWriter.print(buff.toString());
 			fileWriter.close();
+			list.setNotSynced(changeCount);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
