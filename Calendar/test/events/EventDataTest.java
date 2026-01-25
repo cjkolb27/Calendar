@@ -163,14 +163,14 @@ class EventDataTest {
 		EventData e = new EventData("Job", "1215a", "415p", 12, 12, 30, 100, 100, 100, SyncState.Synced, " ", " ");
 		EventData e1 = new EventData("Job", "1215a", "415p", 12, 12, 2023, 100, 100, 100, SyncState.Synced, " ", " ");
 		assertTrue(e.getDate() < e1.getDate());
-		e.editData("Job", "12:15a", "4:15p", 12, 12, 30, 100, 100, 100, SyncState.Synced, " ");
+		e.editData("Job", "12:15a", "4:15p", 12, 12, 30, 100, 100, 100, SyncState.Synced, " ", " ");
 		assertEquals("Job", e.getName());
 		assertEquals("12:15am", e.getStartTime());
 		assertEquals("4:15pm", e.getEndTime());
 		assertEquals(12, e.getDay());
 		assertEquals(12, e.getMonth());
 		assertEquals(30, e.getYear());
-		e.editData("Job", "12:15a", "4:15p", 13, 12, 2023, 100, 100, 100, SyncState.Synced, " ");
+		e.editData("Job", "12:15a", "4:15p", 13, 12, 2023, 100, 100, 100, SyncState.Synced, " ", " ");
 		assertTrue(e.getDate() > e1.getDate());
 
 	}

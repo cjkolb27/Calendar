@@ -93,7 +93,7 @@ public class SortedDateList<E> {
 				eventData = get(eventData.getDate(), eventData.getStartInt());
 				if (eventData != null) {
 					System.out.println("NOT NULL");
-					eventData.editData(event.getName(), event.getStartTime(), event.getEndTime(), event.getDay(), event.getMonth(), event.getYear(), event.getColor().getRed(), event.getColor().getGreen(), event.getColor().getBlue(), SyncState.Synced, " ");
+					eventData.editData(event.getName(), event.getStartTime(), event.getEndTime(), event.getDay(), event.getMonth(), event.getYear(), event.getColor().getRed(), event.getColor().getGreen(), event.getColor().getBlue(), SyncState.Synced, " ", event.getTimestamp());
 				} else {
 					System.out.println("THE NULL");
 					EventData theEvent = get(event.getDate(), event.getStartInt());

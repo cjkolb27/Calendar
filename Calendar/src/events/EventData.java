@@ -430,7 +430,7 @@ public class EventData {
 	 * @param blue      the blue color
 	 */
 	public void editData(String name, String startTime, String endTime, int day, int month, int year, int red,
-			int green, int blue, SyncState syncState, String previous) {
+			int green, int blue, SyncState syncState, String previous, String timestamp) {
 		setColor(red, green, blue);
 		setName(name);
 		setStartTime(startTime);
@@ -440,6 +440,13 @@ public class EventData {
 		setDay(day);
 		setSyncState(syncState);
 		setPrevious(previous);
+		if (" ".equals(timestamp)) {
+			String formatted = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
+					.format(Instant.now());
+			setTimestamp(formatted);
+		} else {
+			setTimestamp(timestamp);
+		}
 		setDate();
 	}
 }
