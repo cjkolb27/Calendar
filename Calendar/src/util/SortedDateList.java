@@ -89,16 +89,16 @@ public class SortedDateList<E> {
 				String timestamp = scanner.next();
 				scanner.close();
 				EventData eventData = new EventData(name, startTime, endTime, theDay, theMonth, theYear, red, green, blue, SyncState.Synced, previous, timestamp);
+				System.out.println(eventData.toString());
 				eventData = get(eventData.getDate(), eventData.getStartInt());
 				if (eventData != null) {
 					System.out.println("NOT NULL");
-					eventData.setPrevious(" ");
-					eventData.setSyncState(SyncState.Synced);
+					eventData.editData(event.getName(), event.getStartTime(), event.getEndTime(), event.getDay(), event.getMonth(), event.getYear(), event.getColor().getRed(), event.getColor().getGreen(), event.getColor().getBlue(), SyncState.Synced, " ");
 				} else {
 					System.out.println("THE NULL");
-					EventData theEvent = get(event.getDate(), event.getStartInt());
-					theEvent.setPrevious(" ");
-					theEvent.setSyncState(SyncState.Synced);
+//					EventData theEvent = get(event.getDate(), event.getStartInt());
+//					theEvent.setPrevious(" ");
+//					theEvent.setSyncState(SyncState.Synced);
 				}
 				
 				System.out.println("Synced Edited Data");
