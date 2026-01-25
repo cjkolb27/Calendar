@@ -96,9 +96,9 @@ public class SortedDateList<E> {
 					eventData.editData(event.getName(), event.getStartTime(), event.getEndTime(), event.getDay(), event.getMonth(), event.getYear(), event.getColor().getRed(), event.getColor().getGreen(), event.getColor().getBlue(), SyncState.Synced, " ");
 				} else {
 					System.out.println("THE NULL");
-//					EventData theEvent = get(event.getDate(), event.getStartInt());
-//					theEvent.setPrevious(" ");
-//					theEvent.setSyncState(SyncState.Synced);
+					EventData theEvent = get(event.getDate(), event.getStartInt());
+					theEvent.setPrevious(" ");
+					theEvent.setSyncState(SyncState.Synced);
 				}
 				
 				System.out.println("Synced Edited Data");
