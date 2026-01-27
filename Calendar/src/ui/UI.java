@@ -424,7 +424,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 					if (messages.contains("\r\n\r\n")) {
 						LOCK.lock();
 						try {
-							System.out.print(messages);
+							System.out.print("GJGJGKJGKGGNG: " + messages);
 							Scanner scanner2 = new Scanner(messages);
 							String request = scanner2.next();
 							if ("Post".equals(request)) {
@@ -442,6 +442,14 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 									screen.repaint();
 									screen.validate();
 								}
+							} else if ("Get".equals(request)) {
+								String file = scanner2.next();
+								writeToServer.print("Post " + CONNECTION_VERSION + "\r\nHost: "
+										+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
+										+ "\r\n" + manager.getYear() + ".txt\r\n"
+										+ Files.readString(Path.of(manager.getPath().substring(0, manager.getPath().length() - 8) + file)) + "\r\n\r\n");
+								writeToServer.flush();
+								System.out.println("Posted to server");
 							}
 							scanner2.close();
 							messages = "";
@@ -464,7 +472,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 									if (message.indexOf("\r\n") == 0) {
 										message = message.replaceFirst("\\r\\n", "");
 									}
-									System.out.print(message);
+									System.out.print("FKJSLKFJSLKFJSLDKJLKDFS: " + message);
 									Scanner scanner2 = new Scanner(message);
 									String request = scanner2.next();
 									if ("Get".equals(request)) {
@@ -472,8 +480,9 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 										writeToServer.print("Post " + CONNECTION_VERSION + "\r\nHost: "
 												+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
 												+ "\r\n" + manager.getYear() + ".txt\r\n"
-												+ Files.readString(Path.of(manager.getPath())) + "\r\n\r\n");
+												+ Files.readString(Path.of(manager.getPath().substring(0, manager.getPath().length() - 8) + file)) + "\r\n\r\n");
 										writeToServer.flush();
+										System.out.println("Posted to server");
 									} else if ("Post".equals(request)) {
 										int version = Integer.parseInt(scanner2.next());
 										if (version == manager.getEvents().getVersion()) {
@@ -500,7 +509,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 												scanner3.nextLine().replaceAll("Version: ", "").replaceAll("\r\n", ""));
 										// version = Integer.parseInt(scanner.nextLine().replaceAll("Version: ",
 										// "").replaceAll("\r\n", ""));
-										System.out.println(version);
+										System.out.println("Version: " + version);
 										scanner3.close();
 										manager.getEvents().setVersion(version);
 										for (int i = 0; i < 3; i++) {
