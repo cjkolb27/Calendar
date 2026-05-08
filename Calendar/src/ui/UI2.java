@@ -71,8 +71,8 @@ import events.EventData.SyncState;
 import io.NetworkIO;
 import manager.CalendarManager;
 import util.ColorData;
-import util.DatePanel;
-import util.DatePanel.DateButton;
+import util.DatePanel2;
+import util.DatePanel2.DateButton;
 import util.JColorBox;
 import util.PresetData;
 import util.PresetStateMachine;
@@ -85,7 +85,7 @@ import util.SortedDateList;
  * 
  * @author Caleb Kolb
  */
-public class UI extends JFrame implements ActionListener, MouseWheelListener, ItemListener {
+public class UI2 extends JFrame implements ActionListener, MouseWheelListener, ItemListener {
 
 	/** Default Serial Version UID */
 	private static final long serialVersionUID = 1L;
@@ -212,7 +212,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	/** End text field */
 	private JTextField endTextField;
 	/** Panel for all events added to a day */
-	private static DatePanel[] datePanel;
+	private static DatePanel2[] datePanel;
 	/** Menu bar */
 	private JMenuBar menuBar;
 	/** Menu */
@@ -303,7 +303,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	/**
 	 * Creates the GUI for the user to interact with the CalendarManager
 	 */
-	public UI() {
+	public UI2() {
 		super();
 		LOCK = new ReentrantLock();
 		// UIManager UI = new UIManager();
@@ -571,7 +571,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	 * @param args the amount of arguments
 	 */
 	public static void main(String[] args) {
-		new UI();
+		new UI2();
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			try {
 				if (serverSocket != null && !serverSocket.isClosed()) {
@@ -1033,7 +1033,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 
 		fakeButtons = new JButton[6];
 
-		datePanel = new DatePanel[366];
+		datePanel = new DatePanel2[366];
 
 		SortedDateList<EventData> sdl = manager.getEvents();
 
@@ -1121,7 +1121,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 					buttons[currentDay].setBackground(evenMonthColor);
 				} else
 					buttons[currentDay].setBackground(oddMonthColor);
-				datePanel[currentDay] = new DatePanel((j + 1), (i + 1), yearOfCalendar, this);
+				datePanel[currentDay] = new DatePanel2((j + 1), (i + 1), yearOfCalendar, this);
 				while (currentData != null && currentData.getDay() == j + 1 && currentData.getMonth() == i + 1
 						&& currentData.getYear() == yearOfCalendar) {
 					if (currentData.getSyncState() != SyncState.Deleted) {
@@ -3191,7 +3191,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 	 * 
 	 * @return datePanel the date panel of the calendar
 	 */
-	public DatePanel[] getDatePanel() {
+	public DatePanel2[] getDatePanel() {
 		return datePanel;
 	}
 

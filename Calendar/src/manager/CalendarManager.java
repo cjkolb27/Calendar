@@ -12,7 +12,7 @@ import events.EventData.SyncState;
 import util.SortedDateList;
 import io.CalendarReader;
 import io.CalendarWriter;
-import ui.UI.ScreenState;
+import util.ScreenState;
 
 /**
  * Manager for interacting with the UI
