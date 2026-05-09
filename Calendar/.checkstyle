@@ -4,7 +4,7 @@
   <local-check-config name="CS Checkstyle" location="C:\Users\cjkol\developer\csc_checkstyle.xml" type="external" description="">
     <additional-data name="protect-config-file" value="false"/>
   </local-check-config>
-  <fileset name="all" enabled="true" check-config-name="CS Checkstyle" local="true">
+  <fileset name="all" enabled="true" check-config-name="CS Checkstyle" local="false">
     <file-match-pattern match-pattern="." include-pattern="true"/>
   </fileset>
 </fileset-config>
