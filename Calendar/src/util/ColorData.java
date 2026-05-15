@@ -34,10 +34,16 @@ public class ColorData {
 			new File(file).createNewFile();
 			Scanner scanner = new Scanner(new File(file));
 			colorFile = file;
-			size = scanner.nextInt();
-			colors = new Color[size];
 			int counter = 0;
-			scanner.nextLine();
+			if (!scanner.hasNextLine()) {
+				System.out.print("No Colors");
+				size = 0;
+				colors = new Color[size];
+			} else {
+				size = scanner.nextInt();
+				colors = new Color[size];
+				scanner.nextLine();
+			}
 			while (scanner.hasNextLine() && scanner.hasNext()) {
 				scanner.useDelimiter("[\\n,]+");
 				int red = scanner.nextInt();
@@ -50,7 +56,11 @@ public class ColorData {
 				counter++;
 			}
 			scanner.close();
+		} catch (FileNotFoundException e1){
+			System.out.println("File not found");
+			throw new IllegalArgumentException(e1.getMessage());
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new IllegalArgumentException(e.getMessage());
 		}
 	}

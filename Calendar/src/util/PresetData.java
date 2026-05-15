@@ -31,10 +31,16 @@ public class PresetData {
 			new File(file).createNewFile();
 			Scanner scanner = new Scanner(new File(file));
 			presetFile = file;
-			size = scanner.nextInt();
-			presets = new PresetItems[size];
 			int counter = 0;
-			scanner.nextLine();
+			if (!scanner.hasNextLine()) {
+				System.out.print("No Presets");
+				size = 0;
+				presets = new PresetItems[size];
+			} else {
+				size = scanner.nextInt();
+				presets = new PresetItems[size];
+				scanner.nextLine();
+			}
 			while (scanner.hasNextLine() && scanner.hasNext()) {
 				scanner.useDelimiter("[\\n,]+");
 				String name = scanner.next();
@@ -51,6 +57,7 @@ public class PresetData {
 			}
 			scanner.close();
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new IllegalArgumentException(e.getMessage());
 		}
 		setStringPresets();
