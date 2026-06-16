@@ -403,7 +403,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 				writeToServer = new PrintWriter(serverSocket.getOutputStream(), true);
 				LOCK.lock();
 				writeToServer.print("Get " + CONNECTION_VERSION + "\r\nHost: "
-						+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort + "\r\nVersion: "
+						+ InetAddress.getLocalHost().getHostAddress() + "\r\nPort: " + clientPort + "\r\nVersion: "
 						+ manager.getEvents().getVersion() + "\r\n" + manager.getYear() + ".txt\r\n\r\n");
 
 				// Files.readString(Path.of(manager.getPath()))
@@ -446,7 +446,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 							} else if ("Get".equals(request)) {
 								String file = scanner2.next();
 								writeToServer.print("Post " + CONNECTION_VERSION + "\r\nHost: "
-										+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
+										+ InetAddress.getLocalHost().getHostAddress() + "\r\nPort: " + clientPort
 										+ "\r\n" + manager.getYear() + ".txt\r\n"
 										+ Files.readString(Path.of(manager.getPath().substring(0, manager.getPath().length() - 8) + file)) + "\r\n\r\n");
 								writeToServer.flush();
@@ -479,7 +479,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 									if ("Get".equals(request)) {
 										String file = scanner2.next();
 										writeToServer.print("Post " + CONNECTION_VERSION + "\r\nHost: "
-												+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
+												+ InetAddress.getLocalHost().getHostAddress() + "\r\nPort: " + clientPort
 												+ "\r\n" + manager.getYear() + ".txt\r\n"
 												+ Files.readString(Path.of(manager.getPath().substring(0, manager.getPath().length() - 8) + file)) + "\r\n\r\n");
 										writeToServer.flush();
@@ -547,7 +547,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 						String line = Files.readString(Path.of(manager.getChangePath())) + "";
 						line = line.substring(line.indexOf("\r\n") + 2);
 						writeToServer.print(
-								"Put " + CONNECTION_VERSION + "\r\nHost: " + InetAddress.getLocalHost().getHostName()
+								"Put " + CONNECTION_VERSION + "\r\nHost: " + InetAddress.getLocalHost().getHostAddress()
 										+ "\r\nPort: " + clientPort + "\r\nVersion: " + manager.getEvents().getVersion()
 										+ "\r\n" + manager.getYear() + ".txt\r\n" + line + "\r\n\r\n");
 						writeToServer.flush();
@@ -1893,7 +1893,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 										newEvent.getColor().getGreen(), newEvent.getColor().getBlue());
 								if (connectOnline) {
 									writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
-											+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
+											+ InetAddress.getLocalHost().getHostAddress() + "\r\nPort: " + clientPort
 											+ "\r\nVersion: " + manager.getEvents().getVersion() + "\r\n"
 											+ manager.getYear() + ".txt\r\n" + newEvent.toString() + "\r\n\r\n");
 									writeToServer.flush();
@@ -2004,7 +2004,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 								}
 								if (connectOnline && events.length() > 0) {
 									writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
-											+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
+											+ InetAddress.getLocalHost().getHostAddress() + "\r\nPort: " + clientPort
 											+ "\r\nVersion: " + manager.getEvents().getVersion() + "\r\n"
 											+ manager.getYear() + ".txt\r\n" + events + "\r\n");
 									writeToServer.flush();
@@ -2651,7 +2651,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 									}
 									if (connectOnline) {
 										writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
-												+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
+												+ InetAddress.getLocalHost().getHostAddress() + "\r\nPort: " + clientPort
 												+ "\r\nVersion: " + manager.getEvents().getVersion() + "\r\n"
 												+ manager.getYear() + ".txt\r\n" + newEvent.toString() + "\r\n\r\n");
 										writeToServer.flush();
@@ -2810,7 +2810,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 													SyncState.NotSynced, " ");
 											if (connectOnline) {
 												writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
-														+ InetAddress.getLocalHost().getHostName() + "\r\nPort: "
+														+ InetAddress.getLocalHost().getHostAddress() + "\r\nPort: "
 														+ clientPort + "\r\nVersion: "
 														+ manager.getEvents().getVersion() + "\r\n" + manager.getYear()
 														+ ".txt\r\n" + newEvent.toString() + "\r\n\r\n");
@@ -2828,7 +2828,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 													eventPrevious.toString().replaceAll("@@", "/"));
 											if (connectOnline) {
 												writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
-														+ InetAddress.getLocalHost().getHostName() + "\r\nPort: "
+														+ InetAddress.getLocalHost().getHostAddress() + "\r\nPort: "
 														+ clientPort + "\r\nVersion: "
 														+ manager.getEvents().getVersion() + "\r\n" + manager.getYear()
 														+ ".txt\r\n" + newEvent.toString() + "\r\n\r\n");
@@ -2846,7 +2846,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 													eventPrevious.getPrevious());
 											if (connectOnline) {
 												writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
-														+ InetAddress.getLocalHost().getHostName() + "\r\nPort: "
+														+ InetAddress.getLocalHost().getHostAddress() + "\r\nPort: "
 														+ clientPort + "\r\nVersion: "
 														+ manager.getEvents().getVersion() + "\r\n" + manager.getYear()
 														+ ".txt\r\n" + newEvent.toString() + "\r\n\r\n");
@@ -2908,7 +2908,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 													eventPrevious.toString().replaceAll("@@", "/"));
 											if (connectOnline) {
 												writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
-														+ InetAddress.getLocalHost().getHostName() + "\r\nPort: "
+														+ InetAddress.getLocalHost().getHostAddress() + "\r\nPort: "
 														+ clientPort + "\r\nVersion: "
 														+ manager.getEvents().getVersion() + "\r\n" + manager.getYear()
 														+ ".txt\r\n" + deletedData.toString() + "\r\n\r\n");
@@ -2937,7 +2937,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 													" ");
 											if (connectOnline) {
 												writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
-														+ InetAddress.getLocalHost().getHostName() + "\r\nPort: "
+														+ InetAddress.getLocalHost().getHostAddress() + "\r\nPort: "
 														+ clientPort + "\r\nVersion: "
 														+ manager.getEvents().getVersion() + "\r\n" + manager.getYear()
 														+ ".txt\r\n" + deletedData.toString() + "\r\n\r\n");
@@ -3105,7 +3105,7 @@ public class UI extends JFrame implements ActionListener, MouseWheelListener, It
 											newEvent.getColor().getBlue());
 									if (connectOnline) {
 										writeToServer.print("Put " + CONNECTION_VERSION + "\r\nHost: "
-												+ InetAddress.getLocalHost().getHostName() + "\r\nPort: " + clientPort
+												+ InetAddress.getLocalHost().getHostAddress() + "\r\nPort: " + clientPort
 												+ "\r\nVersion: " + manager.getEvents().getVersion() + "\r\n"
 												+ manager.getYear() + ".txt\r\n" + newEvent.toString() + "\r\n\r\n");
 										writeToServer.flush();

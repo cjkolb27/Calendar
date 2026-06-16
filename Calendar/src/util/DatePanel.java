@@ -423,7 +423,7 @@ public class DatePanel implements ActionListener {
 												" ");
 										if (currentUI.connectOnline) {
 											currentUI.writeToServer.print("Put " + currentUI.CONNECTION_VERSION
-													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
+													+ "\r\nHost: " + InetAddress.getLocalHost().getHostAddress()
 													+ "\r\nPort: " + currentUI.clientPort + "\r\nVersion: "
 													+ currentUI.getManager().getEvents().getVersion() + "\r\n"
 													+ currentUI.getManager().getYear() + ".txt\r\n"
@@ -439,7 +439,7 @@ public class DatePanel implements ActionListener {
 												eventPrevious.toString().replaceAll("@@", "/"));
 										if (currentUI.connectOnline) {
 											currentUI.writeToServer.print("Put " + currentUI.CONNECTION_VERSION
-													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
+													+ "\r\nHost: " + InetAddress.getLocalHost().getHostAddress()
 													+ "\r\nPort: " + currentUI.clientPort + "\r\nVersion: "
 													+ currentUI.getManager().getEvents().getVersion() + "\r\n"
 													+ currentUI.getManager().getYear() + ".txt\r\n"
@@ -455,7 +455,7 @@ public class DatePanel implements ActionListener {
 												eventPrevious.getPrevious());
 										if (currentUI.connectOnline) {
 											currentUI.writeToServer.print("Put " + currentUI.CONNECTION_VERSION
-													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
+													+ "\r\nHost: " + InetAddress.getLocalHost().getHostAddress()
 													+ "\r\nPort: " + currentUI.clientPort + "\r\nVersion: "
 													+ currentUI.getManager().getEvents().getVersion() + "\r\n"
 													+ currentUI.getManager().getYear() + ".txt\r\n"
@@ -520,7 +520,7 @@ public class DatePanel implements ActionListener {
 												SyncState.Deleted, eventPrevious.toString().replaceAll("@@", "/"));
 										if (currentUI.connectOnline) {
 											currentUI.writeToServer.print("Put " + currentUI.CONNECTION_VERSION
-													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
+													+ "\r\nHost: " + InetAddress.getLocalHost().getHostAddress()
 													+ "\r\nPort: " + currentUI.clientPort + "\r\nVersion: "
 													+ currentUI.getManager().getEvents().getVersion() + "\r\n"
 													+ currentUI.getManager().getYear() + ".txt\r\n"
@@ -547,7 +547,7 @@ public class DatePanel implements ActionListener {
 												theYear, red, green, blue, SyncState.Deleted, " ");
 										if (currentUI.connectOnline) {
 											currentUI.writeToServer.print("Put " + currentUI.CONNECTION_VERSION
-													+ "\r\nHost: " + InetAddress.getLocalHost().getHostName()
+													+ "\r\nHost: " + InetAddress.getLocalHost().getHostAddress()
 													+ "\r\nPort: " + currentUI.clientPort + "\r\nVersion: "
 													+ currentUI.getManager().getEvents().getVersion() + "\r\n"
 													+ currentUI.getManager().getYear() + ".txt\r\n"
