@@ -81,7 +81,7 @@ import util.ScreenState;
 import util.SortedDateList;
 
 /**
- * GUI for displaying the Calendar to the user. 
+ * GUI for displaying the Calendar to the user.  
  * 
  * @author Caleb Kolb
  */
